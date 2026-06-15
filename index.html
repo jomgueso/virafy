@@ -1,0 +1,3362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VehicleTrack v13 — Libro de vida de tus vehículos</title>
+<!-- Favicon: el iconito de la pestaña del navegador. Usamos un SVG con el emoji 🚗
+     incrustado directamente (un "data URI"), así no hace falta un archivo aparte. -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+<style>
+/* ============================================================
+   VEHICLETRACK v13 — Estilos (mobile-first, CSS puro)
+   ============================================================ */
+:root {
+  --tinta: #1b2a38;
+  --tinta-suave: #51626f;
+  --fondo: #eef1f4;
+  --tarjeta: #ffffff;
+  --cabecera: #1b2a38;          /* fondo de la barra superior */
+  --ambar: #e8950c;
+  --ambar-texto: #3a2503;       /* texto sobre botones ámbar */
+  --ambar-suave: #fdf3e0;
+  --ambar-borde: #f3cf8d;       /* borde de las alertas */
+  --verde: #2e8b57;
+  --verde-suave: #e7f3ec;
+  --rojo: #c44536;
+  --rojo-suave: #faece9;
+  --azul-cat: #2b6cb0;
+  --azul-cat-suave: #e3edf7;    /* fondo del chip Mantenimiento */
+  --gris-cat: #6b7280;
+  --gris-cat-suave: #eceef1;    /* fondo del chip Documentación */
+  --borde: #dde3e9;
+  --campo-fondo: #fbfcfd;       /* fondo de inputs y selects */
+  --foto-fondo: linear-gradient(135deg, #243646, #1b2a38);
+  --odometro-fondo: #1b2a38;
+  --odometro-texto: #ffd9a0;
+  --fab-sombra: 0 6px 18px rgba(232,149,12,.45);
+  --radio: 14px;
+  --sombra: 0 1px 3px rgba(27,42,56,.08), 0 4px 14px rgba(27,42,56,.06);
+}
+
+/* ============================================================
+   TEMAS (novedad v5)
+   El atributo data-tema del <body> decide qué bloque se aplica.
+   Cada tema solo REDEFINE las variables de color: como toda la
+   app pinta con var(--...), cambiar el tema no toca el contenido.
+   ============================================================ */
+
+/* 🌙 NOCHE — fondos oscuros, texto claro */
+body[data-tema="noche"] {
+  --tinta: #e9eef3;
+  --tinta-suave: #9fadb9;
+  --fondo: #10171e;
+  --tarjeta: #1a242e;
+  --cabecera: #0b1117;
+  --ambar: #f2a52b;
+  --ambar-texto: #3a2503;
+  --ambar-suave: #33270f;
+  --ambar-borde: #5a4515;
+  --verde: #5cbd8b;
+  --verde-suave: #16291f;
+  --rojo: #e57364;
+  --rojo-suave: #33201c;
+  --azul-cat: #6fa8dc;
+  --azul-cat-suave: #1c2f42;
+  --gris-cat: #9aa4ae;
+  --gris-cat-suave: #28313a;
+  --borde: #2d3a46;
+  --campo-fondo: #141d26;
+  --foto-fondo: linear-gradient(135deg, #1c2935, #10171e);
+  --odometro-fondo: #0b1117;
+  --odometro-texto: #ffd9a0;
+  --fab-sombra: 0 6px 18px rgba(0,0,0,.5);
+  --sombra: 0 1px 3px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+}
+
+/* ◾ SOBRIO — neutro y serio: grises en lugar de ámbar */
+body[data-tema="sobrio"] {
+  --tinta: #24272a;
+  --tinta-suave: #5f6569;
+  --fondo: #f2f2f1;
+  --tarjeta: #ffffff;
+  --cabecera: #2b2f33;
+  --ambar: #3d444b;            /* los botones principales pasan a gris carbón */
+  --ambar-texto: #ffffff;
+  --ambar-suave: #eceeef;
+  --ambar-borde: #c9cdd1;
+  --verde: #41705a;
+  --verde-suave: #e9f0ec;
+  --rojo: #8f4a42;
+  --rojo-suave: #f3eae8;
+  --azul-cat: #4d6276;
+  --azul-cat-suave: #e7ebef;
+  --gris-cat: #6b7177;
+  --gris-cat-suave: #ebedee;
+  --borde: #d8dadc;
+  --campo-fondo: #fafafa;
+  --foto-fondo: linear-gradient(135deg, #3a4046, #2b2f33);
+  --odometro-fondo: #2b2f33;
+  --odometro-texto: #e8eaec;
+  --fab-sombra: 0 6px 18px rgba(43,47,51,.35);
+  --sombra: 0 1px 3px rgba(36,39,42,.08), 0 4px 14px rgba(36,39,42,.06);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--fondo);
+  color: var(--tinta);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Cabecera ---------- */
+header {
+  background: var(--cabecera);
+  color: #fff;
+  padding: 12px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+header .logo { font-weight: 800; font-size: 1.15rem; letter-spacing: -0.3px; cursor: pointer; }
+header .logo span { color: var(--ambar); }
+header .btn-ajustes {
+  margin-left: auto;
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 1rem;
+}
+
+main { max-width: 720px; margin: 0 auto; padding: 16px 16px 110px; }
+
+/* ---------- Pantallas ---------- */
+.screen { display: none; }
+.screen.activa { display: block; animation: aparecer .18s ease; }
+@keyframes aparecer { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .screen.activa { animation: none; } }
+
+h1 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 4px; }
+h2 { font-size: 1.05rem; font-weight: 700; margin: 22px 0 10px; }
+.subtitulo { color: var(--tinta-suave); font-size: 0.9rem; margin-bottom: 16px; }
+
+/* ---------- Botones ---------- */
+button {
+  font: inherit; border: none; border-radius: 12px; cursor: pointer;
+  padding: 12px 18px; font-weight: 600;
+  transition: filter .15s ease, transform .05s ease;
+}
+button:active { transform: scale(.98); }
+button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--ambar); outline-offset: 2px; }
+.btn-primario { background: var(--ambar); color: var(--ambar-texto); width: 100%; font-size: 1rem; }
+.btn-primario:hover { filter: brightness(1.05); }
+.btn-secundario { background: var(--tarjeta); color: var(--tinta); border: 1.5px solid var(--borde); width: 100%; }
+.btn-peligro { background: var(--rojo-suave); color: var(--rojo); width: 100%; }
+.btn-texto { background: none; color: var(--tinta-suave); padding: 8px 10px; font-weight: 600; }
+.btn-mini { padding: 7px 12px; font-size: 0.8rem; border-radius: 999px; }
+.fila-botones { display: flex; gap: 10px; margin-top: 18px; }
+
+/* Botón protagonista del informe (v6) */
+.btn-informe {
+  width: 100%; margin-top: 10px; font-size: 1rem;
+  background: var(--cabecera); color: #fff;
+  border: 2px solid var(--ambar);
+}
+
+.fab {
+  position: fixed; right: 18px; bottom: 22px;
+  background: var(--ambar); color: var(--ambar-texto);
+  border-radius: 999px; padding: 14px 22px;
+  font-size: 1rem; font-weight: 700;
+  box-shadow: var(--fab-sombra);
+  z-index: 9;
+}
+
+/* ---------- Tarjetas de vehículo ---------- */
+.tarjeta-vehiculo {
+  background: var(--tarjeta); border-radius: var(--radio); box-shadow: var(--sombra);
+  margin-bottom: 14px; overflow: hidden; cursor: pointer; border: 1.5px solid transparent;
+}
+.tarjeta-vehiculo:hover { border-color: var(--ambar); }
+.tarjeta-vehiculo .foto {
+  height: 130px; background: var(--foto-fondo);
+  display: flex; align-items: center; justify-content: center; font-size: 3rem;
+}
+.tarjeta-vehiculo .foto img { width: 100%; height: 100%; object-fit: cover; }
+.tarjeta-vehiculo .cuerpo { padding: 14px 16px; }
+.tarjeta-vehiculo .nombre { font-weight: 800; font-size: 1.1rem; }
+.tarjeta-vehiculo .detalle { color: var(--tinta-suave); font-size: 0.88rem; margin-top: 2px; }
+.tarjeta-vehiculo .pie {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 12px; gap: 8px; flex-wrap: wrap;
+}
+
+/* Matrícula española (firma visual) */
+.matricula {
+  display: inline-flex; align-items: stretch;
+  border: 1.5px solid #25323e; border-radius: 5px; overflow: hidden;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 0.8rem; font-weight: 700; line-height: 1;
+}
+.matricula .banda { background: #0a3d91; color: #ffd24a; padding: 5px 4px; font-size: 0.55rem; display: flex; align-items: center; }
+.matricula .numero { background: #fff; color: #1b2a38; padding: 5px 8px; letter-spacing: 1px; display: flex; align-items: center; }
+
+.odometro {
+  background: var(--odometro-fondo); color: var(--odometro-texto);
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  border-radius: 6px; padding: 5px 10px; font-size: 0.82rem; letter-spacing: 0.5px;
+}
+
+/* ---------- Alertas / recordatorios ---------- */
+.alerta {
+  background: var(--ambar-suave); border: 1.5px solid var(--ambar-borde); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 10px; font-size: 0.9rem;
+  display: flex; gap: 10px; align-items: center;
+}
+.alerta .cuerpo-alerta { flex: 1; cursor: pointer; }
+.alerta strong { display: block; }
+.alerta small { color: var(--tinta-suave); }
+.alerta .btn-hecho { background: var(--verde-suave); color: var(--verde); white-space: nowrap; }
+
+/* ---------- Obligaciones legales (v12) ---------- */
+.oblig {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--tarjeta); border: 1px solid var(--borde);
+  border-left: 5px solid var(--borde); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 10px; cursor: pointer;
+}
+.oblig .icono { font-size: 1.6rem; line-height: 1; }
+.oblig .info { flex: 1; }
+.oblig .info .tipo { font-weight: 700; }
+.oblig .info .veh { color: var(--tinta-suave); font-size: 0.85rem; }
+.oblig .plazo { text-align: right; white-space: nowrap; font-size: 0.85rem; }
+.oblig .plazo .fecha { color: var(--tinta-suave); }
+.oblig .plazo .estado { font-weight: 700; display: block; }
+/* Colores del semáforo según el nivel */
+.oblig.vencida { border-left-color: var(--rojo); }
+.oblig.vencida .estado { color: var(--rojo); }
+.oblig.proxima { border-left-color: var(--ambar); }
+.oblig.proxima .estado { color: var(--ambar); }
+.oblig.aldia   { border-left-color: var(--verde); }
+.oblig.aldia   .estado { color: var(--verde); }
+/* Cabecera de cada grupo del semáforo */
+.grupo-oblig-titulo { font-weight: 800; margin: 18px 0 8px; font-size: 0.95rem; }
+/* Acceso a obligaciones desde el inicio */
+.acceso-obligaciones {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  background: var(--cabecera); color: #fff; border: none;
+  border-radius: var(--radio); padding: 14px 16px; margin-bottom: 14px;
+  cursor: pointer; text-align: left; font-size: 0.95rem;
+}
+.acceso-obligaciones .ao-icono { font-size: 1.5rem; }
+.acceso-obligaciones .ao-texto { flex: 1; }
+.acceso-obligaciones .ao-texto strong { display: block; }
+.acceso-obligaciones .ao-texto small { opacity: 0.8; }
+.acceso-obligaciones .ao-badge {
+  background: var(--rojo); color: #fff; border-radius: 999px;
+  padding: 2px 9px; font-weight: 700; font-size: 0.85rem;
+}
+.acceso-obligaciones .ao-flecha { font-size: 1.2rem; opacity: 0.7; }
+
+/* ---------- Estado vacío ---------- */
+.vacio {
+  text-align: center; padding: 56px 24px;
+  background: var(--tarjeta); border-radius: var(--radio);
+  border: 2px dashed var(--borde); color: var(--tinta-suave);
+}
+.vacio .icono { font-size: 3rem; margin-bottom: 12px; }
+.vacio p { margin-bottom: 6px; }
+
+/* ---------- Formularios ---------- */
+form, .panel { background: var(--tarjeta); border-radius: var(--radio); box-shadow: var(--sombra); padding: 18px 16px; }
+.campo { margin-bottom: 16px; }
+.campo label { display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 6px; }
+.campo label .opc { color: var(--tinta-suave); font-weight: 400; font-size: 0.8rem; }
+.campo input, .campo select, .campo textarea {
+  width: 100%; font: inherit; padding: 11px 12px;
+  border: 1.5px solid var(--borde); border-radius: 10px;
+  background: var(--campo-fondo); color: var(--tinta);
+}
+.campo input:focus, .campo select:focus, .campo textarea:focus {
+  outline: none; border-color: var(--ambar); background: var(--tarjeta);
+}
+.campo textarea { resize: vertical; min-height: 80px; }
+.input-otro { margin-top: 8px; display: none; } /* campo de texto de "Otro" (v10) */
+
+/* Casilla "Cubierto por el seguro" (v8) */
+.campo-casilla {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--campo-fondo); border: 1.5px solid var(--borde);
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; cursor: pointer;
+}
+.campo-casilla input { width: 20px; height: 20px; margin-top: 1px; flex-shrink: 0; accent-color: var(--verde); }
+.campo-casilla .texto-casilla { font-size: 0.9rem; }
+.campo-casilla .texto-casilla small { display: block; color: var(--tinta-suave); font-weight: 400; }
+
+/* Insignia de seguro en la lista de actuaciones */
+.sello-seguro {
+  display: inline-block; font-size: 0.68rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 999px; margin-left: 4px;
+  background: var(--verde-suave); color: var(--verde);
+}
+
+/* Bloque de datos del seguro en la ficha del vehículo */
+.bloque-seguro {
+  background: var(--verde-suave); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 16px; font-size: 0.9rem;
+}
+.bloque-seguro .titulo-seguro { font-weight: 800; color: var(--verde); margin-bottom: 6px; }
+.bloque-seguro .linea-seguro { color: var(--tinta-suave); padding: 2px 0; }
+.bloque-seguro .linea-seguro strong { color: var(--tinta); font-weight: 600; }
+.campo .ayuda { font-size: 0.78rem; color: var(--tinta-suave); margin-top: 4px; }
+.dos-columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mensaje-error {
+  background: var(--rojo-suave); color: var(--rojo);
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
+  font-size: 0.88rem; font-weight: 600; display: none;
+}
+.mensaje-error.visible { display: block; }
+
+/* Fotos */
+.previas { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.previa { position: relative; width: 86px; height: 86px; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--borde); }
+.previa img { width: 100%; height: 100%; object-fit: cover; }
+.previa .quitar {
+  position: absolute; top: 3px; right: 3px;
+  background: rgba(27,42,56,.85); color: #fff;
+  border-radius: 999px; width: 24px; height: 24px;
+  padding: 0; font-size: 0.85rem; line-height: 1;
+}
+
+/* ---------- Visión general inteligente (novedad v4) ---------- */
+.vision-general {
+  background: var(--tarjeta); border-radius: var(--radio);
+  box-shadow: var(--sombra); padding: 14px 16px; margin-bottom: 16px;
+  border-left: 5px solid var(--verde); /* verde = todo al día */
+}
+.vision-general.aviso  { border-left-color: var(--ambar); } /* ámbar = avisos próximos */
+.vision-general.alerta { border-left-color: var(--rojo); }  /* rojo = algo vencido */
+.vision-general .estado { font-weight: 800; margin-bottom: 8px; }
+.vision-general ul { list-style: none; }
+.vision-general li { font-size: 0.9rem; padding: 3px 0; color: var(--tinta-suave); }
+/* 🆕 v12: cada recordatorio vencido concreto, tocable para ir a su actuación */
+.vision-general .sub-aviso {
+  display: inline-block; color: var(--rojo); font-weight: 600;
+  cursor: pointer; padding: 2px 0; text-decoration: underline;
+  text-decoration-style: dotted;
+}
+.vision-general .sub-aviso:hover { opacity: 0.75; }
+
+/* ---------- Pantalla de bienvenida / onboarding (v9) ---------- */
+body.onboarding header { display: none; } /* sin cabecera mientras configura */
+.bienvenida-intro { text-align: center; margin-bottom: 22px; }
+.bienvenida-intro .logo-grande { font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; }
+.bienvenida-intro .logo-grande span { color: var(--ambar); }
+.bienvenida-intro .emoji { font-size: 3rem; margin-bottom: 8px; }
+.bienvenida-intro p { color: var(--tinta-suave); margin-top: 6px; }
+
+/* ---------- Ficha de vehículo ---------- */
+.cabecera-vehiculo { background: var(--tarjeta); border-radius: var(--radio); box-shadow: var(--sombra); overflow: hidden; margin-bottom: 16px; }
+.cabecera-vehiculo .foto-grande {
+  height: 170px; background: var(--foto-fondo);
+  display: flex; align-items: center; justify-content: center; font-size: 4rem;
+}
+.cabecera-vehiculo .foto-grande img { width: 100%; height: 100%; object-fit: cover; }
+.cabecera-vehiculo .cuerpo { padding: 16px; }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.stat { background: var(--tarjeta); border-radius: 12px; box-shadow: var(--sombra); padding: 12px 10px; text-align: center; }
+.stat .valor { font-weight: 800; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.stat .etiqueta { font-size: 0.72rem; color: var(--tinta-suave); text-transform: uppercase; letter-spacing: 0.4px; }
+
+/* ---------- Lista de actuaciones ---------- */
+.item-actuacion {
+  background: var(--tarjeta); border-radius: 12px; box-shadow: var(--sombra);
+  padding: 12px 14px; margin-bottom: 10px; cursor: pointer;
+  display: flex; gap: 12px; align-items: center;
+  border-left: 5px solid var(--azul-cat);
+}
+.item-actuacion.averia { border-left-color: var(--rojo); }
+.item-actuacion.documentacion { border-left-color: var(--gris-cat); }
+.item-actuacion .info { flex: 1; min-width: 0; }
+.item-actuacion .titulo { font-weight: 700; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-actuacion .meta { font-size: 0.8rem; color: var(--tinta-suave); }
+.item-actuacion .coste { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.chip {
+  display: inline-block; font-size: 0.72rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 999px;
+  text-transform: uppercase; letter-spacing: 0.4px;
+}
+.chip.mantenimiento { background: var(--azul-cat-suave); color: var(--azul-cat); }
+.chip.averia { background: var(--rojo-suave); color: var(--rojo); }
+.chip.documentacion { background: var(--gris-cat-suave); color: var(--gris-cat); }
+
+/* ---------- Detalle de actuación ---------- */
+.ficha-datos { background: var(--tarjeta); border-radius: var(--radio); box-shadow: var(--sombra); padding: 16px; }
+.dato { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid var(--borde); font-size: 0.92rem; }
+.dato:last-child { border-bottom: none; }
+.dato .clave { color: var(--tinta-suave); }
+.dato .valor { font-weight: 600; text-align: right; }
+.notas-bloque { background: var(--ambar-suave); border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 0.9rem; white-space: pre-wrap; }
+.galeria { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.galeria img { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; border: 1.5px solid var(--borde); cursor: pointer; }
+
+/* ---------- Filtros del historial ---------- */
+.filtros {
+  background: var(--tarjeta); border-radius: var(--radio); box-shadow: var(--sombra);
+  padding: 12px; margin-bottom: 14px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.filtros input, .filtros select {
+  font: inherit; font-size: 0.9rem; padding: 9px 10px;
+  border: 1.5px solid var(--borde); border-radius: 10px; width: 100%;
+}
+.filtros .busqueda { grid-column: 1 / -1; }
+.filtros label {
+  font-size: 0.76rem; font-weight: 600; color: var(--tinta-suave);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.filtros .btn-limpiar {
+  background: var(--fondo); color: var(--tinta-suave);
+  border: 1.5px solid var(--borde);
+  padding: 9px 10px; font-size: 0.85rem;
+  align-self: end;
+}
+
+/* ---------- Estadísticas (barras) ---------- */
+.barra-fila { margin-bottom: 14px; }
+.barra-fila .cabecera-barra { display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 4px; }
+.barra-fila .cabecera-barra .valor { font-weight: 700; font-variant-numeric: tabular-nums; }
+.barra-fondo { background: var(--fondo); border-radius: 999px; height: 12px; overflow: hidden; }
+.barra-relleno { height: 100%; border-radius: 999px; background: var(--azul-cat); }
+.barra-relleno.averia { background: var(--rojo); }
+.barra-relleno.documentacion { background: var(--gris-cat); }
+.barra-relleno.anual { background: var(--ambar); }
+
+/* ---------- Ajustes ---------- */
+.opcion-ajustes { display: flex; flex-direction: column; gap: 10px; }
+
+/* Selector de tema (v5): tres botones, el activo se resalta */
+.selector-tema { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.btn-tema {
+  background: var(--fondo); color: var(--tinta);
+  border: 1.5px solid var(--borde);
+  font-size: 0.9rem; padding: 12px 8px;
+}
+.btn-tema.activo {
+  background: var(--ambar); color: var(--ambar-texto);
+  border-color: var(--ambar);
+}
+.nota-info {
+  background: var(--verde-suave); color: var(--verde);
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 0.85rem; margin-top: 12px;
+}
+
+.nav-pantalla { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
+.nav-pantalla button { padding: 8px 12px; }
+
+@media (min-width: 560px) {
+  .lista-vehiculos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .tarjeta-vehiculo { margin-bottom: 0; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" onclick="Pantallas.lista()">Vehicle<span>Track</span></div>
+  <button class="btn-ajustes" onclick="Pantallas.ajustes()" aria-label="Ajustes">⚙️ Ajustes</button>
+</header>
+
+<main>
+
+  <!-- ============ PANTALLA: BIENVENIDA / ONBOARDING (v9) ============ -->
+  <section id="pantalla-bienvenida" class="screen">
+    <div class="bienvenida-intro">
+      <div class="emoji">🚗</div>
+      <div class="logo-grande">Vehicle<span>Track</span></div>
+      <p>El libro de vida de tus vehículos. Antes de empezar, cuéntanos un par de cosas.</p>
+    </div>
+    <div id="error-bienvenida" class="mensaje-error"></div>
+    <form id="form-bienvenida" onsubmit="Acciones.completarBienvenida(event)">
+      <div class="campo">
+        <label for="b-nombre">¿Cómo te llamas? *</label>
+        <input id="b-nombre" type="text" placeholder="Tu nombre" maxlength="30">
+      </div>
+      <div class="campo">
+        <label for="b-pais">País</label>
+        <select id="b-pais" onchange="Pantallas.paisPreseleccionaMoneda()"></select>
+        <input id="b-pais-otro" class="input-otro" type="text" placeholder="Escribe tu país" maxlength="40">
+        <div class="ayuda">Nos sirve para proponerte la moneda. Podrás cambiarla.</div>
+      </div>
+      <div class="campo">
+        <label for="b-moneda">Moneda de tus gastos *</label>
+        <select id="b-moneda"></select>
+        <div class="ayuda">Todos los importes se mostrarán con esta moneda. No se hace conversión de divisas: una cifra es una cifra.</div>
+      </div>
+      <button type="submit" class="btn-primario" style="margin-top:6px">Empezar a usar VehicleTrack</button>
+    </form>
+  </section>
+
+  <!-- ============ PANTALLA: LISTA DE VEHÍCULOS ============ -->
+  <section id="pantalla-lista" class="screen">
+    <h1 id="saludo-lista">Mis vehículos</h1>
+    <p class="subtitulo">Toca un vehículo para ver su ficha e historial.</p>
+    <div id="zona-acceso-obligaciones"></div>
+    <div id="zona-alertas"></div>
+    <div id="lista-vehiculos" class="lista-vehiculos"></div>
+    <button class="fab" onclick="Pantallas.formVehiculo()">+ Añadir vehículo</button>
+  </section>
+
+  <!-- ============ PANTALLA: FORMULARIO DE VEHÍCULO ============ -->
+  <section id="pantalla-form-vehiculo" class="screen">
+    <div class="nav-pantalla">
+      <button class="btn-texto" onclick="Pantallas.atras()">← Volver</button>
+    </div>
+    <h1 id="titulo-form-vehiculo">Añadir vehículo</h1>
+    <p class="subtitulo">Los campos marcados con * son obligatorios.</p>
+    <div id="error-vehiculo" class="mensaje-error"></div>
+    <form id="form-vehiculo" onsubmit="Acciones.guardarVehiculo(event)">
+      <div class="campo">
+        <label for="v-nombre">Nombre del vehículo *</label>
+        <input id="v-nombre" type="text" placeholder="Ej: Mi Seat León" maxlength="40">
+      </div>
+      <div class="dos-columnas">
+        <div class="campo">
+          <label for="v-tipo">Tipo *</label>
+          <select id="v-tipo" onchange="Util.toggleOtro('v-tipo','v-tipo-otro')">
+            <option value="coche">Coche</option>
+            <option value="moto">Moto</option>
+            <option value="furgoneta">Furgoneta</option>
+            <option value="__otro__">Otro (especificar)…</option>
+          </select>
+          <input id="v-tipo-otro" class="input-otro" type="text" placeholder="Escribe el tipo" maxlength="20">
+        </div>
+        <div class="campo">
+          <label for="v-combustible">Combustible *</label>
+          <select id="v-combustible" onchange="Util.toggleOtro('v-combustible','v-combustible-otro')">
+            <option value="gasolina">Gasolina</option>
+            <option value="diésel">Diésel</option>
+            <option value="híbrido">Híbrido</option>
+            <option value="eléctrico">Eléctrico</option>
+            <option value="GLP">GLP</option>
+            <option value="__otro__">Otro (especificar)…</option>
+          </select>
+          <input id="v-combustible-otro" class="input-otro" type="text" placeholder="Escribe el combustible" maxlength="20">
+        </div>
+      </div>
+      <div class="dos-columnas">
+        <div class="campo">
+          <label for="v-marca">Marca *</label>
+          <input id="v-marca" type="text" placeholder="Ej: SEAT" maxlength="30">
+        </div>
+        <div class="campo">
+          <label for="v-modelo">Modelo *</label>
+          <input id="v-modelo" type="text" placeholder="Ej: León" maxlength="30">
+        </div>
+      </div>
+      <div class="dos-columnas">
+        <div class="campo">
+          <label for="v-anio">Año *</label>
+          <input id="v-anio" type="number" min="1900" max="2100" placeholder="Ej: 2018">
+        </div>
+        <div class="campo">
+          <label for="v-km">Km actuales *</label>
+          <input id="v-km" type="number" min="0" step="1" placeholder="Ej: 145230">
+        </div>
+      </div>
+      <div class="dos-columnas">
+        <div class="campo">
+          <label for="v-matricula">Matrícula <span class="opc">(opcional)</span></label>
+          <input id="v-matricula" type="text" placeholder="Ej: 1234 ABC" maxlength="12">
+        </div>
+        <div class="campo">
+          <label for="v-color">Color <span class="opc">(opcional)</span></label>
+          <input id="v-color" type="text" placeholder="Ej: Gris plata" maxlength="20">
+        </div>
+      </div>
+      <div class="campo">
+        <label for="v-vin">Nº de bastidor (VIN) <span class="opc">(opcional)</span></label>
+        <input id="v-vin" type="text" placeholder="17 caracteres" maxlength="17">
+      </div>
+
+      <h2>Seguro <span class="opc" style="font-weight:400;font-size:0.8rem;color:var(--tinta-suave)">(opcional)</span></h2>
+      <div class="dos-columnas">
+        <div class="campo">
+          <label for="v-seguro-compania">Compañía aseguradora</label>
+          <input id="v-seguro-compania" type="text" placeholder="Ej: Mapfre, Línea Directa..." maxlength="40">
+        </div>
+        <div class="campo">
+          <label for="v-seguro-tipo">Tipo de seguro</label>
+          <select id="v-seguro-tipo" onchange="Util.toggleOtro('v-seguro-tipo','v-seguro-tipo-otro')">
+            <option value="">— Sin especificar —</option>
+            <option value="Terceros">Terceros</option>
+            <option value="Terceros ampliado">Terceros ampliado</option>
+            <option value="Todo riesgo con franquicia">Todo riesgo con franquicia</option>
+            <option value="Todo riesgo">Todo riesgo</option>
+            <option value="__otro__">Otro (especificar)…</option>
+          </select>
+          <input id="v-seguro-tipo-otro" class="input-otro" type="text" placeholder="Escribe el tipo de seguro" maxlength="40">
+        </div>
+      </div>
+      <div class="dos-columnas">
+        <div class="campo">
+          <label for="v-seguro-poliza">Nº de póliza</label>
+          <input id="v-seguro-poliza" type="text" placeholder="Ej: 0012345678" maxlength="30">
+        </div>
+        <div class="campo">
+          <label for="v-seguro-vencimiento">Vencimiento / renovación</label>
+          <input id="v-seguro-vencimiento" type="date">
+        </div>
+      </div>
+      <div class="campo">
+        <label for="v-seguro-telefono">Teléfono de asistencia</label>
+        <input id="v-seguro-telefono" type="tel" placeholder="Ej: 900 123 456" maxlength="20">
+        <div class="ayuda">Si rellenas el vencimiento, la app te avisará cuando se acerque la renovación.</div>
+      </div>
+
+      <div class="campo">
+        <label for="v-foto">Foto del vehículo <span class="opc">(opcional, se optimiza sola)</span></label>
+        <input id="v-foto" type="file" accept="image/*" onchange="Fotos.cargarFotoVehiculo(this)">
+        <div id="previa-foto-vehiculo" class="previas"></div>
+      </div>
+      <div class="fila-botones">
+        <button type="button" class="btn-secundario" onclick="Pantallas.atras()">Cancelar</button>
+        <button type="submit" class="btn-primario">Guardar vehículo</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ============ PANTALLA: FICHA DEL VEHÍCULO ============ -->
+  <section id="pantalla-detalle-vehiculo" class="screen">
+    <div class="nav-pantalla">
+      <button class="btn-texto" onclick="Pantallas.lista()">← Mis vehículos</button>
+    </div>
+    <div id="contenido-detalle-vehiculo"></div>
+  </section>
+
+  <!-- ============ PANTALLA: DETALLE DE ACTUACIÓN ============ -->
+  <section id="pantalla-detalle-actuacion" class="screen">
+    <div class="nav-pantalla">
+      <button class="btn-texto" onclick="Pantallas.detalleVehiculo(Estado.vehiculoActualId)">← Ficha del vehículo</button>
+    </div>
+    <div id="contenido-detalle-actuacion"></div>
+  </section>
+
+  <!-- ============ PANTALLA: FORMULARIO DE ACTUACIÓN ============ -->
+  <section id="pantalla-form-actuacion" class="screen">
+    <div class="nav-pantalla">
+      <button class="btn-texto" onclick="Pantallas.atras()">← Volver</button>
+    </div>
+    <h1 id="titulo-form-actuacion">Registrar actuación</h1>
+    <p class="subtitulo" id="subtitulo-form-actuacion"></p>
+    <div id="error-actuacion" class="mensaje-error"></div>
+    <form id="form-actuacion" onsubmit="Acciones.guardarActuacion(event)">
+      <div class="dos-columnas">
+        <div class="campo">
+          <label for="a-fecha">Fecha *</label>
+          <input id="a-fecha" type="date">
+        </div>
+        <div class="campo" id="campo-km">
+          <label for="a-km">Kilometraje *</label>
+          <input id="a-km" type="number" min="0" step="1" placeholder="Km del vehículo">
+        </div>
+      </div>
+      <div class="dos-columnas">
+        <div class="campo">
+          <label for="a-categoria">Categoría *</label>
+          <select id="a-categoria" onchange="Pantallas.actualizarSubcategorias()">
+            <option value="mantenimiento">Mantenimiento</option>
+            <option value="averia">Avería / Reparación</option>
+            <option value="documentacion">Documentación</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="a-subcategoria">Sistema *</label>
+          <select id="a-subcategoria" onchange="Util.toggleOtro('a-subcategoria','a-subcategoria-otro'); Pantallas.aplicarCamposSubcategoria(); Pantallas.actualizarObligacion()"></select>
+          <input id="a-subcategoria-otro" class="input-otro" type="text" placeholder="Escribe el sistema" maxlength="40">
+        </div>
+      </div>
+      <div class="campo">
+        <label for="a-titulo">Título *</label>
+        <input id="a-titulo" type="text" placeholder="Ej: breve descripción de la actuación" maxlength="80">
+      </div>
+
+      <!-- 🆕 v12: campos ESPECÍFICOS de Documentación. Ocultos por defecto;
+           Pantallas.aplicarCamposSubcategoria() muestra solo los que tocan. -->
+      <div id="campo-resultado-itv" class="campo campo-doc" style="display:none">
+        <label for="a-resultado-itv">Resultado de la ITV</label>
+        <select id="a-resultado-itv">
+          <option value="favorable">✅ Favorable</option>
+          <option value="desfavorable">⚠️ Desfavorable (a subsanar)</option>
+          <option value="negativa">❌ Negativa</option>
+        </select>
+        <div class="ayuda">Si es desfavorable o negativa, la próxima fecha suele ser antes de un año: ponla tú abajo.</div>
+      </div>
+      <div id="campo-motivo" class="campo campo-doc" style="display:none">
+        <label for="a-motivo">Motivo</label>
+        <input id="a-motivo" type="text" placeholder="Ej: Exceso de velocidad, mal aparcamiento..." maxlength="80">
+      </div>
+      <div class="dos-columnas campo-doc" id="campo-pagada-puntos" style="display:none">
+        <label class="campo-casilla" style="align-self:center">
+          <input id="a-pagada" type="checkbox">
+          <span class="texto-casilla">Pagada
+            <small>Márcala si ya la has abonado (con descuento por pronto pago si aplicaba).</small>
+          </span>
+        </label>
+        <div class="campo">
+          <label for="a-puntos">Puntos retirados</label>
+          <input id="a-puntos" type="number" min="0" max="8" step="1" placeholder="Ej: 2">
+        </div>
+      </div>
+      <div id="campo-preaviso" class="campo campo-doc" style="display:none">
+        <label for="a-preaviso">Avisarme antes del vencimiento</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input id="a-preaviso" type="number" min="0" max="120" step="1" value="45" style="max-width:90px">
+          <span>días antes</span>
+        </div>
+        <div class="ayuda">Para cambiar de seguro normalmente hay que preavisar con margen. 45 días da tiempo de comparar y decidir.</div>
+      </div>
+      <div id="campo-garantia-hasta" class="campo campo-doc" style="display:none">
+        <label for="a-garantia-hasta">Garantía válida hasta <span class="opc">(opcional)</span></label>
+        <input id="a-garantia-hasta" type="date">
+        <div class="ayuda">Fecha en la que caduca la garantía de la pieza o el producto (ej: batería, turbo, neumáticos).</div>
+      </div>
+      <div id="ayuda-otros" class="ayuda campo-doc" style="display:none;margin-top:-4px;margin-bottom:8px">
+        Para guardar documentos del vehículo: permiso de circulación, ficha técnica, factura de compra, contrato... Adjunta una foto del documento abajo.
+      </div>
+
+      <div class="campo" id="campo-taller-fila">
+        <label for="a-taller" id="label-taller">Taller / Realizado por <span class="opc">(opcional)</span></label>
+        <input id="a-taller" type="text" placeholder="Ej: Taller Pérez · Yo mismo" maxlength="60">
+      </div>
+      <div class="dos-columnas" id="campo-coste-fila">
+        <div class="campo">
+          <label for="a-coste" id="label-coste">Coste total <span class="opc">(opcional)</span></label>
+          <input id="a-coste" type="number" min="0" step="0.01" placeholder="Ej: 75.50">
+        </div>
+        <div class="campo" id="campo-desglose">
+          <label for="a-desglose">Desglose <span class="opc">(opcional)</span></label>
+          <input id="a-desglose" type="text" placeholder="Piezas 45€ + mano obra 30€" maxlength="120">
+        </div>
+      </div>
+      <label class="campo-casilla" id="campo-por-seguro">
+        <input id="a-por-seguro" type="checkbox">
+        <span class="texto-casilla">Cubierto por el seguro / aseguradora
+          <small>Marca esta casilla si la reparación la gestionó o pagó tu compañía de seguros. En el coste puedes anotar solo lo que pagaste tú (la franquicia, por ejemplo).</small>
+        </span>
+      </label>
+      <!-- 🆕 v12 (Opción B): casilla que aparece SOLO para ITV/seguro/impuesto.
+           Si está marcada (lo normal), la fecha de la próxima es obligatoria,
+           para poder avisar luego en la vista de obligaciones. Si la desmarcas
+           (registro histórico, coche vendido...), la fecha vuelve a ser libre. -->
+      <label id="bloque-programar" class="campo-casilla" style="display:none">
+        <input id="a-programar-siguiente" type="checkbox" checked onchange="Pantallas.actualizarObligacion()">
+        <span class="texto-casilla">Programar la siguiente
+          <small id="texto-programar">Marca esto para que la app vigile el próximo vencimiento. Desmárcalo si solo estás anotando algo del pasado.</small>
+        </span>
+      </label>
+      <h2 id="titulo-prox-revision">Próxima revisión <span id="hint-prox" class="opc" style="font-weight:400;font-size:0.8rem;color:var(--tinta-suave)">(opcional, crea un recordatorio)</span></h2>
+      <div class="dos-columnas" id="fila-prox-revision">
+        <div class="campo" id="campo-prox-km">
+          <label for="a-prox-km">Por kilómetros</label>
+          <input id="a-prox-km" type="number" min="0" step="1" placeholder="Ej: 150000">
+        </div>
+        <div class="campo" id="campo-prox-fecha">
+          <label for="a-prox-fecha" id="label-prox-fecha">Por fecha</label>
+          <input id="a-prox-fecha" type="date">
+          <div id="ayuda-prox-fecha" class="ayuda" style="display:none">Obligatorio: indica cuándo vence la próxima, para poder avisarte.</div>
+        </div>
+      </div>
+      <div class="campo">
+        <label for="a-notas">Notas <span class="opc">(opcional)</span></label>
+        <textarea id="a-notas" placeholder="Observaciones, recomendaciones del mecánico..."></textarea>
+      </div>
+      <div class="campo">
+        <label for="a-fotos">Fotos / facturas <span class="opc">(opcional, hasta 3, se optimizan solas)</span></label>
+        <input id="a-fotos" type="file" accept="image/*" multiple onchange="Fotos.cargarFotosActuacion(this)">
+        <div id="previa-fotos-actuacion" class="previas"></div>
+      </div>
+      <div class="fila-botones">
+        <button type="button" class="btn-secundario" onclick="Pantallas.atras()">Cancelar</button>
+        <button type="submit" class="btn-primario">Guardar actuación</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ============ PANTALLA: HISTORIAL COMPLETO ============ -->
+  <section id="pantalla-historial" class="screen">
+    <div class="nav-pantalla">
+      <button class="btn-texto" onclick="Pantallas.detalleVehiculo(Estado.vehiculoActualId)">← Ficha del vehículo</button>
+    </div>
+    <h1>Historial completo</h1>
+    <p class="subtitulo" id="subtitulo-historial"></p>
+    <div class="filtros">
+      <input id="filtro-busqueda" class="busqueda" type="search" placeholder="🔍 Buscar por título, taller o notas..." oninput="Pantallas.renderHistorial()">
+      <label>Categoría
+        <select id="filtro-categoria" onchange="Pantallas.cambioFiltroCategoria()">
+          <option value="">Todas las categorías</option>
+          <option value="mantenimiento">Mantenimiento</option>
+          <option value="averia">Avería / Reparación</option>
+          <option value="documentacion">Documentación</option>
+        </select>
+      </label>
+      <label>Sistema
+        <select id="filtro-sistema" onchange="Pantallas.renderHistorial()">
+          <option value="">Todos los sistemas</option>
+        </select>
+      </label>
+      <!-- 📅 Búsqueda por rango de fechas -->
+      <label>Desde
+        <input id="filtro-desde" type="date" onchange="Pantallas.renderHistorial()">
+      </label>
+      <label>Hasta
+        <input id="filtro-hasta" type="date" onchange="Pantallas.renderHistorial()">
+      </label>
+      <label>Orden
+        <select id="filtro-orden" onchange="Pantallas.renderHistorial()">
+          <option value="recientes">Más recientes primero</option>
+          <option value="antiguas">Más antiguas primero</option>
+        </select>
+      </label>
+      <button type="button" class="btn-limpiar" onclick="Pantallas.limpiarFiltros()">✕ Limpiar filtros</button>
+    </div>
+    <div id="lista-historial"></div>
+  </section>
+
+  <!-- ============ PANTALLA: OBLIGACIONES LEGALES (v12) ============ -->
+  <section id="pantalla-obligaciones" class="screen">
+    <div class="nav-pantalla">
+      <button class="btn-texto" onclick="Pantallas.lista()">← Mis vehículos</button>
+    </div>
+    <h1>Obligaciones legales</h1>
+    <p class="subtitulo">ITV, seguros e impuestos de todos tus vehículos, ordenados por vencimiento.</p>
+    <div id="contenido-obligaciones"></div>
+  </section>
+
+  <!-- ============ PANTALLA: ESTADÍSTICAS ============ -->
+  <section id="pantalla-estadisticas" class="screen">
+    <div class="nav-pantalla">
+      <button class="btn-texto" onclick="Pantallas.detalleVehiculo(Estado.vehiculoActualId)">← Ficha del vehículo</button>
+    </div>
+    <h1>Estadísticas de gasto</h1>
+    <p class="subtitulo" id="subtitulo-estadisticas"></p>
+    <div id="contenido-estadisticas"></div>
+  </section>
+
+  <!-- ============ PANTALLA: AJUSTES ============ -->
+  <section id="pantalla-ajustes" class="screen">
+    <div class="nav-pantalla">
+      <button class="btn-texto" onclick="Pantallas.lista()">← Mis vehículos</button>
+    </div>
+    <h1>Ajustes</h1>
+    <p class="subtitulo">Apariencia, copia de seguridad y gestión de datos.</p>
+
+    <h2>Perfil y moneda</h2>
+    <div class="panel">
+      <div class="campo">
+        <label for="aj-nombre">Tu nombre</label>
+        <input id="aj-nombre" type="text" maxlength="30" onchange="Acciones.guardarPerfil()">
+      </div>
+      <div class="campo">
+        <label for="aj-pais">País</label>
+        <select id="aj-pais" onchange="Util.toggleOtro('aj-pais','aj-pais-otro'); Acciones.guardarPerfil()"></select>
+        <input id="aj-pais-otro" class="input-otro" type="text" placeholder="Escribe tu país" maxlength="40" onchange="Acciones.guardarPerfil()">
+      </div>
+      <div class="campo" style="margin-bottom:0">
+        <label for="aj-moneda">Moneda</label>
+        <select id="aj-moneda" onchange="Acciones.cambiarMoneda(this.value)"></select>
+        <div class="ayuda">Cambiar la moneda solo cambia el símbolo, no convierte las cifras ya registradas.</div>
+      </div>
+    </div>
+
+    <h2>Apariencia</h2>
+    <div class="panel">
+      <div class="selector-tema">
+        <button type="button" class="btn-tema" data-tema="claro" onclick="Acciones.cambiarTema('claro')">☀️ Claro</button>
+        <button type="button" class="btn-tema" data-tema="noche" onclick="Acciones.cambiarTema('noche')">🌙 Noche</button>
+        <button type="button" class="btn-tema" data-tema="sobrio" onclick="Acciones.cambiarTema('sobrio')">◾ Sobrio</button>
+      </div>
+    </div>
+
+    <h2>Copia de seguridad</h2>
+    <div class="panel opcion-ajustes">
+      <button class="btn-primario" onclick="Acciones.exportarDatos()">⬇️ Exportar datos (archivo de respaldo)</button>
+      <button class="btn-secundario" onclick="document.getElementById('input-importar').click()">⬆️ Importar copia de seguridad</button>
+      <input id="input-importar" type="file" accept=".json,application/json" style="display:none" onchange="Acciones.importarDatos(this)">
+      <p class="ayuda" style="font-size:0.82rem;color:var(--tinta-suave)">
+        Los datos se guardan solo en este navegador. Exporta una copia de vez en cuando
+        y guárdala en un lugar seguro (correo, nube...). Si cambias de ordenador o
+        navegador, podrás importarla y recuperar todo.
+      </p>
+      <div id="info-almacenamiento" class="nota-info"></div>
+    </div>
+
+    <h2>Zona de peligro</h2>
+    <div class="panel opcion-ajustes">
+      <button class="btn-peligro" onclick="Acciones.borrarTodo()">🗑 Borrar todos los datos</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ============================================================
+   VEHICLETRACK v2 — Lógica de la aplicación
+   ============================================================
+   ARQUITECTURA EN 4 CAPAS (pensada para migrar a React Native):
+
+   1. BD        → capa de datos. Lo ÚNICO que toca localStorage.
+                  En la app móvil se sustituye por expo-sqlite
+                  manteniendo los mismos nombres de función.
+   2. Estado    → qué vehículo/actuación está abierto ahora.
+                  En React Native será el estado de los componentes.
+   3. Pantallas → dibuja cada pantalla a partir de los datos.
+                  Cada función equivale a un componente/screen.
+   4. Acciones  → responde a los botones: validar y guardar.
+                  En React Native serán los manejadores de eventos.
+
+   Regla de oro: Pantallas y Acciones NUNCA usan localStorage
+   directamente. Siempre pasan por BD. Así, migrar a móvil solo
+   requiere reescribir el interior de BD, no toda la app.
+   ============================================================ */
+
+/* ================= UTILIDADES ================= */
+const Util = {
+  // Genera un identificador único (hora actual + número aleatorio)
+  generarId() {
+    return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+  },
+
+  // "2026-05-15" (formato interno ISO) → "15/05/2026" (formato español)
+  formatearFecha(fechaISO) {
+    if (!fechaISO) return '—';
+    const [anio, mes, dia] = fechaISO.split('-');
+    return dia + '/' + mes + '/' + anio;
+  },
+
+  // Números al estilo español: 1.234,56
+  formatearNumero(num, decimales) {
+    return Number(num).toLocaleString('es-ES', {
+      minimumFractionDigits: decimales,
+      maximumFractionDigits: decimales
+    });
+  },
+
+  // Da formato a un importe en la MONEDA elegida por el usuario (v9).
+  // Importante: NO convierte divisas. Solo cambia el símbolo y su posición.
+  // El número en sí se muestra siempre con separadores españoles (1.234,56).
+  formatearDinero(num) {
+    if (num === null || num === undefined || num === '') return '—';
+    const m = MONEDAS[Config.moneda()] || MONEDAS.EUR;
+    const cifra = Util.formatearNumero(num, 2);
+    const sep = m.espacio ? ' ' : '';
+    return m.antes ? (m.simbolo + sep + cifra) : (cifra + sep + m.simbolo);
+  },
+
+  formatearKm(num) {
+    if (num === null || num === undefined || num === '') return '—';
+    return Util.formatearNumero(num, 0) + ' km';
+  },
+
+  // Convierte un objeto Date a "AAAA-MM-DD" usando la hora LOCAL (España).
+  // ⚠️ Corrección v2: toISOString() usa hora UTC y cerca de medianoche
+  // devolvía el día equivocado. Esta versión usa siempre la hora local.
+  fechaISOLocal(d) {
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const dia = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + mes + '-' + dia;
+  },
+
+  hoyISO() {
+    return Util.fechaISOLocal(new Date());
+  },
+
+  // "2026-02-10" → "hace 4 meses", "hace 12 días", "hoy"...
+  // Las fechas AAAA-MM-DD se pueden convertir a Date y restar:
+  // la resta da milisegundos, y 86400000 ms = 1 día.
+  tiempoTranscurrido(fechaISO) {
+    const dias = Math.floor((new Date(Util.hoyISO()) - new Date(fechaISO)) / 86400000);
+    if (dias <= 0) return 'hoy';
+    if (dias === 1) return 'ayer';
+    if (dias < 31) return 'hace ' + dias + ' días';
+    const meses = Math.floor(dias / 30);
+    if (meses < 12) return 'hace ' + meses + (meses === 1 ? ' mes' : ' meses');
+    const anios = Math.floor(dias / 365);
+    return 'hace ' + anios + (anios === 1 ? ' año' : ' años');
+  },
+
+  // Días que faltan hasta una fecha futura (ej: para "ITV en 42 días")
+  diasHasta(fechaISO) {
+    return Math.ceil((new Date(fechaISO) - new Date(Util.hoyISO())) / 86400000);
+  },
+
+  // Escapa texto del usuario antes de insertarlo en HTML (evita romper la página)
+  escapar(texto) {
+    const div = document.createElement('div');
+    div.textContent = texto == null ? '' : String(texto);
+    return div.innerHTML;
+  },
+
+  // Diálogos centralizados. En React Native se cambiarán por Alert.alert()
+  // tocando SOLO estas dos funciones, no toda la app.
+  confirmar(mensaje) { return confirm(mensaje); },
+  avisar(mensaje) { alert(mensaje); },
+
+  /* ----- Opción "Otro (especificar)" en desplegables (v10) -----
+     Patrón reutilizado por todos los desplegables que admiten texto libre.
+     El valor especial '__otro__' significa "el usuario quiere escribir".  */
+  VALOR_OTRO: '__otro__',
+
+  // Muestra u oculta el campo de texto según si está elegido "Otro"
+  toggleOtro(idSelect, idInput) {
+    const select = document.getElementById(idSelect);
+    const input = document.getElementById(idInput);
+    const esOtro = select.value === Util.VALOR_OTRO;
+    input.style.display = esOtro ? 'block' : 'none';
+    if (esOtro && input.focus) input.focus();
+  },
+
+  // Devuelve el valor final: el texto escrito si es "Otro", o la opción elegida
+  valorConOtro(idSelect, idInput) {
+    const select = document.getElementById(idSelect);
+    if (select.value === Util.VALOR_OTRO) {
+      return document.getElementById(idInput).value.trim();
+    }
+    return select.value;
+  },
+
+  // Al editar: si el valor guardado NO está entre las opciones cerradas,
+  // selecciona "Otro" y lo pone en el campo de texto.
+  cargarConOtro(idSelect, idInput, valor) {
+    const select = document.getElementById(idSelect);
+    const input = document.getElementById(idInput);
+    const existe = Array.prototype.some.call(select.options, o => o.value === valor);
+    if (valor && !existe) {
+      select.value = Util.VALOR_OTRO;
+      input.value = valor;
+      input.style.display = 'block';
+    } else {
+      if (valor) select.value = valor;
+      input.value = '';
+      input.style.display = 'none';
+    }
+  }
+};
+
+/* ================= TAXONOMÍA ================= */
+const NOMBRE_CATEGORIA = {
+  mantenimiento: 'Mantenimiento',
+  averia: 'Avería',
+  documentacion: 'Documentación'
+};
+
+const CATEGORIAS = {
+  mantenimiento: {
+    motor: 'Motor (aceite, filtros, bujías, distribución...)',
+    frenos: 'Frenos (pastillas, discos, líquido...)',
+    neumaticos: 'Neumáticos (inflado, equilibrado, alineación...)',
+    suspension: 'Suspensión y dirección',
+    transmision: 'Transmisión (embrague, caja de cambios...)',
+    electrica: 'Eléctrica (batería, alternador, luces...)',
+    climatizacion: 'Climatización (A/C, filtros...)',
+    carroceria: 'Carrocería (pintura, anticorrosión...)',
+    fluidos: 'Fluidos (dirección, limpiaparabrisas...)',
+    general: 'Revisión general / ITV'
+  },
+  averia: {
+    motor: 'Motor (sobrecalentamiento, humo, ruidos...)',
+    electrica: 'Eléctrica (batería, sensores, centralita...)',
+    frenos: 'Frenos (frenada irregular, luz ABS...)',
+    transmision: 'Transmisión (patinaje, saltos de marcha...)',
+    suspension: 'Suspensión / dirección (vibración, ruidos...)',
+    neumaticos: 'Neumáticos (pinchazo, desgaste irregular...)',
+    carroceria: 'Carrocería (golpe, rayada, parabrisas...)',
+    climatizacion: 'Climatización (no enfría, fugas...)',
+    escape: 'Escape (ruidos, humos, sonda lambda...)',
+    combustible: 'Combustible (pérdida de potencia, bomba...)'
+  },
+  documentacion: {
+    itv: 'ITV / Inspección técnica',
+    seguro: 'Seguro',
+    multas: 'Multas',
+    impuestos: 'Impuestos (IVTM, matriculación...)',
+    garantia: 'Garantía de producto o pieza',
+    otros: 'Otros documentos (permiso, ficha técnica, factura...)'
+  }
+};
+
+const ICONO_TIPO = { coche: '🚗', moto: '🏍️', furgoneta: '🚐' };
+
+/* ================= OBLIGACIONES LEGALES (v12) =================
+   ITV, seguro e impuestos son obligaciones que SE REPITEN en el tiempo
+   y siempre tienen una "próxima fecha". Al registrarlas, exigimos esa
+   fecha para poder avisar de su vencimiento en la vista de obligaciones.
+
+   Definimos las subcategorías que cuentan como obligación legal en UN
+   solo sitio, para no repetir la condición por el código (si mañana
+   añadimos otra, se cambia aquí y punto).                            */
+const SUBCAT_OBLIGACION = ['itv', 'seguro', 'impuestos'];
+
+const Obligaciones = {
+  // ¿Esta categoría+subcategoría es una obligación legal recurrente?
+  esObligacion(categoria, subcategoria) {
+    return categoria === 'documentacion' && SUBCAT_OBLIGACION.includes(subcategoria);
+  },
+  // Etiqueta e icono bonitos para mostrar en la vista
+  ETIQUETAS: {
+    itv:       { icono: '🔧', nombre: 'ITV' },
+    seguro:    { icono: '🛡️', nombre: 'Seguro' },
+    impuestos: { icono: '🏛️', nombre: 'Impuesto de circulación' }
+  },
+
+  /* Recolecta TODAS las obligaciones con fecha de todos los vehículos y las
+     devuelve ordenadas de la más urgente a la más lejana.
+
+     Dos fuentes:
+     1. Actuaciones de tipo ITV/seguro/impuesto que tengan proximaRevisionFecha.
+     2. El seguroVencimiento que cada vehículo guarda en su ficha (v8).
+
+     Cada elemento devuelto lleva: vehículo, tipo (icono+nombre), la fecha,
+     los días que faltan (negativo = vencida) y un "nivel" para el color.   */
+  recolectar() {
+    const items = [];
+
+    // Fuente 1: actuaciones marcadas como obligación con fecha de próxima
+    BD.obtenerActuaciones().forEach(a => {
+      if (!a.proximaRevisionFecha) return;
+      if (!this.esObligacion(a.categoria, a.subcategoria)) return;
+      const v = BD.obtenerVehiculo(a.vehiculoId);
+      if (!v) return;
+      const et = this.ETIQUETAS[a.subcategoria] || { icono: '📄', nombre: a.subcategoria };
+      items.push({
+        vehiculoId: v.id,
+        vehiculo: v.nombre,
+        icono: et.icono,
+        tipo: et.nombre,
+        fecha: a.proximaRevisionFecha,
+        dias: Util.diasHasta(a.proximaRevisionFecha),
+        // El seguro avisa con su propio margen de preaviso (45 días por defecto);
+        // el resto de obligaciones, con el margen estándar de 30 días.
+        umbral: (a.subcategoria === 'seguro' && a.preavisoDias != null) ? a.preavisoDias : 30,
+        origenActuacionId: a.id   // para poder abrir la actuación al tocar
+      });
+    });
+
+    // Fuente 2: el vencimiento del seguro guardado en la ficha del vehículo.
+    // Evitamos duplicar si ya hay una actuación de seguro con la MISMA fecha.
+    BD.obtenerVehiculos().forEach(v => {
+      if (!v.seguroVencimiento) return;
+      const yaEsta = items.some(it =>
+        it.vehiculoId === v.id && it.tipo === 'Seguro' && it.fecha === v.seguroVencimiento);
+      if (yaEsta) return;
+      items.push({
+        vehiculoId: v.id,
+        vehiculo: v.nombre,
+        icono: this.ETIQUETAS.seguro.icono,
+        tipo: 'Seguro' + (v.seguroCompania ? ' · ' + v.seguroCompania : ''),
+        fecha: v.seguroVencimiento,
+        dias: Util.diasHasta(v.seguroVencimiento),
+        umbral: 45,   // el seguro de la ficha usa el preaviso por defecto (45 días)
+        origenActuacionId: null   // viene de la ficha, no de una actuación
+      });
+    });
+
+    // Nivel de urgencia: cada obligación usa su propio umbral de preaviso
+    items.forEach(it => {
+      if (it.dias < 0) it.nivel = 'vencida';
+      else if (it.dias <= (it.umbral || 30)) it.nivel = 'proxima';
+      else it.nivel = 'aldia';
+    });
+
+    // Ordenamos por fecha: la más cercana (o más vencida) primero
+    items.sort((a, b) => a.fecha.localeCompare(b.fecha));
+    return items;
+  }
+};
+
+/* ================= MONEDAS Y PAÍSES (v9) =================
+   Cada moneda define su símbolo, si va ANTES o DESPUÉS de la cifra,
+   y si lleva espacio. NO hay conversión de divisas: una cifra es
+   una cifra; solo cambia cómo se muestra.                          */
+const MONEDAS = {
+  EUR: { nombre: 'Euro',                  simbolo: '€',   antes: false, espacio: true  },
+  GBP: { nombre: 'Libra esterlina',       simbolo: '£',   antes: true,  espacio: false },
+  USD: { nombre: 'Dólar estadounidense',  simbolo: '$',   antes: true,  espacio: false },
+  CHF: { nombre: 'Franco suizo',          simbolo: 'CHF', antes: true,  espacio: true  }
+};
+
+// Cada país propone una moneda por defecto (solo en la bienvenida).
+// El usuario siempre puede cambiarla a mano después.
+const PAISES = {
+  'España':         'EUR',
+  'Portugal':       'EUR',
+  'Francia':        'EUR',
+  'Alemania':       'EUR',
+  'Italia':         'EUR',
+  'Reino Unido':    'GBP',
+  'Estados Unidos': 'USD',
+  'Suiza':          'CHF'
+};
+
+/* ================= CONFIG (preferencias del usuario, v9) =========
+   Guarda nombre, país y moneda. Vive en localStorage (es diminuto
+   y así se lee al instante, sin esperar a IndexedDB). Mantenemos
+   una copia en memoria (_cache) para no leer del disco cada vez
+   que formateamos un importe.                                      */
+const Config = {
+  _cache: null,
+
+  cargar() { this._cache = BD.obtenerConfig(); return this._cache; },
+
+  get() { if (!this._cache) this.cargar(); return this._cache; },
+
+  guardar(cambios) {
+    const actual = this.get();
+    this._cache = Object.assign({}, actual, cambios);
+    BD.guardarConfig(this._cache);
+  },
+
+  nombre()      { return this.get().nombre || ''; },
+  pais()        { return this.get().pais || ''; },
+  moneda()      { return this.get().moneda || 'EUR'; },
+  configurado() { return this.get().configurado === true; }
+};
+
+/* ================= CAPA 1: BD (BASE DE DATOS) =================
+   ÚNICO lugar de la app que toca el almacenamiento.
+
+   🆕 NOVEDAD v7: pasamos de localStorage a IndexedDB.
+   ¿Por qué? localStorage solo admite ~5 MB y guarda TEXTO; con
+   muchas fotos se llenaba. IndexedDB es la base de datos nativa
+   del navegador: admite mucho más espacio y guarda objetos tal
+   cual (sin convertir a texto).
+
+   CÓMO está montado, para que el resto de la app NO cambie:
+   · Al arrancar, cargamos TODO en memoria (_vehiculos, _actuaciones).
+   · Las LECTURAS siguen siendo instantáneas (leen de memoria).
+   · Las ESCRITURAS actualizan memoria Y guardan en IndexedDB
+     en segundo plano (IndexedDB es ASÍNCRONO: no devuelve el
+     resultado al momento, sino una "promesa" que se cumple luego).
+
+   Conceptos nuevos de IndexedDB:
+   · "almacén" (object store) = como una tabla. Tenemos dos:
+     'vehiculos' y 'actuaciones'. Cada registro se guarda por su 'id'.
+   · "transacción" = una operación de lectura o escritura.        */
+const BD = {
+  NOMBRE_BD: 'vehicletrack',
+  VERSION_BD: 1,
+  _db: null,            // conexión abierta a IndexedDB
+  _vehiculos: [],       // copia en memoria (para lecturas rápidas)
+  _actuaciones: [],
+
+  // Claves de la antigua versión en localStorage (solo para migrar)
+  CLAVE_VEHICULOS: 'vehicletrack_vehicles',
+  CLAVE_ACTUACIONES: 'vehicletrack_actuaciones',
+  CLAVE_MIGRADO: 'vehicletrack_migrado_idb',
+
+  /* ----- Apertura de la base de datos ----- */
+  // Abre (o crea la primera vez) la base de datos. Devuelve una PROMESA:
+  // un objeto que representa "algo que terminará más tarde". Con await o
+  // .then() esperamos a que termine.
+  _abrir() {
+    return new Promise((resolve, reject) => {
+      const solicitud = indexedDB.open(this.NOMBRE_BD, this.VERSION_BD);
+
+      // Se ejecuta SOLO la primera vez (o si subimos VERSION_BD): es donde
+      // se crean los almacenes. No se puede crear un almacén en otro momento.
+      solicitud.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('vehiculos')) {
+          db.createObjectStore('vehiculos', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('actuaciones')) {
+          db.createObjectStore('actuaciones', { keyPath: 'id' });
+        }
+      };
+
+      solicitud.onsuccess = (e) => { this._db = e.target.result; resolve(); };
+      solicitud.onerror = () => reject(solicitud.error);
+    });
+  },
+
+  // Lee TODOS los registros de un almacén → promesa con el array
+  _leerTodo(almacen) {
+    return new Promise((resolve, reject) => {
+      const solicitud = this._db.transaction(almacen, 'readonly')
+        .objectStore(almacen).getAll();
+      solicitud.onsuccess = () => resolve(solicitud.result || []);
+      solicitud.onerror = () => reject(solicitud.error);
+    });
+  },
+
+  // Guarda (inserta o reemplaza) un registro → promesa
+  _guardar(almacen, registro) {
+    return new Promise((resolve, reject) => {
+      const tx = this._db.transaction(almacen, 'readwrite');
+      tx.objectStore(almacen).put(registro);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+
+  // Borra un registro por su id → promesa
+  _borrar(almacen, id) {
+    return new Promise((resolve, reject) => {
+      const tx = this._db.transaction(almacen, 'readwrite');
+      tx.objectStore(almacen).delete(id);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+
+  // Vacía un almacén entero → promesa
+  _vaciar(almacen) {
+    return new Promise((resolve, reject) => {
+      const tx = this._db.transaction(almacen, 'readwrite');
+      tx.objectStore(almacen).clear();
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+
+  // Si una escritura en segundo plano falla, avisamos al usuario.
+  _avisarError(e) {
+    console.error('Error al guardar en IndexedDB:', e);
+    Util.avisar(
+      'No se han podido guardar los últimos cambios.\n\n' +
+      'Puede deberse a falta de espacio o a estar en modo incógnito/privado.\n' +
+      'Exporta una copia de seguridad desde Ajustes para no perder datos.'
+    );
+  },
+
+  /* ----- Arranque ----- */
+  // Ahora es ASÍNCRONO: abre la BD, migra los datos antiguos (si los hay)
+  // y carga todo en memoria. El arranque de la app espera a que termine.
+  async iniciar() {
+    await this._abrir();
+    await this._migrarDesdeLocalStorage(); // solo hace algo la primera vez
+    this._vehiculos = await this._leerTodo('vehiculos');
+    this._actuaciones = await this._leerTodo('actuaciones');
+
+    // Por si quedara alguna actuación antigua sin el campo "completada"
+    const pendientes = this._actuaciones.filter(a => a.completada === undefined);
+    pendientes.forEach(a => { a.completada = false; });
+    await Promise.all(pendientes.map(a => this._guardar('actuaciones', a)));
+  },
+
+  // MIGRACIÓN automática localStorage → IndexedDB.
+  // Si ya existían datos en la versión anterior, los copiamos a IndexedDB.
+  // No borramos los de localStorage: quedan como respaldo por seguridad.
+  async _migrarDesdeLocalStorage() {
+    if (localStorage.getItem(this.CLAVE_MIGRADO) === '1') return; // ya migrado
+    const vs = JSON.parse(localStorage.getItem(this.CLAVE_VEHICULOS) || '[]');
+    const as = JSON.parse(localStorage.getItem(this.CLAVE_ACTUACIONES) || '[]');
+    for (const v of vs) await this._guardar('vehiculos', v);
+    for (const a of as) {
+      if (a.completada === undefined) a.completada = false;
+      await this._guardar('actuaciones', a);
+    }
+    localStorage.setItem(this.CLAVE_MIGRADO, '1');
+  },
+
+  // Espacio usado/disponible (IndexedDB) → promesa con un texto legible.
+  // navigator.storage.estimate() nos dice cuánto ocupa el sitio y su límite.
+  async estimarEspacio() {
+    if (navigator.storage && navigator.storage.estimate) {
+      const { usage, quota } = await navigator.storage.estimate();
+      const mb = (bytes) => (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+      return 'espacio usado: ' + mb(usage || 0) + ' de ' + mb(quota || 0) + ' disponibles';
+    }
+    return 'espacio: el navegador no permite calcularlo';
+  },
+
+  /* ----- Vehículos -----
+     Las lecturas son SÍNCRONAS (de memoria). Las escrituras actualizan
+     memoria y lanzan el guardado en IndexedDB en segundo plano. */
+  obtenerVehiculos() { return this._vehiculos.slice(); },
+  obtenerVehiculo(id) { return this._vehiculos.find(v => v.id === id) || null; },
+
+  existeMatricula(matricula, idExcluir) {
+    return this._vehiculos.some(v => v.matricula === matricula && v.id !== idExcluir);
+  },
+
+  crearVehiculo(datos) {
+    const v = Object.assign({ id: Util.generarId(), fechaCreacion: new Date().toISOString() }, datos);
+    this._vehiculos.push(v);
+    this._guardar('vehiculos', v).catch(e => this._avisarError(e));
+    return v;
+  },
+
+  actualizarVehiculo(id, datos) {
+    const v = this.obtenerVehiculo(id);
+    if (!v) return false;
+    Object.assign(v, datos);
+    this._guardar('vehiculos', v).catch(e => this._avisarError(e));
+    return true;
+  },
+
+  eliminarVehiculo(id) {
+    this._vehiculos = this._vehiculos.filter(v => v.id !== id);
+    // Sus actuaciones también se borran (en memoria y en IndexedDB)
+    const aBorrar = this._actuaciones.filter(a => a.vehiculoId === id);
+    this._actuaciones = this._actuaciones.filter(a => a.vehiculoId !== id);
+    this._borrar('vehiculos', id).catch(e => this._avisarError(e));
+    aBorrar.forEach(a => this._borrar('actuaciones', a.id).catch(e => this._avisarError(e)));
+    return true;
+  },
+
+  /* ----- Actuaciones ----- */
+  obtenerActuaciones(vehiculoId) {
+    let lista = this._actuaciones.slice();
+    if (vehiculoId) lista = lista.filter(a => a.vehiculoId === vehiculoId);
+    return lista;
+  },
+
+  obtenerActuacion(id) { return this._actuaciones.find(a => a.id === id) || null; },
+
+  crearActuacion(datos) {
+    const a = Object.assign({ id: Util.generarId(), completada: false }, datos);
+    this._actuaciones.push(a);
+    this._guardar('actuaciones', a).catch(e => this._avisarError(e));
+    return a;
+  },
+
+  actualizarActuacion(id, datos) {
+    const a = this.obtenerActuacion(id);
+    if (!a) return false;
+    Object.assign(a, datos);
+    this._guardar('actuaciones', a).catch(e => this._avisarError(e));
+    return true;
+  },
+
+  eliminarActuacion(id) {
+    this._actuaciones = this._actuaciones.filter(a => a.id !== id);
+    this._borrar('actuaciones', id).catch(e => this._avisarError(e));
+    return true;
+  },
+
+  /* ----- Preferencias (v5) -----
+     El tema lo dejamos en localStorage a propósito: es un dato diminuto
+     y así se aplica al instante al cargar, sin esperar a IndexedDB. */
+  CLAVE_TEMA: 'vehicletrack_tema',
+
+  obtenerTema() {
+    return localStorage.getItem(this.CLAVE_TEMA) || 'claro';
+  },
+
+  guardarTema(tema) {
+    localStorage.setItem(this.CLAVE_TEMA, tema);
+  },
+
+  /* ----- Configuración del usuario (v9): nombre, país, moneda ----- */
+  CLAVE_CONFIG: 'vehicletrack_config',
+
+  obtenerConfig() {
+    try {
+      return JSON.parse(localStorage.getItem(this.CLAVE_CONFIG) || '{}');
+    } catch (e) {
+      return {}; // si el dato estuviera dañado, devolvemos config vacía
+    }
+  },
+
+  guardarConfig(config) {
+    localStorage.setItem(this.CLAVE_CONFIG, JSON.stringify(config));
+  },
+
+  /* ----- Copia de seguridad ----- */
+  // Exportar es ASÍNCRONO: las fotos se guardan como Blob (binario) y el JSON
+  // solo admite texto, así que convertimos cada foto a base64 antes de volcar.
+  // Devolvemos una copia de los datos con las fotos ya como texto; NO tocamos
+  // los datos reales en memoria.
+  async exportarTodo() {
+    // Copia de los vehículos con su foto convertida a base64 (si la hay)
+    const vehiculos = [];
+    for (const v of this._vehiculos) {
+      vehiculos.push(Object.assign({}, v, { foto: await Fotos.blobAbase64(v.foto) }));
+    }
+    // Copia de las actuaciones con sus fotos convertidas a base64
+    const actuaciones = [];
+    for (const a of this._actuaciones) {
+      const fotos = [];
+      for (const f of (a.fotos || [])) fotos.push(await Fotos.blobAbase64(f));
+      actuaciones.push(Object.assign({}, a, { fotos: fotos }));
+    }
+    return JSON.stringify({
+      app: 'VehicleTrack',
+      version: 2,
+      exportadoEl: new Date().toISOString(),
+      vehiculos: vehiculos,
+      actuaciones: actuaciones
+    }, null, 2);
+  },
+
+  // Importar es ASÍNCRONO: reemplaza memoria y reescribe IndexedDB entero.
+  async importarTodo(texto) {
+    const datos = JSON.parse(texto); // lanza error si el archivo no es JSON
+    if (datos.app !== 'VehicleTrack' || !Array.isArray(datos.vehiculos) || !Array.isArray(datos.actuaciones)) {
+      throw new Error('El archivo no es una copia de seguridad válida de VehicleTrack.');
+    }
+    // Las fotos vienen como base64 (texto) en el archivo: las pasamos a Blob
+    // para guardarlas ligeras, igual que las fotos nuevas.
+    this._vehiculos = datos.vehiculos.map(v =>
+      Object.assign({}, v, { foto: Fotos.base64ABlob(v.foto) }));
+    this._actuaciones = datos.actuaciones.map(a =>
+      Object.assign({}, a, {
+        fotos: (a.fotos || []).map(f => Fotos.base64ABlob(f)).filter(Boolean)
+      }));
+    this._actuaciones.forEach(a => { if (a.completada === undefined) a.completada = false; });
+
+    // Vaciamos los almacenes y reescribimos con los datos importados
+    await this._vaciar('vehiculos');
+    await this._vaciar('actuaciones');
+    for (const v of this._vehiculos) await this._guardar('vehiculos', v);
+    for (const a of this._actuaciones) await this._guardar('actuaciones', a);
+    return true;
+  },
+
+  async borrarTodo() {
+    this._vehiculos = [];
+    this._actuaciones = [];
+    await this._vaciar('vehiculos');
+    await this._vaciar('actuaciones');
+    return true;
+  }
+};
+
+/* ================= CAPA 2: ESTADO ================= */
+const Estado = {
+  vehiculoActualId: null,    // vehículo abierto en la ficha
+  editandoVehiculoId: null,  // null = creando nuevo
+  editandoActuacionId: null, // null = creando nueva
+  pantallaAnterior: 'pantalla-lista',
+  fotoVehiculoTemp: null,    // foto del formulario, aún sin guardar
+  fotosActuacionTemp: []     // hasta 3 fotos del formulario
+};
+
+/* ================= CAPA 3: PANTALLAS ================= */
+const Pantallas = {
+  // Muestra una pantalla y oculta las demás
+  _mostrar(id) {
+    document.querySelectorAll('.screen').forEach(p => p.classList.remove('activa'));
+    document.getElementById(id).classList.add('activa');
+    window.scrollTo(0, 0);
+  },
+
+  atras() {
+    if (Estado.pantallaAnterior === 'pantalla-detalle-vehiculo' && Estado.vehiculoActualId) {
+      Pantallas.detalleVehiculo(Estado.vehiculoActualId);
+    } else {
+      Pantallas.lista();
+    }
+  },
+
+  /* ----- Bienvenida / onboarding (v9) ----- */
+  bienvenida() {
+    document.body.classList.add('onboarding'); // oculta la cabecera
+    document.getElementById('error-bienvenida').classList.remove('visible');
+
+    // Rellenamos los desplegables de país y moneda
+    document.getElementById('b-pais').innerHTML = Pantallas._opcionesPais('España');
+    document.getElementById('b-moneda').innerHTML = Pantallas._opcionesMoneda('EUR');
+    document.getElementById('b-pais-otro').style.display = 'none';
+    document.getElementById('b-pais-otro').value = '';
+
+    Pantallas._mostrar('pantalla-bienvenida');
+  },
+
+  // Genera las <option> de monedas (ej: "Euro (€)")
+  _opcionesMoneda(seleccionada) {
+    return Object.keys(MONEDAS).map(codigo => {
+      const m = MONEDAS[codigo];
+      const sel = codigo === seleccionada ? ' selected' : '';
+      return '<option value="' + codigo + '"' + sel + '>' + m.nombre + ' (' + m.simbolo + ')</option>';
+    }).join('');
+  },
+
+  // Genera las <option> de países (+ "Otro" al final)
+  _opcionesPais(seleccionado) {
+    const paises = Object.keys(PAISES).map(pais => {
+      const sel = pais === seleccionado ? ' selected' : '';
+      return '<option value="' + pais + '"' + sel + '>' + pais + '</option>';
+    }).join('');
+    return paises + '<option value="__otro__">Otro (especificar)…</option>';
+  },
+
+  // Al elegir país en la bienvenida, se propone su moneda por defecto.
+  // Si elige "Otro", mostramos el campo de texto (la moneda queda a su elección).
+  paisPreseleccionaMoneda() {
+    const pais = document.getElementById('b-pais').value;
+    Util.toggleOtro('b-pais', 'b-pais-otro');
+    if (pais !== Util.VALOR_OTRO) {
+      document.getElementById('b-moneda').value = PAISES[pais] || 'EUR';
+    }
+  },
+
+  /* ----- Lista de vehículos ----- */
+  lista() {
+    Estado.vehiculoActualId = null;
+
+    // Saludo personalizado con el nombre (v9)
+    const nombre = Config.nombre();
+    document.getElementById('saludo-lista').textContent =
+      nombre ? 'Hola, ' + nombre + ' 👋' : 'Mis vehículos';
+
+    const vehiculos = BD.obtenerVehiculos();
+    const contenedor = document.getElementById('lista-vehiculos');
+
+    if (vehiculos.length === 0) {
+      contenedor.innerHTML =
+        '<div class="vacio">' +
+          '<div class="icono">🚗</div>' +
+          '<p><strong>Todavía no hay vehículos.</strong></p>' +
+          '<p>Añade el primero con el botón de abajo y empieza su libro de vida.</p>' +
+        '</div>';
+      document.getElementById('zona-alertas').innerHTML = '';
+      document.getElementById('zona-acceso-obligaciones').innerHTML = '';
+      Pantallas._mostrar('pantalla-lista');
+      return;
+    }
+
+    contenedor.innerHTML = vehiculos.map(v => {
+      const foto = v.foto
+        ? '<img src="' + Fotos.urlDe(v.foto) + '" alt="Foto de ' + Util.escapar(v.nombre) + '">'
+        : (ICONO_TIPO[v.tipo] || '🚗');
+      const matricula = v.matricula
+        ? '<span class="matricula"><span class="banda">E</span><span class="numero">' + Util.escapar(v.matricula) + '</span></span>'
+        : '<span></span>';
+      return (
+        '<div class="tarjeta-vehiculo" role="button" tabindex="0" onclick="Pantallas.detalleVehiculo(\'' + v.id + '\')">' +
+          '<div class="foto">' + foto + '</div>' +
+          '<div class="cuerpo">' +
+            '<div class="nombre">' + Util.escapar(v.nombre) + '</div>' +
+            '<div class="detalle">' + Util.escapar(v.marca) + ' ' + Util.escapar(v.modelo) + ' · ' + Util.escapar(v.anio) + ' · ' + Util.escapar(v.combustible) + '</div>' +
+            '<div class="pie">' + matricula + '<span class="odometro">' + Util.formatearKm(v.kmActuales) + '</span></div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+
+    Pantallas._renderAccesoObligaciones();
+    Pantallas._renderAlertas();
+    Pantallas._mostrar('pantalla-lista');
+  },
+
+  /* Botón de acceso a "Obligaciones legales" en el inicio. Muestra un badge
+     rojo con el número de obligaciones que requieren atención (vencidas o
+     próximas). Si no hay ninguna obligación registrada, no se muestra nada. */
+  _renderAccesoObligaciones() {
+    const zona = document.getElementById('zona-acceso-obligaciones');
+    const items = Obligaciones.recolectar();
+    if (items.length === 0) { zona.innerHTML = ''; return; }
+
+    // Contamos las que piden atención (vencidas o próximas en 30 días)
+    const atencion = items.filter(it => it.nivel !== 'aldia').length;
+    const badge = atencion > 0
+      ? '<span class="ao-badge">' + atencion + '</span>'
+      : '';
+    const sub = atencion > 0
+      ? atencion + (atencion === 1 ? ' requiere atención' : ' requieren atención')
+      : 'Todo al día';
+
+    zona.innerHTML =
+      '<button class="acceso-obligaciones" onclick="Pantallas.obligaciones()">' +
+        '<span class="ao-icono">📋</span>' +
+        '<span class="ao-texto"><strong>Obligaciones legales</strong><small>' + sub + '</small></span>' +
+        badge +
+        '<span class="ao-flecha">›</span>' +
+      '</button>';
+  },
+
+  // Recordatorios pendientes (no completados): vencidos o cercanos.
+  // ✅ Novedad v2: botón "Hecho" para marcar el recordatorio como atendido.
+  _renderAlertas() {
+    const zona = document.getElementById('zona-alertas');
+    const hoy = Util.hoyISO();
+    const limite = new Date();
+    limite.setDate(limite.getDate() + 30);
+    const fechaLimite = Util.fechaISOLocal(limite); // hora local, no UTC
+    const avisos = [];
+
+    BD.obtenerActuaciones().forEach(a => {
+      if (a.completada) return; // ya atendido: no molestar más
+      const v = BD.obtenerVehiculo(a.vehiculoId);
+      if (!v) return;
+
+      if (a.proximaRevisionFecha && a.proximaRevisionFecha <= fechaLimite) {
+        const vencida = a.proximaRevisionFecha < hoy;
+        avisos.push({
+          a,
+          texto: (vencida ? '⚠️ Revisión vencida' : '🔔 Revisión próxima') + ' · ' + Util.escapar(v.nombre),
+          detalle: Util.escapar(a.titulo) + ' — fecha límite ' + Util.formatearFecha(a.proximaRevisionFecha)
+        });
+        return;
+      }
+      if (a.proximaRevisionKm && v.kmActuales >= a.proximaRevisionKm - 1000) {
+        avisos.push({
+          a,
+          texto: '🔔 Revisión por km · ' + Util.escapar(v.nombre),
+          detalle: Util.escapar(a.titulo) + ' — toca a los ' + Util.formatearKm(a.proximaRevisionKm)
+        });
+      }
+    });
+
+    zona.innerHTML = avisos.map(av =>
+      '<div class="alerta">' +
+        '<div class="cuerpo-alerta" role="button" tabindex="0" onclick="Pantallas.detalleActuacion(\'' + av.a.id + '\')">' +
+          '<strong>' + av.texto + '</strong><small>' + av.detalle + '</small>' +
+        '</div>' +
+        '<button class="btn-mini btn-hecho" onclick="Acciones.marcarRecordatorioHecho(\'' + av.a.id + '\')">✓ Hecho</button>' +
+      '</div>'
+    ).join('');
+  },
+
+  /* ----- Formulario de vehículo ----- */
+  formVehiculo(idEditar) {
+    Estado.editandoVehiculoId = idEditar || null;
+    Estado.pantallaAnterior = idEditar ? 'pantalla-detalle-vehiculo' : 'pantalla-lista';
+    Estado.fotoVehiculoTemp = null;
+
+    document.getElementById('form-vehiculo').reset();
+    document.getElementById('error-vehiculo').classList.remove('visible');
+    document.getElementById('previa-foto-vehiculo').innerHTML = '';
+    document.getElementById('titulo-form-vehiculo').textContent =
+      idEditar ? 'Editar vehículo' : 'Añadir vehículo';
+    // Ocultamos los campos de texto "Otro" (form.reset no los oculta)
+    document.getElementById('v-tipo-otro').style.display = 'none';
+    document.getElementById('v-combustible-otro').style.display = 'none';
+    document.getElementById('v-seguro-tipo-otro').style.display = 'none';
+
+    if (idEditar) {
+      const v = BD.obtenerVehiculo(idEditar);
+      if (v) {
+        document.getElementById('v-nombre').value = v.nombre;
+        // tipo, combustible y tipo de seguro pueden ser un valor "Otro" libre
+        Util.cargarConOtro('v-tipo', 'v-tipo-otro', v.tipo);
+        Util.cargarConOtro('v-combustible', 'v-combustible-otro', v.combustible);
+        document.getElementById('v-marca').value = v.marca;
+        document.getElementById('v-modelo').value = v.modelo;
+        document.getElementById('v-anio').value = v.anio;
+        document.getElementById('v-km').value = v.kmActuales;
+        document.getElementById('v-matricula').value = v.matricula || '';
+        document.getElementById('v-color').value = v.color || '';
+        document.getElementById('v-vin').value = v.vin || '';
+        document.getElementById('v-seguro-compania').value = v.seguroCompania || '';
+        Util.cargarConOtro('v-seguro-tipo', 'v-seguro-tipo-otro', v.seguroTipo || '');
+        document.getElementById('v-seguro-poliza').value = v.seguroPoliza || '';
+        document.getElementById('v-seguro-vencimiento').value = v.seguroVencimiento || '';
+        document.getElementById('v-seguro-telefono').value = v.seguroTelefono || '';
+        Estado.fotoVehiculoTemp = v.foto || null;
+        Fotos.renderPreviaFotoVehiculo();
+      }
+    }
+    Pantallas._mostrar('pantalla-form-vehiculo');
+  },
+
+  /* ----- Bloque de datos del seguro (v8) ----- */
+  // Solo se muestra si el vehículo tiene al menos un dato de seguro.
+  _bloqueSeguroHTML(v) {
+    // ¿Hay algún dato de seguro relleno?
+    const hayDatos = v.seguroCompania || v.seguroTipo || v.seguroPoliza ||
+                     v.seguroVencimiento || v.seguroTelefono;
+    if (!hayDatos) return '';
+
+    const lineas = [];
+    if (v.seguroTipo) lineas.push('Tipo: <strong>' + Util.escapar(v.seguroTipo) + '</strong>');
+    if (v.seguroPoliza) lineas.push('Póliza: <strong>' + Util.escapar(v.seguroPoliza) + '</strong>');
+    if (v.seguroTelefono) lineas.push('Asistencia: <strong>' + Util.escapar(v.seguroTelefono) + '</strong>');
+
+    // El vencimiento se resalta si está cerca o pasado
+    if (v.seguroVencimiento) {
+      const dias = Util.diasHasta(v.seguroVencimiento);
+      let aviso = '';
+      if (dias < 0) aviso = ' ⚠️ (vencido)';
+      else if (dias <= 30) aviso = ' 🔔 (en ' + dias + ' días)';
+      lineas.push('Vencimiento: <strong>' + Util.formatearFecha(v.seguroVencimiento) + '</strong>' + aviso);
+    }
+
+    const titulo = v.seguroCompania ? Util.escapar(v.seguroCompania) : 'Seguro del vehículo';
+
+    return (
+      '<div class="bloque-seguro">' +
+        '<div class="titulo-seguro">🛡 ' + titulo + '</div>' +
+        lineas.map(l => '<div class="linea-seguro">' + l + '</div>').join('') +
+      '</div>'
+    );
+  },
+
+  /* ----- Visión general inteligente (novedad v4) ----- */
+  // Recibe el vehículo y su lista de actuaciones (ya ordenada de más
+  // reciente a más antigua) y devuelve el HTML del panel-resumen.
+  // Solo LEE datos y devuelve HTML: no toca localStorage, respetando
+  // la arquitectura de capas (fácil de migrar a React Native).
+  _visionGeneralHTML(v, lista) {
+    if (lista.length === 0) return ''; // sin datos no hay nada que analizar
+
+    const hoy = Util.hoyISO();
+    const frases = [];   // cada frase será una línea del panel
+    let nivel = 'ok';    // ok | aviso | alerta → decide el color del borde
+
+    /* 1. Recordatorios pendientes (mismo criterio que las alertas: 30 días / 1.000 km) */
+    const limite = new Date();
+    limite.setDate(limite.getDate() + 30);
+    const fechaLimite = Util.fechaISOLocal(limite);
+
+    let vencidos = 0, proximos = 0;
+    let avisoMasCercano = null; // el recordatorio por fecha más próximo
+    const detallesVencidos = []; // 🆕 v12: qué está vencido exactamente (para nombrarlo)
+
+    lista.forEach(a => {
+      if (a.completada) return; // los ya atendidos no cuentan
+      if (a.proximaRevisionFecha) {
+        if (a.proximaRevisionFecha < hoy) {
+          vencidos++;
+          detallesVencidos.push({
+            id: a.id,
+            texto: Util.escapar(a.titulo) + ' — venció hace ' + Math.abs(Util.diasHasta(a.proximaRevisionFecha)) + ' días'
+          });
+        } else {
+          if (a.proximaRevisionFecha <= fechaLimite) proximos++;
+          // Guardamos el aviso futuro más cercano (aunque falten más de 30 días)
+          if (!avisoMasCercano || a.proximaRevisionFecha < avisoMasCercano.proximaRevisionFecha) {
+            avisoMasCercano = a;
+          }
+        }
+      }
+      if (a.proximaRevisionKm) {
+        const faltan = a.proximaRevisionKm - v.kmActuales;
+        if (faltan <= 0) {
+          vencidos++;
+          detallesVencidos.push({
+            id: a.id,
+            texto: Util.escapar(a.titulo) + ' — superada en ' + Util.formatearKm(Math.abs(faltan))
+          });
+        } else if (faltan <= 1000) proximos++;
+      }
+    });
+
+    if (vencidos > 0) {
+      nivel = 'alerta';
+      // 🆕 v12: en vez de solo el número, listamos CADA recordatorio vencido,
+      // y cada uno es un enlace que abre esa actuación directamente.
+      frases.push('⚠️ ' + vencidos + (vencidos === 1 ? ' recordatorio vencido:' : ' recordatorios vencidos:'));
+      detallesVencidos.forEach(d => {
+        frases.push('<span class="sub-aviso" role="button" tabindex="0" onclick="Pantallas.detalleActuacion(\'' + d.id + '\')">↳ ' + d.texto + '</span>');
+      });
+    }
+    if (proximos > 0) {
+      if (nivel === 'ok') nivel = 'aviso';
+      frases.push('🔔 ' + proximos + (proximos === 1 ? ' recordatorio próximo.' : ' recordatorios próximos.'));
+    }
+    if (avisoMasCercano) {
+      frases.push('📅 Próximo aviso: ' + Util.escapar(avisoMasCercano.titulo) + ' en ' +
+        Util.diasHasta(avisoMasCercano.proximaRevisionFecha) + ' días.');
+    }
+
+    /* 1.b Vencimiento del seguro (v8): vive en el vehículo, no en una actuación */
+    if (v.seguroVencimiento) {
+      const diasSeguro = Util.diasHasta(v.seguroVencimiento);
+      const cia = v.seguroCompania ? ' (' + Util.escapar(v.seguroCompania) + ')' : '';
+      if (diasSeguro < 0) {
+        nivel = 'alerta';
+        frases.push('🛡 El seguro' + cia + ' está vencido desde hace ' + Math.abs(diasSeguro) + ' días.');
+      } else if (diasSeguro <= 30) {
+        if (nivel === 'ok') nivel = 'aviso';
+        frases.push('🛡 El seguro' + cia + ' vence en ' + diasSeguro + ' días.');
+      }
+    }
+
+    /* 2. Última actuación con tiempo relativo */
+    const ultima = lista[0];
+    frases.push('🛠 Última actuación: ' + Util.escapar(ultima.titulo) +
+      ' (' + Util.tiempoTranscurrido(ultima.fecha) + ').');
+
+    /* 3. Gasto del año en curso */
+    const anioActual = hoy.slice(0, 4);
+    const gastoAnio = lista
+      .filter(a => a.fecha.slice(0, 4) === anioActual)
+      .reduce((suma, a) => suma + (Number(a.costeTotalEuros) || 0), 0);
+    if (gastoAnio > 0) {
+      frases.push('💶 Gasto en ' + anioActual + ': ' + Util.formatearDinero(gastoAnio) + '.');
+    }
+
+    /* 4. Avería más cara registrada */
+    const averias = lista.filter(a => a.categoria === 'averia' && Number(a.costeTotalEuros) > 0);
+    if (averias.length > 0) {
+      const masCara = averias.reduce((max, a) =>
+        Number(a.costeTotalEuros) > Number(max.costeTotalEuros) ? a : max);
+      frases.push('🔧 Avería más cara: ' + Util.escapar(masCara.titulo) +
+        ' (' + Util.formatearDinero(masCara.costeTotalEuros) + ').');
+    }
+
+    /* 5. Km recorridos desde los últimos mantenimientos clave.
+       lista.find() devuelve la PRIMERA coincidencia y, como la lista
+       está ordenada de reciente a antigua, es el mantenimiento más reciente. */
+    const ultimoMantenimiento = (sistema) =>
+      lista.find(a => a.categoria === 'mantenimiento' && a.subcategoria === sistema);
+
+    const neumaticos = ultimoMantenimiento('neumaticos');
+    if (neumaticos && v.kmActuales > neumaticos.kilometraje) {
+      frases.push('🛞 Neumáticos: ' + Util.formatearKm(v.kmActuales - neumaticos.kilometraje) +
+        ' desde la última revisión.');
+    }
+    const motor = ultimoMantenimiento('motor');
+    if (motor && v.kmActuales > motor.kilometraje) {
+      frases.push('🛢 Motor (aceite/filtros): ' + Util.formatearKm(v.kmActuales - motor.kilometraje) +
+        ' desde el último mantenimiento.');
+    }
+
+    /* Cabecera según el estado */
+    const cabeceras = {
+      ok: '✅ ' + Util.escapar(v.nombre) + ' está al día.',
+      aviso: '🔔 ' + Util.escapar(v.nombre) + ': revisa los próximos avisos.',
+      alerta: '⚠️ ' + Util.escapar(v.nombre) + ': hay recordatorios vencidos.'
+    };
+
+    return (
+      '<div class="vision-general ' + nivel + '">' +
+        '<div class="estado">' + cabeceras[nivel] + '</div>' +
+        '<ul>' + frases.map(f => '<li>' + f + '</li>').join('') + '</ul>' +
+      '</div>'
+    );
+  },
+
+  /* ----- Ficha del vehículo ----- */
+  detalleVehiculo(id) {
+    Estado.vehiculoActualId = id;
+    const v = BD.obtenerVehiculo(id);
+    if (!v) { Pantallas.lista(); return; }
+
+    const lista = BD.obtenerActuaciones(id)
+      .sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+    const gastoTotal = lista.reduce((s, a) => s + (Number(a.costeTotalEuros) || 0), 0);
+    const ultimaFecha = lista.length > 0 ? Util.formatearFecha(lista[0].fecha) : '—';
+
+    const foto = v.foto
+      ? '<img src="' + Fotos.urlDe(v.foto) + '" alt="Foto de ' + Util.escapar(v.nombre) + '">'
+      : (ICONO_TIPO[v.tipo] || '🚗');
+    const matricula = v.matricula
+      ? '<span class="matricula"><span class="banda">E</span><span class="numero">' + Util.escapar(v.matricula) + '</span></span>'
+      : '';
+
+    const ultimas = lista.slice(0, 5).map(a => Pantallas._itemActuacionHTML(a)).join('');
+
+    document.getElementById('contenido-detalle-vehiculo').innerHTML =
+      '<div class="cabecera-vehiculo">' +
+        '<div class="foto-grande">' + foto + '</div>' +
+        '<div class="cuerpo">' +
+          '<h1>' + Util.escapar(v.nombre) + '</h1>' +
+          '<p class="subtitulo" style="margin-bottom:10px">' +
+            Util.escapar(v.marca) + ' ' + Util.escapar(v.modelo) + ' · ' + Util.escapar(v.anio) + ' · ' + Util.escapar(v.combustible) +
+            (v.color ? ' · ' + Util.escapar(v.color) : '') +
+          '</p>' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">' +
+            matricula + '<span class="odometro">' + Util.formatearKm(v.kmActuales) + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      Pantallas._visionGeneralHTML(v, lista) + // panel inteligente (v4)
+
+      Pantallas._bloqueSeguroHTML(v) + // datos del seguro (v8)
+
+      '<div class="stats">' +
+        '<div class="stat"><div class="valor">' + Util.formatearDinero(gastoTotal) + '</div><div class="etiqueta">Gasto total</div></div>' +
+        '<div class="stat"><div class="valor">' + lista.length + '</div><div class="etiqueta">Actuaciones</div></div>' +
+        '<div class="stat"><div class="valor">' + ultimaFecha + '</div><div class="etiqueta">Última</div></div>' +
+      '</div>' +
+
+      '<button class="btn-primario" onclick="Pantallas.formActuacion()">+ Registrar actuación</button>' +
+      '<button class="btn-informe" onclick="Informe.generar(\'' + v.id + '\')">📄 Generar informe de vida del vehículo</button>' +
+
+      '<h2>Últimas actuaciones</h2>' +
+      (ultimas || '<div class="vacio" style="padding:30px"><p>Sin actuaciones todavía. Registra la primera.</p></div>') +
+      (lista.length > 0
+        ? '<div class="fila-botones" style="margin-top:8px">' +
+            '<button class="btn-secundario" onclick="Pantallas.historial()">📋 Historial (' + lista.length + ')</button>' +
+            '<button class="btn-secundario" onclick="Pantallas.estadisticas()">📊 Estadísticas</button>' +
+          '</div>'
+        : '') +
+
+      '<h2>Vehículo</h2>' +
+      '<div class="fila-botones" style="margin-top:0">' +
+        '<button class="btn-secundario" onclick="Pantallas.formVehiculo(\'' + v.id + '\')">✏️ Editar vehículo</button>' +
+        '<button class="btn-peligro" onclick="Acciones.eliminarVehiculo(\'' + v.id + '\')">🗑 Eliminar</button>' +
+      '</div>';
+
+    Pantallas._mostrar('pantalla-detalle-vehiculo');
+  },
+
+  // HTML de una actuación en lista (reutilizado en ficha e historial)
+  _itemActuacionHTML(a) {
+    const selloSeguro = a.porSeguro ? '<span class="sello-seguro">🛡 Seguro</span>' : '';
+    return (
+      '<div class="item-actuacion ' + a.categoria + '" role="button" tabindex="0" onclick="Pantallas.detalleActuacion(\'' + a.id + '\')">' +
+        '<div class="info">' +
+          '<div class="titulo">' + Util.escapar(a.titulo) + '</div>' +
+          '<div class="meta">' + Util.formatearFecha(a.fecha) + ' · ' + Util.formatearKm(a.kilometraje) +
+            ' · <span class="chip ' + a.categoria + '">' + NOMBRE_CATEGORIA[a.categoria] + '</span>' + selloSeguro + '</div>' +
+        '</div>' +
+        '<div class="coste">' + Util.formatearDinero(a.costeTotalEuros) + '</div>' +
+      '</div>'
+    );
+  },
+
+  /* ----- Detalle de actuación ----- */
+  detalleActuacion(id) {
+    const a = BD.obtenerActuacion(id);
+    if (!a) return;
+    Estado.vehiculoActualId = a.vehiculoId;
+    const v = BD.obtenerVehiculo(a.vehiculoId);
+
+    const etiquetaSubcat = (CATEGORIAS[a.categoria] && CATEGORIAS[a.categoria][a.subcategoria])
+      ? CATEGORIAS[a.categoria][a.subcategoria].split(' (')[0]
+      : a.subcategoria;
+
+    // 🆕 v12: el detalle se adapta a la subcategoría, igual que el formulario.
+    // 'doc' nos dice qué subcategoría de documentación es (o null si no lo es).
+    const doc = (a.categoria === 'documentacion') ? a.subcategoria : null;
+    // Etiquetas que cambian de nombre según el tipo
+    const etqRealizado = { seguro: 'Compañía', impuestos: 'Organismo', itv: 'Estación ITV', multas: 'Organismo' }[doc] || 'Realizado por';
+    const etqCoste     = { seguro: 'Prima', impuestos: 'Importe pagado', itv: 'Coste ITV', multas: 'Importe' }[doc] || 'Coste total';
+    const etqProxFecha = (doc === 'multas') ? 'Fecha límite de pago' : 'Próxima revisión (fecha)';
+    // Texto bonito para el resultado de la ITV
+    const RESULTADO_ITV = { favorable: '✅ Favorable', desfavorable: '⚠️ Desfavorable', negativa: '❌ Negativa' };
+
+    // Pequeño ayudante para no repetir el patrón de cada fila
+    const fila = (clave, valor) => '<div class="dato"><span class="clave">' + clave + '</span><span class="valor">' + valor + '</span></div>';
+
+    let html =
+      '<h1>' + Util.escapar(a.titulo) + '</h1>' +
+      '<p class="subtitulo">' + (v ? Util.escapar(v.nombre) + ' · ' : '') +
+        '<span class="chip ' + a.categoria + '">' + NOMBRE_CATEGORIA[a.categoria] + '</span></p>' +
+      '<div class="ficha-datos">' +
+        fila('Fecha', Util.formatearFecha(a.fecha)) +
+        // El kilometraje no aplica a seguro/impuestos/multas
+        ((doc === 'seguro' || doc === 'impuestos' || doc === 'multas') ? '' : fila('Kilometraje', Util.formatearKm(a.kilometraje))) +
+        fila('Sistema', Util.escapar(etiquetaSubcat)) +
+        // Resultado de la ITV (solo ITV)
+        (doc === 'itv' && a.resultadoItv ? fila('Resultado', RESULTADO_ITV[a.resultadoItv] || a.resultadoItv) : '') +
+        // Motivo (solo multas)
+        (doc === 'multas' && a.motivo ? fila('Motivo', Util.escapar(a.motivo)) : '') +
+        (a.tallerOMismo ? fila(etqRealizado, Util.escapar(a.tallerOMismo)) : '') +
+        (a.porSeguro ? fila('Cubierto por el seguro', '🛡 Sí') : '') +
+        fila(etqCoste, Util.formatearDinero(a.costeTotalEuros)) +
+        // Pagada y puntos (solo multas)
+        (doc === 'multas' ? fila('Pagada', a.pagada ? '✅ Sí' : '⏳ Pendiente') : '') +
+        (doc === 'multas' && a.puntos ? fila('Puntos retirados', a.puntos) : '') +
+        (a.desgloseCoste ? fila('Desglose', Util.escapar(a.desgloseCoste)) : '') +
+        (a.proximaRevisionKm ? fila('Próxima revisión (km)', Util.formatearKm(a.proximaRevisionKm)) : '') +
+        (a.proximaRevisionFecha ? fila(etqProxFecha, Util.formatearFecha(a.proximaRevisionFecha)) : '') +
+        // Preaviso del seguro
+        (doc === 'seguro' && a.preavisoDias != null ? fila('Aviso previo', a.preavisoDias + ' días antes') : '') +
+        // Garantía válida hasta (solo garantías)
+        (doc === 'garantia' && a.garantiaHasta ? fila('Garantía válida hasta', Util.formatearFecha(a.garantiaHasta)) : '') +
+        ((a.proximaRevisionKm || a.proximaRevisionFecha)
+          ? fila('Recordatorio', a.completada ? '✓ Atendido' : 'Pendiente')
+          : '') +
+      '</div>';
+
+    if (a.notas) {
+      html += '<div class="notas-bloque"><strong>Notas</strong><br>' + Util.escapar(a.notas) + '</div>';
+    }
+
+    if (a.fotos && a.fotos.length > 0) {
+      html += '<h2>Fotos y documentos</h2><div class="galeria">' +
+        a.fotos.map(f => '<img src="' + Fotos.urlDe(f) + '" alt="Foto de la actuación" onclick="window.open(this.src)">').join('') +
+        '</div>';
+    }
+
+    html +=
+      '<div class="fila-botones">' +
+        '<button class="btn-secundario" onclick="Pantallas.formActuacion(\'' + a.id + '\')">✏️ Editar</button>' +
+        '<button class="btn-peligro" onclick="Acciones.eliminarActuacion(\'' + a.id + '\')">🗑 Eliminar</button>' +
+      '</div>';
+
+    document.getElementById('contenido-detalle-actuacion').innerHTML = html;
+    Pantallas._mostrar('pantalla-detalle-actuacion');
+  },
+
+  /* ----- Formulario de actuación ----- */
+  formActuacion(idEditar) {
+    Estado.editandoActuacionId = idEditar || null;
+    Estado.pantallaAnterior = 'pantalla-detalle-vehiculo';
+    Estado.fotosActuacionTemp = [];
+
+    const v = BD.obtenerVehiculo(Estado.vehiculoActualId);
+    if (!v) { Pantallas.lista(); return; }
+
+    document.getElementById('form-actuacion').reset();
+    document.getElementById('error-actuacion').classList.remove('visible');
+    document.getElementById('previa-fotos-actuacion').innerHTML = '';
+    document.getElementById('titulo-form-actuacion').textContent =
+      idEditar ? 'Editar actuación' : 'Registrar actuación';
+    document.getElementById('subtitulo-form-actuacion').textContent =
+      'Vehículo: ' + v.nombre + ' · ' + Util.formatearKm(v.kmActuales);
+
+    // La etiqueta del coste muestra el símbolo de la moneda elegida (v9)
+    const simbolo = (MONEDAS[Config.moneda()] || MONEDAS.EUR).simbolo;
+    document.getElementById('label-coste').innerHTML =
+      'Coste total (' + simbolo + ') <span class="opc">(opcional)</span>';
+
+    // Valores por defecto: hoy y los km actuales del vehículo
+    document.getElementById('a-fecha').value = Util.hoyISO();
+    document.getElementById('a-km').value = v.kmActuales;
+    Pantallas.actualizarSubcategorias();
+
+    if (idEditar) {
+      const a = BD.obtenerActuacion(idEditar);
+      if (a) {
+        document.getElementById('a-fecha').value = a.fecha;
+        document.getElementById('a-km').value = a.kilometraje;
+        document.getElementById('a-categoria').value = a.categoria;
+        Pantallas.actualizarSubcategorias();
+        // El sistema puede ser un valor "Otro" libre que no esté en la lista
+        Util.cargarConOtro('a-subcategoria', 'a-subcategoria-otro', a.subcategoria);
+        Pantallas.aplicarCamposSubcategoria(); // muestra los campos propios de esta subcategoría
+        document.getElementById('a-titulo').value = a.titulo;
+        document.getElementById('a-taller').value = a.tallerOMismo || '';
+        document.getElementById('a-coste').value = a.costeTotalEuros ?? '';
+        document.getElementById('a-desglose').value = a.desgloseCoste || '';
+        document.getElementById('a-prox-km').value = a.proximaRevisionKm ?? '';
+        document.getElementById('a-prox-fecha').value = a.proximaRevisionFecha || '';
+        document.getElementById('a-notas').value = a.notas || '';
+        document.getElementById('a-por-seguro').checked = !!a.porSeguro;
+        // 🆕 v12: valores de los campos específicos (con sus valores por defecto)
+        document.getElementById('a-resultado-itv').value = a.resultadoItv || 'favorable';
+        document.getElementById('a-motivo').value = a.motivo || '';
+        document.getElementById('a-pagada').checked = !!a.pagada;
+        document.getElementById('a-puntos').value = a.puntos ?? '';
+        document.getElementById('a-preaviso').value = a.preavisoDias ?? 45;
+        document.getElementById('a-garantia-hasta').value = a.garantiaHasta || '';
+        // Si la actuación que editamos ya tenía fecha de próxima, damos por hecho
+        // que estaba "programada"; si no, la casilla queda desmarcada.
+        document.getElementById('a-programar-siguiente').checked = !!a.proximaRevisionFecha;
+        Pantallas.actualizarObligacion(); // refresca la casilla y la obligatoriedad
+        Estado.fotosActuacionTemp = (a.fotos || []).slice();
+        Fotos.renderPreviasFotosActuacion();
+      }
+    }
+    Pantallas._mostrar('pantalla-form-actuacion');
+  },
+
+  // Rellena el desplegable de subcategorías según la categoría elegida
+  actualizarSubcategorias() {
+    const categoria = document.getElementById('a-categoria').value;
+    const select = document.getElementById('a-subcategoria');
+    const opciones = CATEGORIAS[categoria];
+    select.innerHTML = Object.keys(opciones)
+      .map(clave => '<option value="' + clave + '">' + opciones[clave] + '</option>')
+      .join('') +
+      '<option value="__otro__">Otro (especificar)…</option>'; // texto libre (v10)
+    // Al cambiar de categoría ocultamos el campo de texto de "Otro"
+    document.getElementById('a-subcategoria-otro').style.display = 'none';
+    document.getElementById('a-subcategoria-otro').value = '';
+    // Personalizamos los campos según la subcategoría y revisamos obligación
+    Pantallas.aplicarCamposSubcategoria();
+    Pantallas.actualizarObligacion();
+  },
+
+  /* 🆕 v12: PERSONALIZACIÓN DE CAMPOS POR SUBCATEGORÍA.
+     Toda la configuración vive en esta tabla: para cada subcategoría de
+     Documentación decimos qué campos ESPECÍFICOS mostrar, qué campos comunes
+     OCULTAR y qué etiquetas renombrar. Mantenerlo en un único sitio hace muy
+     fácil ajustar o añadir casos sin tocar el resto del código. */
+  CONFIG_CAMPOS: {
+    seguro: {
+      mostrar: ['campo-preaviso'],
+      ocultar: ['campo-km', 'campo-desglose', 'campo-prox-km', 'campo-por-seguro'],
+      etiquetas: { 'label-taller': 'Compañía / aseguradora', 'label-coste': 'Coste (prima)' },
+      placeholders: { 'a-taller': 'Ej: Mapfre, Línea Directa...', 'a-titulo': 'Ej: Renovación del seguro a todo riesgo' }
+    },
+    impuestos: {
+      mostrar: [],
+      ocultar: ['campo-km', 'campo-desglose', 'campo-prox-km', 'campo-por-seguro'],
+      etiquetas: { 'label-taller': 'Ayuntamiento / organismo', 'label-coste': 'Importe pagado' },
+      placeholders: { 'a-taller': 'Ej: Ayuntamiento de Granada', 'a-titulo': 'Ej: Impuesto de circulación 2026' }
+    },
+    itv: {
+      mostrar: ['campo-resultado-itv'],
+      ocultar: ['campo-desglose', 'campo-prox-km', 'campo-por-seguro'],
+      etiquetas: { 'label-taller': 'Estación ITV', 'label-coste': 'Coste de la ITV' },
+      placeholders: { 'a-taller': 'Ej: ITV Granada Norte', 'a-titulo': 'Ej: ITV periódica' }
+    },
+    multas: {
+      mostrar: ['campo-motivo', 'campo-pagada-puntos'],
+      ocultar: ['campo-km', 'campo-desglose', 'campo-por-seguro', 'campo-prox-km', 'titulo-prox-revision', 'fila-prox-revision'],
+      etiquetas: { 'label-taller': 'Organismo', 'label-coste': 'Importe de la multa', 'label-prox-fecha': 'Fecha límite de pago' },
+      placeholders: { 'a-taller': 'Ej: DGT, Ayuntamiento...', 'a-titulo': 'Ej: Multa por exceso de velocidad' }
+    },
+    garantia: {
+      // Garantía de una pieza/producto: nos basta con hasta cuándo es válida.
+      mostrar: ['campo-garantia-hasta'],
+      ocultar: ['campo-km', 'campo-taller-fila', 'campo-desglose', 'campo-por-seguro',
+                'titulo-prox-revision', 'fila-prox-revision'],
+      etiquetas: { 'label-coste': 'Coste (opcional)' },
+      placeholders: { 'a-titulo': 'Ej: Garantía de la batería (2 años)' }
+    },
+    otros: {
+      // Documento del vehículo: solo lo esencial (título, fecha, notas, foto).
+      mostrar: ['ayuda-otros'],
+      ocultar: ['campo-km', 'campo-taller-fila', 'campo-coste-fila', 'campo-por-seguro',
+                'titulo-prox-revision', 'fila-prox-revision'],
+      etiquetas: {},
+      placeholders: { 'a-titulo': 'Ej: Permiso de circulación' }
+    }
+  },
+
+  // Lista de TODOS los campos específicos y comunes-ocultables, para poder
+  // resetear el formulario a su estado normal antes de aplicar una config.
+  _TODOS_DOC: ['campo-resultado-itv', 'campo-motivo', 'campo-pagada-puntos', 'campo-preaviso',
+               'campo-garantia-hasta', 'ayuda-otros'],
+  _OCULTABLES: ['campo-km', 'campo-desglose', 'campo-por-seguro', 'campo-taller-fila', 'campo-coste-fila',
+                'titulo-prox-revision', 'fila-prox-revision', 'campo-prox-fecha', 'campo-prox-km'],
+
+  aplicarCamposSubcategoria() {
+    const categoria = document.getElementById('a-categoria').value;
+    const subcategoria = Util.valorConOtro('a-subcategoria', 'a-subcategoria-otro');
+
+    // 1) Reset: ocultamos todos los campos específicos de documentación...
+    this._TODOS_DOC.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+    // ...y volvemos a mostrar todos los comunes que se pueden ocultar
+    this._OCULTABLES.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = ''; });
+    // ...y restauramos las etiquetas y placeholders por defecto
+    const simbolo = (MONEDAS[Config.moneda()] || MONEDAS.EUR).simbolo;
+    document.getElementById('label-taller').innerHTML = 'Taller / Realizado por <span class="opc">(opcional)</span>';
+    document.getElementById('label-coste').innerHTML = 'Coste total (' + simbolo + ') <span class="opc">(opcional)</span>';
+    document.getElementById('label-prox-fecha').textContent = 'Por fecha';
+    document.getElementById('a-taller').placeholder = 'Ej: Taller Pérez · Yo mismo';
+    document.getElementById('a-titulo').placeholder = 'Ej: breve descripción de la actuación';
+
+    // 2) Si hay configuración para esta subcategoría, la aplicamos
+    const cfg = (categoria === 'documentacion') ? this.CONFIG_CAMPOS[subcategoria] : null;
+    if (!cfg) {
+      // Mantenimiento y Avería no llevan config especial, pero les damos un
+      // ejemplo de título acorde para que el campo siga siendo orientativo.
+      const ejemplo = { mantenimiento: 'Ej: Cambio de aceite y filtro 5W30', averia: 'Ej: Avería del alternador' }[categoria];
+      if (ejemplo) document.getElementById('a-titulo').placeholder = ejemplo;
+      return;
+    }
+
+    cfg.ocultar.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+    cfg.mostrar.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = ''; });
+    Object.keys(cfg.etiquetas || {}).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = cfg.etiquetas[id]; // las etiquetas renombradas no llevan "(opcional)"
+    });
+    Object.keys(cfg.placeholders || {}).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.placeholder = cfg.placeholders[id];
+    });
+  },
+
+  /* 🆕 v12: muestra/oculta la casilla "Programar la siguiente" y decide si la
+     fecha de la próxima es obligatoria. Se llama al cambiar categoría, sistema
+     o la propia casilla. Toda la lógica visual de obligaciones vive aquí. */
+  actualizarObligacion() {
+    const categoria = document.getElementById('a-categoria').value;
+    const subcategoria = Util.valorConOtro('a-subcategoria', 'a-subcategoria-otro');
+    const esOblig = Obligaciones.esObligacion(categoria, subcategoria);
+
+    const bloque = document.getElementById('bloque-programar');
+    const casilla = document.getElementById('a-programar-siguiente');
+    const hint = document.getElementById('hint-prox');
+    const ayuda = document.getElementById('ayuda-prox-fecha');
+
+    if (!esOblig) {
+      // No es obligación: ocultamos la casilla y la fecha es opcional (como siempre)
+      bloque.style.display = 'none';
+      hint.textContent = '(opcional, crea un recordatorio)';
+      ayuda.style.display = 'none';
+      return;
+    }
+
+    // Sí es obligación: mostramos la casilla
+    bloque.style.display = '';
+    const nombre = (Obligaciones.ETIQUETAS[subcategoria] || {}).nombre || 'esta obligación';
+
+    if (casilla.checked) {
+      // Va a programarse → la fecha es OBLIGATORIA
+      hint.textContent = '(obligatorio para ' + nombre + ')';
+      ayuda.style.display = '';
+    } else {
+      // Registro histórico → la fecha vuelve a ser opcional
+      hint.textContent = '(opcional)';
+      ayuda.style.display = 'none';
+    }
+  },
+
+  /* ----- Historial con filtros combinables ----- */
+  historial() {
+    const v = BD.obtenerVehiculo(Estado.vehiculoActualId);
+    if (!v) { Pantallas.lista(); return; }
+    document.getElementById('subtitulo-historial').textContent = 'Vehículo: ' + v.nombre;
+    Pantallas.limpiarFiltros(false); // resetea filtros sin renderizar todavía
+    Pantallas.renderHistorial();
+    Pantallas._mostrar('pantalla-historial');
+  },
+
+  // Deja todos los filtros en su estado inicial.
+  // Si renderizar=false, solo limpia (se usa al abrir la pantalla).
+  limpiarFiltros(renderizar) {
+    document.getElementById('filtro-busqueda').value = '';
+    document.getElementById('filtro-categoria').value = '';
+    document.getElementById('filtro-desde').value = '';
+    document.getElementById('filtro-hasta').value = '';
+    document.getElementById('filtro-orden').value = 'recientes';
+    Pantallas._poblarFiltroSistema('');
+    if (renderizar !== false) Pantallas.renderHistorial();
+  },
+
+  // Al cambiar la categoría, el desplegable de sistemas se rellena
+  // con los sistemas de ESA categoría (motor, frenos...).
+  cambioFiltroCategoria() {
+    const categoria = document.getElementById('filtro-categoria').value;
+    Pantallas._poblarFiltroSistema(categoria);
+    Pantallas.renderHistorial();
+  },
+
+  // Rellena el desplegable de sistemas según la categoría elegida.
+  // Sin categoría no se puede filtrar por sistema, porque la clave
+  // "motor" existe tanto en mantenimiento como en avería y sería ambiguo.
+  _poblarFiltroSistema(categoria) {
+    const select = document.getElementById('filtro-sistema');
+    let opciones = '<option value="">Todos los sistemas</option>';
+    if (categoria && CATEGORIAS[categoria]) {
+      opciones += Object.keys(CATEGORIAS[categoria])
+        .map(clave => '<option value="' + clave + '">' + CATEGORIAS[categoria][clave].split(' (')[0] + '</option>')
+        .join('');
+      select.disabled = false;
+    } else {
+      select.disabled = true; // sin categoría, el filtro de sistema se bloquea
+    }
+    select.innerHTML = opciones;
+    select.value = '';
+  },
+
+  renderHistorial() {
+    const busqueda = document.getElementById('filtro-busqueda').value.trim().toLowerCase();
+    const filtroCategoria = document.getElementById('filtro-categoria').value;
+    const filtroSistema = document.getElementById('filtro-sistema').value;
+    const desde = document.getElementById('filtro-desde').value;   // "" si está vacío
+    const hasta = document.getElementById('filtro-hasta').value;
+    const orden = document.getElementById('filtro-orden').value;
+
+    let lista = BD.obtenerActuaciones(Estado.vehiculoActualId);
+
+    // Cada filtro va recortando la lista. Los filtros se COMBINAN:
+    // si pones categoría + fechas + texto, deben cumplirse los tres.
+    if (filtroCategoria) lista = lista.filter(a => a.categoria === filtroCategoria);
+    if (filtroSistema) lista = lista.filter(a => a.subcategoria === filtroSistema);
+
+    // Rango de fechas: como guardamos las fechas en formato "AAAA-MM-DD",
+    // comparar los textos equivale a comparar las fechas. 👌
+    if (desde) lista = lista.filter(a => a.fecha >= desde);
+    if (hasta) lista = lista.filter(a => a.fecha <= hasta);
+
+    if (busqueda) {
+      lista = lista.filter(a =>
+        (a.titulo + ' ' + (a.tallerOMismo || '') + ' ' + (a.notas || '')).toLowerCase().includes(busqueda)
+      );
+    }
+
+    lista.sort((a, b) => orden === 'recientes'
+      ? b.fecha.localeCompare(a.fecha)
+      : a.fecha.localeCompare(b.fecha));
+
+    const total = lista.reduce((s, a) => s + (Number(a.costeTotalEuros) || 0), 0);
+    const contenedor = document.getElementById('lista-historial');
+
+    if (lista.length === 0) {
+      contenedor.innerHTML =
+        '<div class="vacio" style="padding:32px"><p><strong>Sin resultados.</strong></p><p>Prueba con otra búsqueda u otro filtro.</p></div>';
+      return;
+    }
+
+    contenedor.innerHTML =
+      '<p class="subtitulo">' + lista.length + ' actuaciones · total ' + Util.formatearDinero(total) + '</p>' +
+      lista.map(a => Pantallas._itemActuacionHTML(a)).join('');
+  },
+
+  /* ----- Estadísticas (novedad v2) ----- */
+  /* ----- Pantalla de obligaciones legales (v12) -----
+     Recoge todas las obligaciones con fecha (de Obligaciones.recolectar) y las
+     muestra agrupadas por semáforo: vencidas, próximas (≤30 días) y al día. */
+  obligaciones() {
+    const items = Obligaciones.recolectar();
+    const zona = document.getElementById('contenido-obligaciones');
+
+    if (items.length === 0) {
+      zona.innerHTML =
+        '<div class="vacio">Todavía no hay obligaciones con fecha.<br><br>' +
+        'Cuando registres una ITV, un seguro o un impuesto y marques ' +
+        '"Programar la siguiente", aparecerán aquí ordenadas por vencimiento.</div>';
+      Pantallas._mostrar('pantalla-obligaciones');
+      return;
+    }
+
+    // Texto del plazo en lenguaje natural (ej: "vence en 12 días", "vencida hace 3 días")
+    const textoPlazo = (dias) => {
+      if (dias < 0)  return { estado: 'Vencida', detalle: 'hace ' + Math.abs(dias) + (Math.abs(dias) === 1 ? ' día' : ' días') };
+      if (dias === 0) return { estado: 'Vence hoy', detalle: '' };
+      return { estado: 'En ' + dias + (dias === 1 ? ' día' : ' días'), detalle: '' };
+    };
+
+    // Pinta una tarjeta de obligación
+    const tarjeta = (it) => {
+      const p = textoPlazo(it.dias);
+      // Si viene de una actuación, al tocar la abrimos; si viene de la ficha, abrimos el vehículo
+      const onclick = it.origenActuacionId
+        ? 'Pantallas.detalleActuacion(\'' + it.origenActuacionId + '\')'
+        : 'Pantallas.detalleVehiculo(\'' + it.vehiculoId + '\')';
+      return (
+        '<div class="oblig ' + it.nivel + '" role="button" tabindex="0" onclick="' + onclick + '">' +
+          '<div class="icono">' + it.icono + '</div>' +
+          '<div class="info">' +
+            '<div class="tipo">' + Util.escapar(it.tipo) + '</div>' +
+            '<div class="veh">' + Util.escapar(it.vehiculo) + '</div>' +
+          '</div>' +
+          '<div class="plazo">' +
+            '<span class="estado">' + p.estado + '</span>' +
+            '<span class="fecha">' + Util.formatearFecha(it.fecha) + (p.detalle ? ' · ' + p.detalle : '') + '</span>' +
+          '</div>' +
+        '</div>'
+      );
+    };
+
+    // Agrupamos por nivel manteniendo el orden por fecha dentro de cada grupo
+    const grupos = [
+      { nivel: 'vencida', titulo: '🔴 Vencidas' },
+      { nivel: 'proxima', titulo: '🟠 Próximas (30 días)' },
+      { nivel: 'aldia',   titulo: '🟢 Al día' }
+    ];
+
+    let html = '';
+    grupos.forEach(g => {
+      const delGrupo = items.filter(it => it.nivel === g.nivel);
+      if (delGrupo.length === 0) return;
+      html += '<div class="grupo-oblig-titulo">' + g.titulo + ' (' + delGrupo.length + ')</div>';
+      html += delGrupo.map(tarjeta).join('');
+    });
+
+    zona.innerHTML = html;
+    Pantallas._mostrar('pantalla-obligaciones');
+  },
+
+  estadisticas() {
+    const v = BD.obtenerVehiculo(Estado.vehiculoActualId);
+    if (!v) { Pantallas.lista(); return; }
+    document.getElementById('subtitulo-estadisticas').textContent = 'Vehículo: ' + v.nombre;
+
+    const lista = BD.obtenerActuaciones(Estado.vehiculoActualId);
+
+    // Sumamos el gasto por categoría y por año
+    const porCategoria = { mantenimiento: 0, averia: 0, documentacion: 0 };
+    const porAnio = {};
+    let total = 0;
+
+    lista.forEach(a => {
+      const coste = Number(a.costeTotalEuros) || 0;
+      total += coste;
+      porCategoria[a.categoria] += coste;
+      const anio = a.fecha.slice(0, 4); // "2026-05-10" → "2026"
+      porAnio[anio] = (porAnio[anio] || 0) + coste;
+    });
+
+    // Función que dibuja una barra proporcional al gasto
+    function barra(etiqueta, valor, maximo, clase) {
+      const porcentaje = maximo > 0 ? Math.round(valor / maximo * 100) : 0;
+      return (
+        '<div class="barra-fila">' +
+          '<div class="cabecera-barra"><span>' + etiqueta + '</span><span class="valor">' + Util.formatearDinero(valor) + '</span></div>' +
+          '<div class="barra-fondo"><div class="barra-relleno ' + clase + '" style="width:' + porcentaje + '%"></div></div>' +
+        '</div>'
+      );
+    }
+
+    const maxCategoria = Math.max(porCategoria.mantenimiento, porCategoria.averia, porCategoria.documentacion);
+    const anios = Object.keys(porAnio).sort();
+    const maxAnio = Math.max(0, ...anios.map(an => porAnio[an]));
+
+    document.getElementById('contenido-estadisticas').innerHTML =
+      '<div class="stats" style="grid-template-columns:1fr 1fr">' +
+        '<div class="stat"><div class="valor">' + Util.formatearDinero(total) + '</div><div class="etiqueta">Gasto total</div></div>' +
+        '<div class="stat"><div class="valor">' + lista.length + '</div><div class="etiqueta">Actuaciones</div></div>' +
+      '</div>' +
+      '<h2>Gasto por categoría</h2>' +
+      '<div class="panel">' +
+        barra('Mantenimiento', porCategoria.mantenimiento, maxCategoria, 'mantenimiento') +
+        barra('Averías', porCategoria.averia, maxCategoria, 'averia') +
+        barra('Documentación', porCategoria.documentacion, maxCategoria, 'documentacion') +
+      '</div>' +
+      '<h2>Gasto por año</h2>' +
+      '<div class="panel">' +
+        (anios.length > 0
+          ? anios.map(an => barra(an, porAnio[an], maxAnio, 'anual')).join('')
+          : '<p class="subtitulo" style="margin:0">Sin datos todavía.</p>') +
+      '</div>';
+
+    Pantallas._mostrar('pantalla-estadisticas');
+  },
+
+  /* ----- Ajustes ----- */
+  ajustes() {
+    // Perfil y moneda (v9): rellenamos con la configuración actual
+    document.getElementById('aj-nombre').value = Config.nombre();
+    document.getElementById('aj-pais').innerHTML = Pantallas._opcionesPais('España');
+    Util.cargarConOtro('aj-pais', 'aj-pais-otro', Config.pais()); // país puede ser "Otro"
+    document.getElementById('aj-moneda').innerHTML = Pantallas._opcionesMoneda(Config.moneda());
+
+    const nVehiculos = BD.obtenerVehiculos().length;
+    const nActuaciones = BD.obtenerActuaciones().length;
+    const info = document.getElementById('info-almacenamiento');
+
+    // Mostramos ya los recuentos; el espacio se calcula aparte (es asíncrono)
+    info.textContent = '📦 ' + nVehiculos + ' vehículos · ' + nActuaciones + ' actuaciones · calculando espacio…';
+    BD.estimarEspacio().then(texto => {
+      info.textContent = '📦 ' + nVehiculos + ' vehículos · ' + nActuaciones + ' actuaciones · ' + texto;
+    });
+
+    Pantallas._mostrar('pantalla-ajustes');
+  }
+};
+
+/* ================= CAPA 4: ACCIONES ================= */
+const Acciones = {
+  /* ----- Bienvenida / onboarding (v9) ----- */
+  completarBienvenida(evento) {
+    evento.preventDefault();
+    const nombre = document.getElementById('b-nombre').value.trim();
+    const pais = Util.valorConOtro('b-pais', 'b-pais-otro');
+    const moneda = document.getElementById('b-moneda').value;
+
+    if (!nombre) {
+      const caja = document.getElementById('error-bienvenida');
+      caja.textContent = 'Escribe tu nombre para continuar.';
+      caja.classList.add('visible');
+      return;
+    }
+
+    // Guardamos la configuración y marcamos el onboarding como completado
+    Config.guardar({ nombre, pais, moneda, configurado: true });
+    document.body.classList.remove('onboarding'); // vuelve la cabecera
+    Pantallas.lista(); // cae en la lista vacía, que invita a añadir vehículo
+  },
+
+  // Cambiar la moneda desde Ajustes, con AVISO si ya hay gastos registrados.
+  cambiarMoneda(nueva) {
+    const actual = Config.moneda();
+    if (nueva === actual) return;
+
+    // ¿Hay alguna actuación con coste ya registrado?
+    const hayGastos = BD.obtenerActuaciones()
+      .some(a => a.costeTotalEuros !== null && a.costeTotalEuros !== undefined && a.costeTotalEuros !== '');
+
+    if (hayGastos) {
+      const sNueva = MONEDAS[nueva].simbolo;
+      const sActual = MONEDAS[actual].simbolo;
+      const ok = Util.confirmar(
+        'Ya tienes gastos registrados en ' + sActual + '.\n\n' +
+        'Cambiar a ' + sNueva + ' NO convierte las cifras: un gasto de 80 ' + sActual +
+        ' pasará a mostrarse como 80 ' + sNueva + ' (mismo número, otro símbolo).\n\n' +
+        '¿Quieres cambiar la moneda de todas formas?'
+      );
+      if (!ok) {
+        // El usuario cancela: devolvemos el desplegable a la moneda anterior
+        document.getElementById('aj-moneda').value = actual;
+        return;
+      }
+    }
+
+    Config.guardar({ moneda: nueva });
+    Pantallas.ajustes(); // refresca la pantalla con la nueva moneda
+  },
+
+  // Guarda nombre y país desde Ajustes (no toca la moneda)
+  guardarPerfil() {
+    const nombre = document.getElementById('aj-nombre').value.trim();
+    const pais = Util.valorConOtro('aj-pais', 'aj-pais-otro');
+    Config.guardar({ nombre, pais });
+  },
+
+  guardarVehiculo(evento) {
+    evento.preventDefault(); // evita que el formulario recargue la página
+
+    const nombre = document.getElementById('v-nombre').value.trim();
+    // tipo y combustible pueden venir de "Otro" (texto libre)
+    const tipo = Util.valorConOtro('v-tipo', 'v-tipo-otro');
+    const combustible = Util.valorConOtro('v-combustible', 'v-combustible-otro');
+    const marca = document.getElementById('v-marca').value.trim();
+    const modelo = document.getElementById('v-modelo').value.trim();
+    const anio = parseInt(document.getElementById('v-anio').value, 10);
+    const km = parseInt(document.getElementById('v-km').value, 10);
+    const matricula = document.getElementById('v-matricula').value.trim().toUpperCase();
+    const color = document.getElementById('v-color').value.trim();
+    const vin = document.getElementById('v-vin').value.trim().toUpperCase();
+    // Datos del seguro (todos opcionales)
+    const seguroCompania = document.getElementById('v-seguro-compania').value.trim();
+    const seguroTipo = Util.valorConOtro('v-seguro-tipo', 'v-seguro-tipo-otro');
+    const seguroPoliza = document.getElementById('v-seguro-poliza').value.trim();
+    const seguroVencimiento = document.getElementById('v-seguro-vencimiento').value || null;
+    const seguroTelefono = document.getElementById('v-seguro-telefono').value.trim();
+
+    // --- Validaciones ---
+    let error = '';
+    if (!nombre || !marca || !modelo) error = 'Rellena el nombre, la marca y el modelo.';
+    else if (!tipo) error = 'Indica el tipo de vehículo (o escríbelo en "Otro").';
+    else if (!combustible) error = 'Indica el combustible (o escríbelo en "Otro").';
+    else if (isNaN(anio) || anio < 1900 || anio > 2100) error = 'El año debe estar entre 1900 y 2100.';
+    else if (isNaN(km) || km < 0) error = 'Los kilómetros deben ser un número igual o mayor que 0.';
+    else if (matricula && BD.existeMatricula(matricula, Estado.editandoVehiculoId)) {
+      error = 'Ya existe un vehículo con la matrícula ' + matricula + '.';
+    }
+
+    const cajaError = document.getElementById('error-vehiculo');
+    if (error) {
+      cajaError.textContent = error;
+      cajaError.classList.add('visible');
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    const datos = { nombre, tipo, combustible, marca, modelo, anio, kmActuales: km, matricula, color, vin,
+      seguroCompania, seguroTipo, seguroPoliza, seguroVencimiento, seguroTelefono,
+      foto: Estado.fotoVehiculoTemp };
+
+    if (Estado.editandoVehiculoId) {
+      BD.actualizarVehiculo(Estado.editandoVehiculoId, datos);
+      Pantallas.detalleVehiculo(Estado.editandoVehiculoId);
+    } else {
+      BD.crearVehiculo(datos);
+      Pantallas.lista();
+    }
+  },
+
+  eliminarVehiculo(id) {
+    const v = BD.obtenerVehiculo(id);
+    const numActuaciones = BD.obtenerActuaciones(id).length;
+    let mensaje = '¿Eliminar "' + v.nombre + '"?';
+    if (numActuaciones > 0) {
+      mensaje += '\n\nSe borrarán también sus ' + numActuaciones + ' actuaciones registradas. Esta acción no se puede deshacer.';
+    }
+    if (!Util.confirmar(mensaje)) return;
+    BD.eliminarVehiculo(id);
+    Pantallas.lista();
+  },
+
+  guardarActuacion(evento) {
+    evento.preventDefault();
+
+    const v = BD.obtenerVehiculo(Estado.vehiculoActualId);
+    const fecha = document.getElementById('a-fecha').value;
+    const km = parseInt(document.getElementById('a-km').value, 10);
+    const categoria = document.getElementById('a-categoria').value;
+    // El sistema puede venir de "Otro" (texto libre)
+    const subcategoria = Util.valorConOtro('a-subcategoria', 'a-subcategoria-otro');
+    const titulo = document.getElementById('a-titulo').value.trim();
+    const taller = document.getElementById('a-taller').value.trim();
+    const costeTexto = document.getElementById('a-coste').value;
+    const coste = costeTexto === '' ? null : parseFloat(costeTexto);
+    const desglose = document.getElementById('a-desglose').value.trim();
+    const proxKmTexto = document.getElementById('a-prox-km').value;
+    const proxKm = proxKmTexto === '' ? null : parseInt(proxKmTexto, 10);
+    const proxFecha = document.getElementById('a-prox-fecha').value || null;
+    const notas = document.getElementById('a-notas').value.trim();
+    const porSeguro = document.getElementById('a-por-seguro').checked; // true/false
+
+    // 🆕 v12: campos ESPECÍFICOS de Documentación. Solo leemos los que
+    // corresponden a la subcategoría elegida; el resto se guarda como null.
+    let resultadoItv = null, motivo = null, pagada = null, puntos = null, preavisoDias = null, garantiaHasta = null;
+    if (categoria === 'documentacion') {
+      if (subcategoria === 'itv') {
+        resultadoItv = document.getElementById('a-resultado-itv').value;
+      } else if (subcategoria === 'multas') {
+        motivo = document.getElementById('a-motivo').value.trim() || null;
+        pagada = document.getElementById('a-pagada').checked;
+        const pTexto = document.getElementById('a-puntos').value;
+        puntos = pTexto === '' ? null : parseInt(pTexto, 10);
+      } else if (subcategoria === 'seguro') {
+        const preTexto = document.getElementById('a-preaviso').value;
+        preavisoDias = preTexto === '' ? null : parseInt(preTexto, 10);
+      } else if (subcategoria === 'garantia') {
+        garantiaHasta = document.getElementById('a-garantia-hasta').value || null;
+      }
+    }
+
+    // --- Validaciones ---
+    let error = '';
+    if (!fecha) error = 'Indica la fecha de la actuación.';
+    else if (fecha > Util.hoyISO()) error = 'La fecha no puede ser posterior a hoy.';
+    else if (isNaN(km) || km < 0) error = 'El kilometraje debe ser un número igual o mayor que 0.';
+    else if (!subcategoria) error = 'Indica el sistema (o escríbelo en "Otro").';
+    else if (!titulo) error = 'Escribe un título breve para la actuación.';
+    else if (coste !== null && (isNaN(coste) || coste < 0)) error = 'El coste debe ser un número positivo.';
+    else if (puntos !== null && (isNaN(puntos) || puntos < 0 || puntos > 8)) error = 'Los puntos retirados deben estar entre 0 y 8.';
+    else if (preavisoDias !== null && (isNaN(preavisoDias) || preavisoDias < 0)) error = 'Los días de preaviso deben ser 0 o más.';
+    // 🆕 v12 (Opción B): si es ITV/seguro/impuesto Y la casilla "Programar la
+    // siguiente" está marcada, la fecha de la próxima es obligatoria. Si está
+    // desmarcada (registro histórico), no se exige nada.
+    else if (Obligaciones.esObligacion(categoria, subcategoria)
+             && document.getElementById('a-programar-siguiente').checked
+             && !proxFecha) {
+      const nombre = (Obligaciones.ETIQUETAS[subcategoria] || {}).nombre || 'esta obligación';
+      error = 'Para programar la siguiente ' + nombre + ', indica su fecha de vencimiento en "Próxima revisión → Por fecha". (Si solo anotas algo del pasado, desmarca "Programar la siguiente".)';
+    }
+
+    const cajaError = document.getElementById('error-actuacion');
+    if (error) {
+      cajaError.textContent = error;
+      cajaError.classList.add('visible');
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    // Aviso (no bloqueo) si los km son menores que los registrados en el vehículo
+    if (km < v.kmActuales) {
+      const seguir = Util.confirmar(
+        'Has indicado ' + Util.formatearKm(km) + ', pero el vehículo tiene registrados ' +
+        Util.formatearKm(v.kmActuales) + '.\n\n¿Es una actuación antigua? Pulsa Aceptar para guardarla igualmente.'
+      );
+      if (!seguir) return;
+    }
+
+    const datos = {
+      vehiculoId: Estado.vehiculoActualId,
+      fecha, kilometraje: km, categoria, subcategoria, titulo,
+      tallerOMismo: taller,
+      costeTotalEuros: coste,
+      desgloseCoste: desglose,
+      proximaRevisionKm: proxKm,
+      proximaRevisionFecha: proxFecha,
+      notas,
+      porSeguro,
+      // 🆕 v12: campos específicos (null si no aplican a la subcategoría)
+      resultadoItv,
+      motivo,
+      pagada,
+      puntos,
+      preavisoDias,
+      garantiaHasta,
+      fotos: Estado.fotosActuacionTemp.slice()
+    };
+
+    if (Estado.editandoActuacionId) {
+      BD.actualizarActuacion(Estado.editandoActuacionId, datos);
+    } else {
+      BD.crearActuacion(datos);
+    }
+
+    // Si la actuación tiene más km que el vehículo, actualizamos el cuentakilómetros
+    if (km > v.kmActuales) BD.actualizarVehiculo(v.id, { kmActuales: km });
+
+    Pantallas.detalleVehiculo(Estado.vehiculoActualId);
+  },
+
+  eliminarActuacion(id) {
+    const a = BD.obtenerActuacion(id);
+    if (!Util.confirmar('¿Eliminar la actuación "' + a.titulo + '"? Esta acción no se puede deshacer.')) return;
+    BD.eliminarActuacion(id);
+    Pantallas.detalleVehiculo(Estado.vehiculoActualId);
+  },
+
+  // ✅ Novedad v2: marcar un recordatorio como atendido para que deje de avisar
+  marcarRecordatorioHecho(id) {
+    BD.actualizarActuacion(id, { completada: true });
+    Pantallas.lista();
+  },
+
+  /* ----- Tema de la interfaz (v5) ----- */
+  cambiarTema(tema) {
+    // Cambiar data-tema en el <body> activa el bloque CSS de ese tema
+    document.body.dataset.tema = tema;
+    BD.guardarTema(tema); // lo recuerda para la próxima visita
+    Acciones._marcarTemaActivo(tema);
+  },
+
+  // Resalta el botón del tema en uso en la pantalla de Ajustes
+  _marcarTemaActivo(tema) {
+    document.querySelectorAll('.btn-tema').forEach(boton => {
+      boton.classList.toggle('activo', boton.dataset.tema === tema);
+    });
+  },
+
+  /* ----- Copia de seguridad ----- */
+  exportarDatos() {
+    // exportarTodo ahora es asíncrono (convierte las fotos a texto): esperamos
+    // con .then() a tener el contenido antes de descargar el archivo.
+    BD.exportarTodo().then(function (contenido) {
+      const blob = new Blob([contenido], { type: 'application/json' });
+      const enlace = document.createElement('a');
+      enlace.href = URL.createObjectURL(blob);
+      enlace.download = 'vehicletrack-respaldo-' + Util.hoyISO() + '.json';
+      enlace.click();
+      URL.revokeObjectURL(enlace.href);
+    });
+  },
+
+  importarDatos(input) {
+    const archivo = input.files[0];
+    input.value = '';
+    if (!archivo) return;
+
+    if (!Util.confirmar('Importar reemplazará TODOS los datos actuales por los de la copia de seguridad.\n\n¿Continuar?')) return;
+
+    const lector = new FileReader();
+    lector.onload = function (e) {
+      // importarTodo ahora devuelve una promesa: con .then() esperamos a que
+      // termine de reescribir IndexedDB antes de avisar y refrescar.
+      BD.importarTodo(e.target.result)
+        .then(function () {
+          Util.avisar('Copia de seguridad importada correctamente.');
+          Pantallas.lista();
+        })
+        .catch(function (err) {
+          Util.avisar('No se pudo importar: ' + err.message);
+        });
+    };
+    lector.readAsText(archivo);
+  },
+
+  borrarTodo() {
+    if (!Util.confirmar('⚠️ Se borrarán TODOS los vehículos y actuaciones.\n\n¿Seguro que quieres continuar?')) return;
+    if (!Util.confirmar('Última confirmación: esta acción NO se puede deshacer.\n\n¿Borrar todo definitivamente?')) return;
+    BD.borrarTodo().then(function () { Pantallas.lista(); });
+  }
+};
+
+/* ================= INFORME DE VIDA (v6) =================
+   Genera un informe completo del vehículo en una ventana
+   nueva, listo para imprimir o GUARDAR COMO PDF desde el
+   propio navegador (botón Imprimir → destino "Guardar como PDF").
+
+   ¿Por qué así y no con una librería de PDF? Porque no añade
+   dependencias, funciona sin internet, las fotos salen perfectas
+   y en la Fase 2 (React Native) expo-print también recibe HTML:
+   este mismo informe se reutilizará casi sin cambios.            */
+const Informe = {
+
+  generar(vehiculoId) {
+    const v = BD.obtenerVehiculo(vehiculoId);
+    if (!v) return;
+
+    // Historial en orden CRONOLÓGICO (de la más antigua a la más reciente)
+    const lista = BD.obtenerActuaciones(vehiculoId)
+      .sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+    // Abrimos la ventana YA (antes de cualquier espera): si abriéramos la
+    // ventana después de un await, el navegador la bloquearía por no venir
+    // directamente de tu clic. Mostramos un "Generando…" mientras preparamos
+    // las fotos en base64.
+    const ventana = window.open('', '_blank');
+    if (!ventana) {
+      Util.avisar('El navegador ha bloqueado la ventana del informe.\n\nPermite las ventanas emergentes para esta página y vuelve a intentarlo.');
+      return;
+    }
+    ventana.document.write('<p style="font-family:sans-serif;padding:24px">Generando informe…</p>');
+
+    // Convertimos todas las fotos (Blob → base64) y, cuando estén listas,
+    // construimos el HTML y lo escribimos en la ventana.
+    Informe._prepararFotos(v, lista).then(function () {
+      ventana.document.open();
+      ventana.document.write(Informe._construirHTML(v, lista));
+      ventana.document.close();
+    });
+  },
+
+  // Recorre el vehículo y sus actuaciones y deja una copia en base64 de cada
+  // foto (en campos _fotoB64 / _fotosB64) para que el informe las muestre.
+  // No toca los datos guardados: son copias temporales solo para el informe.
+  _prepararFotos(v, lista) {
+    const tareas = [];
+
+    tareas.push(Fotos.blobAbase64(v.foto).then(function (b64) { v._fotoB64 = b64; }));
+
+    lista.forEach(function (a) {
+      a._fotosB64 = [];
+      (a.fotos || []).forEach(function (f, i) {
+        tareas.push(Fotos.blobAbase64(f).then(function (b64) { a._fotosB64[i] = b64; }));
+      });
+    });
+
+    // Promise.all espera a que TODAS las conversiones terminen.
+    return Promise.all(tareas);
+  },
+
+  /* ----- Pequeños ayudantes para no repetir código ----- */
+
+  // Fila "clave | valor" de las tablas de datos
+  _fila(clave, valor) {
+    return '<tr><td class="clave">' + clave + '</td><td>' + valor + '</td></tr>';
+  },
+
+  // Nombre legible del sistema (ej: "motor" → "Motor")
+  _sistema(a) {
+    const grupo = CATEGORIAS[a.categoria];
+    return (grupo && grupo[a.subcategoria])
+      ? grupo[a.subcategoria].split(' (')[0]
+      : a.subcategoria;
+  },
+
+  _vacio(texto) {
+    return '<p class="gris">' + (texto || 'Sin registros en este apartado.') + '</p>';
+  },
+
+  /* ----- Construcción del documento ----- */
+  _construirHTML(v, lista) {
+    const e = Util.escapar; // abreviatura: escapa el texto del usuario
+    const hoy = Util.hoyISO();
+
+    /* ---------- Cálculos previos ---------- */
+    const total = lista.reduce((s, a) => s + (Number(a.costeTotalEuros) || 0), 0);
+
+    // Gasto y nº de actuaciones por año, y gasto por categoría
+    const porAnio = {};
+    const porCategoria = { mantenimiento: 0, averia: 0, documentacion: 0 };
+    lista.forEach(a => {
+      const coste = Number(a.costeTotalEuros) || 0;
+      const anio = a.fecha.slice(0, 4);
+      if (!porAnio[anio]) porAnio[anio] = { coste: 0, n: 0 };
+      porAnio[anio].coste += coste;
+      porAnio[anio].n++;
+      porCategoria[a.categoria] += coste;
+    });
+    const anios = Object.keys(porAnio).sort();
+
+    // Averías relevantes: las 5 de mayor coste
+    const averias = lista
+      .filter(a => a.categoria === 'averia')
+      .sort((a, b) => (Number(b.costeTotalEuros) || 0) - (Number(a.costeTotalEuros) || 0))
+      .slice(0, 5);
+
+    const documentos = lista.filter(a => a.categoria === 'documentacion');
+
+    // Próximos mantenimientos: recordatorios no atendidos
+    const pendientes = lista.filter(a =>
+      !a.completada && (a.proximaRevisionKm || a.proximaRevisionFecha));
+
+    // Uso estimado (km/año) entre el primer y el último registro,
+    // solo si hay al menos 6 meses de historial para que sea fiable
+    let kmPorAnio = null;
+    if (lista.length >= 2) {
+      const dias = (new Date(lista[lista.length - 1].fecha) - new Date(lista[0].fecha)) / 86400000;
+      const km = lista[lista.length - 1].kilometraje - lista[0].kilometraje;
+      if (dias >= 180 && km > 0) kmPorAnio = Math.round(km / dias * 365);
+    }
+
+    /* ---------- Secciones del informe ---------- */
+
+    const cabecera =
+      '<div class="barra-informe no-imprimir">' +
+        '<span>Vista previa del informe · en el diálogo de impresión elige <strong>"Guardar como PDF"</strong></span>' +
+        '<button onclick="window.print()">🖨 Imprimir / Guardar como PDF</button>' +
+      '</div>' +
+      '<header class="cab">' +
+        '<div>' +
+          '<div class="marca-app">Vehicle<span>Track</span></div>' +
+          '<h1>Informe de vida del vehículo</h1>' +
+          '<p class="gris">Generado el ' + Util.formatearFecha(hoy) + '</p>' +
+        '</div>' +
+        (v._fotoB64 ? '<img class="foto-v" src="' + v._fotoB64 + '" alt="Foto del vehículo">' : '') +
+      '</header>';
+
+    const datosVehiculo =
+      '<h2>1 · Datos del vehículo</h2>' +
+      '<table class="tabla-datos"><tbody>' +
+        Informe._fila('Nombre', e(v.nombre)) +
+        Informe._fila('Vehículo', e(v.marca) + ' ' + e(v.modelo) + ' (' + e(v.anio) + ')') +
+        Informe._fila('Tipo / Combustible', e(v.tipo) + ' · ' + e(v.combustible)) +
+        (v.matricula ? Informe._fila('Matrícula', e(v.matricula)) : '') +
+        (v.vin ? Informe._fila('Nº de bastidor (VIN)', e(v.vin)) : '') +
+        (v.color ? Informe._fila('Color', e(v.color)) : '') +
+        Informe._fila('Kilometraje actual', '<strong>' + Util.formatearKm(v.kmActuales) + '</strong>') +
+      '</tbody></table>';
+
+    // Sección de seguro: solo si hay algún dato relleno
+    const haySeguro = v.seguroCompania || v.seguroTipo || v.seguroPoliza || v.seguroVencimiento || v.seguroTelefono;
+    const seguroHTML =
+      '<h2>1.b · Seguro</h2>' +
+      (!haySeguro ? Informe._vacio('Sin datos de seguro registrados.') :
+        '<table class="tabla-datos"><tbody>' +
+          (v.seguroCompania ? Informe._fila('Compañía', e(v.seguroCompania)) : '') +
+          (v.seguroTipo ? Informe._fila('Tipo de seguro', e(v.seguroTipo)) : '') +
+          (v.seguroPoliza ? Informe._fila('Nº de póliza', e(v.seguroPoliza)) : '') +
+          (v.seguroVencimiento ? Informe._fila('Vencimiento', Util.formatearFecha(v.seguroVencimiento)) : '') +
+          (v.seguroTelefono ? Informe._fila('Teléfono de asistencia', e(v.seguroTelefono)) : '') +
+        '</tbody></table>');
+
+    const resumen =
+      '<h2>2 · Resumen general</h2>' +
+      '<table class="tabla-datos"><tbody>' +
+        Informe._fila('Actuaciones registradas', lista.length) +
+        (lista.length > 0
+          ? Informe._fila('Periodo registrado',
+              Util.formatearFecha(lista[0].fecha) + ' — ' + Util.formatearFecha(lista[lista.length - 1].fecha))
+          : '') +
+        Informe._fila('Coste total', '<strong>' + Util.formatearDinero(total) + '</strong>') +
+        (anios.length > 0 ? Informe._fila('Gasto medio anual', Util.formatearDinero(total / anios.length)) : '') +
+        (lista.length > 0 ? Informe._fila('Coste medio por actuación', Util.formatearDinero(total / lista.length)) : '') +
+        (kmPorAnio ? Informe._fila('Uso estimado', Util.formatearKm(kmPorAnio) + ' al año') : '') +
+      '</tbody></table>';
+
+    const gastosAnio =
+      '<h2>3 · Gastos por año</h2>' +
+      (anios.length === 0 ? Informe._vacio() :
+        '<table><thead><tr><th>Año</th><th class="num">Actuaciones</th><th class="num">Gasto</th></tr></thead><tbody>' +
+        anios.map(an =>
+          '<tr><td>' + an + '</td><td class="num">' + porAnio[an].n + '</td>' +
+          '<td class="num">' + Util.formatearDinero(porAnio[an].coste) + '</td></tr>').join('') +
+        '<tr class="fila-total"><td>Total</td><td class="num">' + lista.length + '</td>' +
+        '<td class="num">' + Util.formatearDinero(total) + '</td></tr>' +
+        '</tbody></table>');
+
+    const gastosCategoria =
+      '<h2>4 · Gastos por categoría</h2>' +
+      '<table><thead><tr><th>Categoría</th><th class="num">Gasto</th><th class="num">% del total</th></tr></thead><tbody>' +
+      Object.keys(porCategoria).map(cat => {
+        const pct = total > 0 ? Math.round(porCategoria[cat] / total * 100) : 0;
+        return '<tr><td>' + NOMBRE_CATEGORIA[cat] + '</td>' +
+          '<td class="num">' + Util.formatearDinero(porCategoria[cat]) + '</td>' +
+          '<td class="num">' + pct + ' %</td></tr>';
+      }).join('') +
+      '</tbody></table>';
+
+    const averiasHTML =
+      '<h2>5 · Averías más relevantes</h2>' +
+      (averias.length === 0 ? Informe._vacio('Sin averías registradas. ¡Buen historial!') :
+        '<table><thead><tr><th>Fecha</th><th>Avería</th><th>Sistema</th><th class="num">Km</th><th class="num">Coste</th></tr></thead><tbody>' +
+        averias.map(a =>
+          '<tr><td>' + Util.formatearFecha(a.fecha) + '</td><td>' + e(a.titulo) + '</td>' +
+          '<td>' + e(Informe._sistema(a)) + '</td>' +
+          '<td class="num">' + Util.formatearKm(a.kilometraje) + '</td>' +
+          '<td class="num">' + Util.formatearDinero(a.costeTotalEuros) + '</td></tr>').join('') +
+        '</tbody></table>');
+
+    const proximosHTML =
+      '<h2>6 · Próximos mantenimientos</h2>' +
+      (pendientes.length === 0 ? Informe._vacio('Sin recordatorios pendientes.') :
+        '<table><thead><tr><th>Actuación</th><th class="num">Por km</th><th>Por fecha</th><th>Estado</th></tr></thead><tbody>' +
+        pendientes.map(a => {
+          const vencido = (a.proximaRevisionFecha && a.proximaRevisionFecha < hoy) ||
+                          (a.proximaRevisionKm && v.kmActuales >= a.proximaRevisionKm);
+          return '<tr><td>' + e(a.titulo) + '</td>' +
+            '<td class="num">' + (a.proximaRevisionKm ? Util.formatearKm(a.proximaRevisionKm) : '—') + '</td>' +
+            '<td>' + (a.proximaRevisionFecha ? Util.formatearFecha(a.proximaRevisionFecha) : '—') + '</td>' +
+            '<td>' + (vencido ? '⚠️ Vencido' : 'Pendiente') + '</td></tr>';
+        }).join('') +
+        '</tbody></table>');
+
+    // 🆕 v12: sección de documentación enriquecida con los datos legales.
+    // Texto del estado/detalle según el tipo de documento.
+    const detalleDoc = (a) => {
+      if (a.subcategoria === 'itv') {
+        const r = { favorable: '✅ Favorable', desfavorable: '⚠️ Desfavorable', negativa: '❌ Negativa' }[a.resultadoItv] || '—';
+        return r;
+      }
+      if (a.subcategoria === 'multas') {
+        const partes = [a.pagada ? '✅ Pagada' : '⏳ Pendiente'];
+        if (a.puntos) partes.push(a.puntos + ' pts');
+        return partes.join(' · ');
+      }
+      return '—';
+    };
+    const documentosHTML =
+      '<h2>7 · Documentación y obligaciones</h2>' +
+      (documentos.length === 0 ? Informe._vacio() :
+        '<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Estado / Resultado</th><th>Vencimiento</th><th class="num">Importe</th></tr></thead><tbody>' +
+        documentos.map(a =>
+          '<tr><td>' + Util.formatearFecha(a.fecha) + '</td><td>' + e(Informe._sistema(a)) + '</td>' +
+          '<td>' + e(a.titulo) + '</td>' +
+          '<td>' + detalleDoc(a) + '</td>' +
+          '<td>' + (a.proximaRevisionFecha ? Util.formatearFecha(a.proximaRevisionFecha) : '—') + '</td>' +
+          '<td class="num">' + Util.formatearDinero(a.costeTotalEuros) + '</td></tr>').join('') +
+        '</tbody></table>');
+
+    const historialHTML =
+      '<h2>8 · Historial cronológico completo</h2>' +
+      (lista.length === 0 ? Informe._vacio() :
+        '<table><thead><tr><th>Fecha</th><th class="num">Km</th><th>Categoría</th><th>Sistema</th><th>Actuación</th><th>Realizado por</th><th>Seguro</th><th class="num">Coste</th></tr></thead><tbody>' +
+        lista.map(a =>
+          '<tr><td>' + Util.formatearFecha(a.fecha) + '</td>' +
+          '<td class="num">' + Util.formatearKm(a.kilometraje) + '</td>' +
+          '<td>' + NOMBRE_CATEGORIA[a.categoria] + '</td>' +
+          '<td>' + e(Informe._sistema(a)) + '</td>' +
+          '<td>' + e(a.titulo) + '</td>' +
+          '<td>' + (a.tallerOMismo ? e(a.tallerOMismo) : '—') + '</td>' +
+          '<td>' + (a.porSeguro ? '🛡 Sí' : '—') + '</td>' +
+          '<td class="num">' + Util.formatearDinero(a.costeTotalEuros) + '</td></tr>').join('') +
+        '</tbody></table>');
+
+    // Anexo fotográfico: todas las fotos, agrupadas por actuación
+    const conFotos = lista.filter(a => a.fotos && a.fotos.length > 0);
+    const fotosHTML =
+      '<h2>9 · Anexo: fotos y facturas</h2>' +
+      (conFotos.length === 0 ? Informe._vacio('Sin fotos ni facturas adjuntas.') :
+        conFotos.map(a =>
+          '<div class="grupo-fotos">' +
+            '<p class="titulo-fotos">' + e(a.titulo) + ' · ' + Util.formatearFecha(a.fecha) + '</p>' +
+            '<div class="galeria-informe">' +
+              a._fotosB64.map(f => '<img src="' + f + '" alt="Foto o factura">').join('') +
+            '</div>' +
+          '</div>').join(''));
+
+    const pie =
+      '<footer class="pie-informe">' +
+        'Informe generado con VehicleTrack el ' + Util.formatearFecha(hoy) +
+        '. Recoge el historial de mantenimiento registrado por el propietario ' +
+        'y puede adjuntarse como documentación en la venta del vehículo.' +
+      '</footer>';
+
+    /* ---------- Documento completo (con su propio CSS de impresión) ---------- */
+    return '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">' +
+      '<title>Informe — ' + e(v.nombre) + '</title>' +
+      '<style>' +
+        '* { box-sizing: border-box; margin: 0; padding: 0; }' +
+        'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;' +
+        '  color: #1b2a38; font-size: 13px; line-height: 1.5; max-width: 820px; margin: 0 auto; padding: 20px; }' +
+        '.barra-informe { position: sticky; top: 10px; background: #1b2a38; color: #fff;' +
+        '  padding: 12px 16px; border-radius: 10px; margin-bottom: 22px;' +
+        '  display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }' +
+        '.barra-informe button { font: inherit; font-weight: 700; background: #e8950c; color: #3a2503;' +
+        '  border: none; border-radius: 8px; padding: 10px 16px; cursor: pointer; }' +
+        '.cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;' +
+        '  border-bottom: 3px solid #e8950c; padding-bottom: 14px; margin-bottom: 8px; }' +
+        '.marca-app { font-weight: 800; font-size: 14px; letter-spacing: -0.3px; }' +
+        '.marca-app span { color: #e8950c; }' +
+        'h1 { font-size: 22px; margin: 4px 0 2px; }' +
+        'h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;' +
+        '  margin: 26px 0 8px; padding-bottom: 4px; border-bottom: 2px solid #1b2a38; }' +
+        '.gris { color: #51626f; }' +
+        '.foto-v { width: 150px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #dde3e9; }' +
+        'table { width: 100%; border-collapse: collapse; }' +
+        'th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #dde3e9; vertical-align: top; }' +
+        'th { background: #eef1f4; font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }' +
+        '.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }' +
+        '.clave { color: #51626f; width: 42%; }' +
+        '.fila-total td { font-weight: 700; border-top: 2px solid #1b2a38; }' +
+        '.grupo-fotos { margin-bottom: 14px; break-inside: avoid; }' +
+        '.titulo-fotos { font-weight: 700; font-size: 12px; margin-bottom: 6px; }' +
+        '.galeria-informe { display: flex; flex-wrap: wrap; gap: 10px; }' +
+        '.galeria-informe img { width: 170px; border: 1px solid #dde3e9; border-radius: 6px; }' +
+        '.pie-informe { margin-top: 32px; padding-top: 10px; border-top: 1px solid #dde3e9;' +
+        '  font-size: 10px; color: #51626f; }' +
+        // Reglas SOLO para la impresión / PDF:
+        '@media print { .no-imprimir { display: none; } body { padding: 0; } }' +
+        '@page { margin: 14mm; }' +
+      '</style></head><body>' +
+        cabecera + datosVehiculo + seguroHTML + resumen + gastosAnio + gastosCategoria +
+        averiasHTML + proximosHTML + documentosHTML + historialHTML + fotosHTML + pie +
+      '</body></html>';
+  }
+};
+
+/* ================= FOTOS ================= */
+const Fotos = {
+  /* 🆕 NOVEDAD v11: guardamos las fotos como BLOB en vez de texto base64.
+
+     ¿Qué es un Blob? (Binary Large Object) Es el archivo "en crudo": los
+     bytes de la imagen tal cual, SIN convertir a texto. Pesa ~33% menos
+     que base64 (base64 infla los datos al pasarlos a texto) e IndexedDB
+     sabe guardarlo directamente. Aprovecha de verdad la migración de la v7.
+
+     El reto: una etiqueta <img> NO puede mostrar un Blob directamente,
+     necesita una URL. La función URL.createObjectURL(blob) crea una
+     dirección temporal en memoria (tipo "blob:http://...") que <img> sí
+     entiende. Esa URL ocupa memoria hasta que se libera con revokeObjectURL.
+
+     Para no pelear con eso en cada render, usamos un AYUDANTE (urlDe) que
+     crea la URL una sola vez por foto y la recuerda (cachea). Así el resto
+     de la app sigue escribiendo <img src="' + Fotos.urlDe(foto) + '"> casi
+     igual que antes, pero por debajo guardamos Blobs ligeros.            */
+
+  // Caché: por cada Blob que ya hemos convertido, recordamos su URL temporal
+  // para no crear una nueva (y gastar memoria) cada vez que se repinta la lista.
+  _cacheUrls: new Map(),
+
+  // Devuelve una URL que <img> pueda mostrar.
+  // · Si la foto es un Blob → crea (o reutiliza) su URL temporal.
+  // · Si la foto es texto (base64 antiguo, o '') → la devuelve tal cual.
+  //   Esto da compatibilidad: si por lo que sea quedara alguna foto vieja,
+  //   no se rompe; simplemente se pinta como antes.
+  urlDe(foto) {
+    if (!foto) return '';
+    if (typeof foto === 'string') return foto;        // base64 antiguo: sirve igual
+    if (this._cacheUrls.has(foto)) return this._cacheUrls.get(foto);
+    const url = URL.createObjectURL(foto);            // foto es un Blob
+    this._cacheUrls.set(foto, url);
+    return url;
+  },
+
+  // Inverso de blobAbase64: convierte un texto "data:image/...;base64,..."
+  // de vuelta a un Blob. Lo usa la IMPORTACIÓN de copias de seguridad.
+  // Si recibe algo vacío, devuelve null.
+  base64ABlob(texto) {
+    if (!texto || typeof texto !== 'string') return null;
+    // Separamos la cabecera ("data:image/jpeg;base64,") del contenido
+    const partes = texto.split(',');
+    const cabecera = partes[0] || '';
+    const datos = partes[1] || '';
+    const tipo = (cabecera.match(/data:(.*?);/) || [])[1] || 'image/jpeg';
+    // atob deshace el base64 a una cadena de bytes; la pasamos a bytes reales.
+    // Quitamos posibles espacios/saltos por si el archivo llegó con formato raro.
+    const binario = atob(datos.replace(/\s/g, ''));
+    const bytes = new Uint8Array(binario.length);
+    for (let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i);
+    return new Blob([bytes], { type: tipo });
+  },
+
+  // Convierte un Blob a texto base64 ("data:image/..."). Lo usa SOLO el
+  // informe: como se abre en una ventana nueva, las URLs blob: de esta
+  // ventana no funcionan allí; el base64 viaja autónomo y se imprime bien.
+  // Devuelve una promesa (FileReader es asíncrono). Si la foto ya es texto
+  // (base64 antiguo), la devuelve tal cual.
+  blobAbase64(foto) {
+    return new Promise(function (resolve) {
+      if (!foto) { resolve(''); return; }
+      if (typeof foto === 'string') { resolve(foto); return; }
+      const lector = new FileReader();
+      lector.onload = function (e) { resolve(e.target.result); };
+      lector.onerror = function () { resolve(''); };
+      lector.readAsDataURL(foto);
+    });
+  },
+
+  // Lee una imagen, la REDUCE a máx. 900px y la devuelve como BLOB jpeg.
+  // ¿Por qué reducir? Una foto de móvil ocupa 3-5 MB; reducida a 900px y
+  // calidad 0.8 baja a unos pocos cientos de KB, que es más que suficiente
+  // para un historial de mantenimiento y ocupa muchísimo menos.
+  _leerYReducir(archivo, alTerminar) {
+    // Límite ALTO (25 MB): las fotos de los móviles actuales pesan varios MB.
+    // No pasa nada porque, sea cual sea el original, abajo lo reducimos a 900px
+    // y JPEG 0.8, quedando en ~100-200 KB. Este tope solo evita que alguien
+    // suba por error un archivo enorme (un vídeo, por ejemplo).
+    if (archivo.size > 25 * 1024 * 1024) {
+      Util.avisar('La imagen "' + archivo.name + '" supera los 25 MB.\n\nElige una foto normal: aunque sea grande, la app la optimizará sola.');
+      return;
+    }
+    const lector = new FileReader();
+    lector.onload = function (e) {
+      const img = new Image();
+      img.onload = function () {
+        const MAX = 900;
+        let ancho = img.width, alto = img.height;
+        if (ancho > MAX || alto > MAX) {
+          if (ancho > alto) { alto = Math.round(alto * MAX / ancho); ancho = MAX; }
+          else { ancho = Math.round(ancho * MAX / alto); alto = MAX; }
+        }
+        const lienzo = document.createElement('canvas');
+        lienzo.width = ancho;
+        lienzo.height = alto;
+        lienzo.getContext('2d').drawImage(img, 0, 0, ancho, alto);
+        // toBlob es ASÍNCRONO: nos entrega el Blob ya comprimido en su callback.
+        // (toDataURL, que usábamos antes, devolvía texto base64; ahora queremos Blob.)
+        lienzo.toBlob(function (blob) {
+          alTerminar(blob);
+        }, 'image/jpeg', 0.8);
+      };
+      img.src = e.target.result;
+    };
+    lector.readAsDataURL(archivo);
+  },
+
+  cargarFotoVehiculo(input) {
+    const archivo = input.files[0];
+    if (!archivo) return;
+    Fotos._leerYReducir(archivo, function (blob) {
+      Estado.fotoVehiculoTemp = blob;   // ahora guardamos el Blob, no texto
+      Fotos.renderPreviaFotoVehiculo();
+    });
+    input.value = ''; // permite volver a elegir el mismo archivo
+  },
+
+  renderPreviaFotoVehiculo() {
+    const zona = document.getElementById('previa-foto-vehiculo');
+    zona.innerHTML = Estado.fotoVehiculoTemp
+      ? '<div class="previa"><img src="' + Fotos.urlDe(Estado.fotoVehiculoTemp) + '" alt="Previsualización">' +
+        '<button type="button" class="quitar" onclick="Fotos.quitarFotoVehiculo()" aria-label="Quitar foto">✕</button></div>'
+      : '';
+  },
+
+  quitarFotoVehiculo() {
+    Estado.fotoVehiculoTemp = null;
+    Fotos.renderPreviaFotoVehiculo();
+  },
+
+  cargarFotosActuacion(input) {
+    const archivos = Array.from(input.files);
+    archivos.forEach(function (archivo) {
+      if (Estado.fotosActuacionTemp.length >= 3) {
+        Util.avisar('Máximo 3 fotos por actuación.');
+        return;
+      }
+      Fotos._leerYReducir(archivo, function (blob) {
+        if (Estado.fotosActuacionTemp.length < 3) {
+          Estado.fotosActuacionTemp.push(blob);   // guardamos el Blob
+          Fotos.renderPreviasFotosActuacion();
+        }
+      });
+    });
+    input.value = '';
+  },
+
+  renderPreviasFotosActuacion() {
+    const zona = document.getElementById('previa-fotos-actuacion');
+    zona.innerHTML = Estado.fotosActuacionTemp.map(function (f, i) {
+      return '<div class="previa"><img src="' + Fotos.urlDe(f) + '" alt="Previsualización ' + (i + 1) + '">' +
+        '<button type="button" class="quitar" onclick="Fotos.quitarFotoActuacion(' + i + ')" aria-label="Quitar foto">✕</button></div>';
+    }).join('');
+  },
+
+  quitarFotoActuacion(indice) {
+    Estado.fotosActuacionTemp.splice(indice, 1);
+    Fotos.renderPreviasFotosActuacion();
+  }
+};
+
+/* ================= ARRANQUE ================= */
+// Accesibilidad: las tarjetas (role="button") responden a la tecla Enter
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && e.target.getAttribute && e.target.getAttribute('role') === 'button') {
+    e.target.click();
+  }
+});
+
+// El tema se aplica YA (vive en localStorage, es instantáneo) para que no
+// haya un parpadeo de color mientras carga la base de datos.
+Acciones.cambiarTema(BD.obtenerTema());
+Config.cargar(); // carga nombre, país y moneda en memoria (v9)
+
+// IndexedDB es ASÍNCRONO: BD.iniciar() devuelve una promesa. Con .then()
+// decimos "cuando TERMINE de abrir la BD y cargar los datos, ENTONCES
+// muestra la pantalla". Si algo falla, avisamos.
+BD.iniciar()
+  .then(function () {
+    // Primera vez (sin configurar) → bienvenida. Si ya está configurado → lista.
+    if (Config.configurado()) {
+      Pantallas.lista();
+    } else {
+      Pantallas.bienvenida();
+    }
+  })
+  .catch(function (err) {
+    console.error(err);
+    Util.avisar(
+      'No se ha podido abrir la base de datos del navegador.\n\n' +
+      'Si estás navegando en modo incógnito/privado, algunos navegadores ' +
+      'bloquean el almacenamiento. Prueba en una ventana normal.'
+    );
+  });
+</script>
+</body>
+</html>
