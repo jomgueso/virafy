@@ -4,12 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VehicleTrack v13 — Libro de vida de tus vehículos</title>
-<!-- Favicon: el iconito de la pestaña del navegador. Usamos un SVG con el emoji 🚗
-     incrustado directamente (un "data URI"), así no hace falta un archivo aparte. -->
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
 <style>
 /* ============================================================
-   VEHICLETRACK v13 — Estilos (mobile-first, CSS puro)
+   VEHICLETRACK v2 — Estilos (mobile-first, CSS puro)
    ============================================================ */
 :root {
   --tinta: #1b2a38;
@@ -545,15 +542,23 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
         </div>
         <div class="campo">
           <label for="v-combustible">Combustible *</label>
-          <select id="v-combustible" onchange="Util.toggleOtro('v-combustible','v-combustible-otro')">
+          <select id="v-combustible" onchange="Util.toggleOtro('v-combustible','v-combustible-otro'); Acciones.toggleCampoBateria()">
             <option value="gasolina">Gasolina</option>
             <option value="diésel">Diésel</option>
-            <option value="híbrido">Híbrido</option>
+            <option value="híbrido enchufable">Híbrido enchufable (PHEV)</option>
+            <option value="híbrido no enchufable">Híbrido no enchufable (HEV)</option>
             <option value="eléctrico">Eléctrico</option>
             <option value="GLP">GLP</option>
             <option value="__otro__">Otro (especificar)…</option>
           </select>
           <input id="v-combustible-otro" class="input-otro" type="text" placeholder="Escribe el combustible" maxlength="20">
+        </div>
+      </div>
+      <!-- Capacidad de batería: solo visible para enchufables y eléctricos (v14) -->
+      <div class="dos-columnas">
+        <div class="campo" id="campo-bateria" style="display:none;">
+          <label for="v-bateria">Capacidad de batería (kWh) <span class="opc">(opcional)</span></label>
+          <input id="v-bateria" type="number" min="0" step="0.1" placeholder="Ej: 13.8">
         </div>
       </div>
       <div class="dos-columnas">
@@ -589,6 +594,96 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
       <div class="campo">
         <label for="v-vin">Nº de bastidor (VIN) <span class="opc">(opcional)</span></label>
         <input id="v-vin" type="text" placeholder="17 caracteres" maxlength="17">
+      </div>
+
+      <!-- Sección de adquisición (v14): cómo y cuándo llegó el vehículo al usuario -->
+      <h2>Adquisición <span class="opc" style="font-weight:400;font-size:0.8rem;color:var(--tinta-suave)">(opcional)</span></h2>
+      <div class="dos-columnas">
+        <div class="campo">
+          <label for="v-adq-forma">Forma de adquisición</label>
+          <select id="v-adq-forma" onchange="Util.toggleOtro('v-adq-forma','v-adq-forma-otro')">
+            <option value="">— Sin especificar —</option>
+            <option value="Nuevo">Nuevo</option>
+            <option value="Kilómetro 0">Kilómetro 0</option>
+            <option value="Seminuevo">Seminuevo</option>
+            <option value="Segunda mano">Segunda mano</option>
+            <option value="Renting">Renting</option>
+            <option value="Leasing">Leasing</option>
+            <option value="Herencia / Donación">Herencia / Donación</option>
+            <option value="Empresa">Empresa</option>
+            <option value="Importado">Importado</option>
+            <option value="__otro__">Otro (especificar)…</option>
+          </select>
+          <input id="v-adq-forma-otro" class="input-otro" type="text" placeholder="Escribe la forma de adquisición" maxlength="40">
+        </div>
+        <div class="campo">
+          <label for="v-adq-fecha">Fecha de adquisición</label>
+          <input id="v-adq-fecha" type="date">
+        </div>
+      </div>
+      <div class="dos-columnas">
+        <div class="campo">
+          <label for="v-adq-km">Kilómetros al adquirirlo</label>
+          <input id="v-adq-km" type="number" min="0" step="1" placeholder="Ej: 82300">
+        </div>
+        <div class="campo">
+          <label for="v-adq-precio">Precio de adquisición</label>
+          <input id="v-adq-precio" type="number" min="0" step="0.01" placeholder="Ej: 18500">
+        </div>
+      </div>
+      <div class="ayuda">Con estos datos, la app calcula los kilómetros que has hecho tú y el tiempo que llevas con el vehículo.</div>
+
+      <!-- Sección de financiación (v15): cómo se paga el vehículo -->
+      <h2>Financiación <span class="opc" style="font-weight:400;font-size:0.8rem;color:var(--tinta-suave)">(opcional)</span></h2>
+      <div class="campo">
+        <label for="v-fin-modalidad">¿Cómo se financia?</label>
+        <select id="v-fin-modalidad" onchange="Util.toggleOtro('v-fin-modalidad','v-fin-modalidad-otro'); Acciones.toggleCamposFinanciacion()">
+          <option value="">— Sin especificar —</option>
+          <option value="Al contado">Al contado / ya pagado</option>
+          <option value="Préstamo">Préstamo / financiación</option>
+          <option value="Renting">Renting</option>
+          <option value="Leasing">Leasing</option>
+          <option value="__otro__">Otro (especificar)…</option>
+        </select>
+        <input id="v-fin-modalidad-otro" class="input-otro" type="text" placeholder="Escribe la modalidad" maxlength="40">
+      </div>
+      <!-- Aviso solo para "Al contado": remite al precio de adquisición de arriba -->
+      <div id="aviso-contado" class="ayuda" style="display:none;">
+        Para un vehículo pagado al contado, anota el importe en <strong>"Precio de adquisición"</strong> (sección Adquisición, arriba).
+      </div>
+      <!-- Estos campos solo se ven si hay pagos (no "Al contado") -->
+      <div id="campos-financiacion" style="display:none;">
+        <div class="campo">
+          <label for="v-fin-entidad">Entidad <span class="opc">(banco, concesionario, compañía…)</span></label>
+          <input id="v-fin-entidad" type="text" placeholder="Ej: Banco Santander, ALD Automotive…" maxlength="40">
+        </div>
+        <div class="dos-columnas">
+          <div class="campo">
+            <label for="v-fin-entrada">Entrada / cuota inicial</label>
+            <input id="v-fin-entrada" type="number" min="0" step="0.01" placeholder="Ej: 3000">
+          </div>
+          <div class="campo">
+            <label for="v-fin-cuota">Cuota mensual</label>
+            <input id="v-fin-cuota" type="number" min="0" step="0.01" placeholder="Ej: 320">
+          </div>
+        </div>
+        <div class="dos-columnas">
+          <div class="campo">
+            <label for="v-fin-meses">Duración (nº de meses)</label>
+            <input id="v-fin-meses" type="number" min="1" step="1" placeholder="Ej: 48">
+          </div>
+          <div class="campo">
+            <label for="v-fin-inicio">Fecha de inicio</label>
+            <input id="v-fin-inicio" type="date">
+          </div>
+        </div>
+        <div class="dos-columnas">
+          <div class="campo" id="campo-cuota-final" style="display:none;">
+            <label for="v-fin-cuota-final">Cuota / aportación final</label>
+            <input id="v-fin-cuota-final" type="number" min="0" step="0.01" placeholder="Ej: 8500">
+          </div>
+        </div>
+        <div class="ayuda">La app calculará las cuotas que te quedan, cuándo terminas de pagar y el coste total del contrato.</div>
       </div>
 
       <h2>Seguro <span class="opc" style="font-weight:400;font-size:0.8rem;color:var(--tinta-suave)">(opcional)</span></h2>
@@ -679,7 +774,7 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
           <select id="a-categoria" onchange="Pantallas.actualizarSubcategorias()">
             <option value="mantenimiento">Mantenimiento</option>
             <option value="averia">Avería / Reparación</option>
-            <option value="documentacion">Documentación</option>
+            <option value="documentacion">Trámites y obligaciones</option>
           </select>
         </div>
         <div class="campo">
@@ -809,7 +904,7 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
           <option value="">Todas las categorías</option>
           <option value="mantenimiento">Mantenimiento</option>
           <option value="averia">Avería / Reparación</option>
-          <option value="documentacion">Documentación</option>
+          <option value="documentacion">Trámites y obligaciones</option>
         </select>
       </label>
       <label>Sistema
@@ -1002,6 +1097,82 @@ const Util = {
     return Math.ceil((new Date(fechaISO) - new Date(Util.hoyISO())) / 86400000);
   },
 
+  // Devuelve el tiempo transcurrido desde una fecha pasada hasta hoy,
+  // en texto natural: "3 años y 2 meses", "5 meses", "Menos de un mes".
+  // Si la fecha es futura o inválida, devuelve cadena vacía. (v14)
+  // Nota: es distinta de tiempoTranscurrido (que da "hace X meses").
+  tiempoEnPropiedad(fechaISO) {
+    const desde = new Date(fechaISO);
+    const hoy = new Date(Util.hoyISO());
+    if (isNaN(desde) || desde > hoy) return '';
+
+    // Diferencia en meses completos entre las dos fechas
+    let meses = (hoy.getFullYear() - desde.getFullYear()) * 12
+              + (hoy.getMonth() - desde.getMonth());
+    // Si aún no se cumplió el día del mes, descontamos un mes
+    if (hoy.getDate() < desde.getDate()) meses--;
+    if (meses < 0) meses = 0;
+
+    const anios = Math.floor(meses / 12);
+    const restoMeses = meses % 12;
+
+    if (anios === 0 && restoMeses === 0) return 'Menos de un mes';
+
+    const partes = [];
+    if (anios > 0)      partes.push(anios + (anios === 1 ? ' año' : ' años'));
+    if (restoMeses > 0) partes.push(restoMeses + (restoMeses === 1 ? ' mes' : ' meses'));
+    return partes.join(' y ');
+  },
+
+  // Suma 'n' meses a una fecha ISO y devuelve la fecha resultante en ISO. (v15)
+  sumarMeses(fechaISO, n) {
+    const d = new Date(fechaISO);
+    d.setMonth(d.getMonth() + n);
+    return Util.fechaISOLocal(d);
+  },
+
+  // Calcula datos derivados de la financiación (v15).
+  // Devuelve un objeto con los cálculos posibles, o null si no hay datos mínimos.
+  // Recibe el vehículo completo y usa finCuota, finMeses, finInicio, finCuotaFinal.
+  calcularFinanciacion(v) {
+    const cuota = v.finCuota;
+    const meses = v.finMeses;
+    const inicio = v.finInicio;
+    const cuotaFinal = v.finCuotaFinal;
+    const entrada = v.finEntrada;
+
+    const res = {};
+
+    // Coste total del contrato: necesita cuota y duración.
+    // Suma también la entrada y la cuota/aportación final si existen.
+    if (cuota !== null && cuota !== undefined && meses !== null && meses !== undefined) {
+      let total = cuota * meses;
+      if (entrada !== null && entrada !== undefined) total += entrada;
+      if (cuotaFinal !== null && cuotaFinal !== undefined) total += cuotaFinal;
+      res.costeTotal = total;
+    }
+
+    // Cuotas pagadas / restantes y fecha de fin: necesitan inicio y duración
+    if (inicio && meses !== null && meses !== undefined) {
+      // Meses completos transcurridos desde el inicio hasta hoy
+      const desde = new Date(inicio);
+      const hoy = new Date(Util.hoyISO());
+      let transcurridos = (hoy.getFullYear() - desde.getFullYear()) * 12
+                        + (hoy.getMonth() - desde.getMonth());
+      if (hoy.getDate() < desde.getDate()) transcurridos--;
+      if (transcurridos < 0) transcurridos = 0;        // contrato aún no empezado
+      if (transcurridos > meses) transcurridos = meses; // ya terminado: no pasar del total
+
+      res.cuotasPagadas = transcurridos;
+      res.cuotasRestantes = meses - transcurridos;
+      res.fechaFin = Util.sumarMeses(inicio, meses);
+      res.terminado = (transcurridos >= meses);
+    }
+
+    // Si no hemos podido calcular nada, devolvemos null
+    return (Object.keys(res).length > 0) ? res : null;
+  },
+
   // Escapa texto del usuario antes de insertarlo en HTML (evita romper la página)
   escapar(texto) {
     const div = document.createElement('div');
@@ -1059,7 +1230,7 @@ const Util = {
 const NOMBRE_CATEGORIA = {
   mantenimiento: 'Mantenimiento',
   averia: 'Avería',
-  documentacion: 'Documentación'
+  documentacion: 'Trámites y obligaciones'
 };
 
 const CATEGORIAS = {
@@ -1737,6 +1908,14 @@ const Pantallas = {
     document.getElementById('v-tipo-otro').style.display = 'none';
     document.getElementById('v-combustible-otro').style.display = 'none';
     document.getElementById('v-seguro-tipo-otro').style.display = 'none';
+    document.getElementById('v-adq-forma-otro').style.display = 'none';
+    document.getElementById('v-fin-modalidad-otro').style.display = 'none';
+    // El campo de batería empieza oculto (v14); se mostrará si el combustible lo pide
+    document.getElementById('campo-bateria').style.display = 'none';
+    // Los campos de financiación empiezan ocultos (v15)
+    document.getElementById('campos-financiacion').style.display = 'none';
+    document.getElementById('campo-cuota-final').style.display = 'none';
+    document.getElementById('aviso-contado').style.display = 'none';
 
     if (idEditar) {
       const v = BD.obtenerVehiculo(idEditar);
@@ -1757,11 +1936,123 @@ const Pantallas = {
         document.getElementById('v-seguro-poliza').value = v.seguroPoliza || '';
         document.getElementById('v-seguro-vencimiento').value = v.seguroVencimiento || '';
         document.getElementById('v-seguro-telefono').value = v.seguroTelefono || '';
+        // Cargamos la capacidad de batería y mostramos el campo si el combustible lo pide (v14)
+        document.getElementById('v-bateria').value = (v.bateriaKwh !== null && v.bateriaKwh !== undefined) ? v.bateriaKwh : '';
+        Acciones.toggleCampoBateria();
+        // Cargamos los datos de adquisición (v14). La forma puede ser un valor "Otro" libre.
+        Util.cargarConOtro('v-adq-forma', 'v-adq-forma-otro', v.adqForma || '');
+        document.getElementById('v-adq-fecha').value = v.adqFecha || '';
+        document.getElementById('v-adq-km').value = (v.adqKm !== null && v.adqKm !== undefined) ? v.adqKm : '';
+        document.getElementById('v-adq-precio').value = (v.adqPrecio !== null && v.adqPrecio !== undefined) ? v.adqPrecio : '';
+        // Cargamos los datos de financiación (v15). La modalidad puede ser "Otro" libre.
+        Util.cargarConOtro('v-fin-modalidad', 'v-fin-modalidad-otro', v.finModalidad || '');
+        document.getElementById('v-fin-entidad').value = v.finEntidad || '';
+        document.getElementById('v-fin-entrada').value = (v.finEntrada !== null && v.finEntrada !== undefined) ? v.finEntrada : '';
+        document.getElementById('v-fin-cuota').value = (v.finCuota !== null && v.finCuota !== undefined) ? v.finCuota : '';
+        document.getElementById('v-fin-meses').value = (v.finMeses !== null && v.finMeses !== undefined) ? v.finMeses : '';
+        document.getElementById('v-fin-inicio').value = v.finInicio || '';
+        document.getElementById('v-fin-cuota-final').value = (v.finCuotaFinal !== null && v.finCuotaFinal !== undefined) ? v.finCuotaFinal : '';
+        Acciones.toggleCamposFinanciacion(); // muestra/oculta según la modalidad cargada
         Estado.fotoVehiculoTemp = v.foto || null;
         Fotos.renderPreviaFotoVehiculo();
       }
     }
     Pantallas._mostrar('pantalla-form-vehiculo');
+  },
+
+  /* ----- Bloque de adquisición (v14) ----- */
+  // Muestra cómo y cuándo llegó el vehículo, y calcula dos cosas útiles:
+  // km recorridos por el usuario y tiempo en propiedad. Solo se muestra
+  // si hay al menos un dato de adquisición. Solo LEE y devuelve HTML.
+  _bloqueAdquisicionHTML(v) {
+    const hayDatos = v.adqForma || v.adqFecha ||
+                     (v.adqKm !== null && v.adqKm !== undefined) ||
+                     (v.adqPrecio !== null && v.adqPrecio !== undefined);
+    if (!hayDatos) return '';
+
+    const lineas = [];
+    if (v.adqForma) lineas.push('Modalidad: <strong>' + Util.escapar(v.adqForma) + '</strong>');
+    if (v.adqFecha) lineas.push('Fecha: <strong>' + Util.formatearFecha(v.adqFecha) + '</strong>');
+    if (v.adqKm !== null && v.adqKm !== undefined) {
+      lineas.push('Km al adquirir: <strong>' + Util.formatearKm(v.adqKm) + '</strong>');
+    }
+    if (v.adqPrecio !== null && v.adqPrecio !== undefined) {
+      lineas.push('Precio: <strong>' + Util.formatearDinero(v.adqPrecio) + '</strong>');
+    }
+
+    // Cálculo 1: kilómetros recorridos por el usuario (actuales − al adquirir)
+    if (v.adqKm !== null && v.adqKm !== undefined && v.kmActuales >= v.adqKm) {
+      const kmContigo = v.kmActuales - v.adqKm;
+      lineas.push('Km recorridos contigo: <strong>' + Util.formatearKm(kmContigo) + '</strong>');
+    }
+
+    // Cálculo 2: tiempo en propiedad (desde la fecha de adquisición hasta hoy)
+    if (v.adqFecha) {
+      const tiempo = Util.tiempoEnPropiedad(v.adqFecha);
+      if (tiempo) lineas.push('Tiempo en propiedad: <strong>' + tiempo + '</strong>');
+    }
+
+    return (
+      '<div class="bloque-seguro">' +
+        '<div class="titulo-seguro">📋 Adquisición</div>' +
+        lineas.map(l => '<div class="linea-seguro">' + l + '</div>').join('') +
+      '</div>'
+    );
+  },
+
+  /* ----- Bloque de financiación (v15) ----- */
+  // Muestra la modalidad de pago y, si hay datos suficientes, calcula
+  // cuotas pagadas/restantes, fecha de fin de pago y coste total.
+  // Solo se muestra si hay algún dato de financiación con pagos. Solo LEE.
+  _bloqueFinanciacionHTML(v) {
+    const hayDatos = v.finModalidad || v.finEntidad ||
+                     (v.finEntrada !== null && v.finEntrada !== undefined) ||
+                     (v.finCuota !== null && v.finCuota !== undefined) ||
+                     (v.finMeses !== null && v.finMeses !== undefined) ||
+                     v.finInicio ||
+                     (v.finCuotaFinal !== null && v.finCuotaFinal !== undefined);
+    if (!hayDatos) return '';
+
+    const lineas = [];
+    if (v.finModalidad) lineas.push('Modalidad: <strong>' + Util.escapar(v.finModalidad) + '</strong>');
+    if (v.finEntidad) lineas.push('Entidad: <strong>' + Util.escapar(v.finEntidad) + '</strong>');
+    if (v.finEntrada !== null && v.finEntrada !== undefined) {
+      lineas.push('Entrada / cuota inicial: <strong>' + Util.formatearDinero(v.finEntrada) + '</strong>');
+    }
+    if (v.finCuota !== null && v.finCuota !== undefined) {
+      lineas.push('Cuota mensual: <strong>' + Util.formatearDinero(v.finCuota) + '</strong>');
+    }
+    if (v.finMeses !== null && v.finMeses !== undefined) {
+      lineas.push('Duración: <strong>' + v.finMeses + (v.finMeses === 1 ? ' mes' : ' meses') + '</strong>');
+    }
+    if (v.finInicio) lineas.push('Inicio: <strong>' + Util.formatearFecha(v.finInicio) + '</strong>');
+    if (v.finCuotaFinal !== null && v.finCuotaFinal !== undefined) {
+      lineas.push('Cuota / aportación final: <strong>' + Util.formatearDinero(v.finCuotaFinal) + '</strong>');
+    }
+
+    // Cálculos derivados
+    const calc = Util.calcularFinanciacion(v);
+    if (calc) {
+      if (calc.costeTotal !== undefined) {
+        lineas.push('Coste total del contrato: <strong>' + Util.formatearDinero(calc.costeTotal) + '</strong>');
+      }
+      if (calc.cuotasRestantes !== undefined) {
+        if (calc.terminado) {
+          lineas.push('Estado: <strong>Contrato finalizado ✓</strong>');
+        } else {
+          lineas.push('Cuotas pagadas: <strong>' + calc.cuotasPagadas + ' de ' + v.finMeses + '</strong>');
+          lineas.push('Cuotas restantes: <strong>' + calc.cuotasRestantes + '</strong>');
+          lineas.push('Fin de pago: <strong>' + Util.formatearFecha(calc.fechaFin) + '</strong>');
+        }
+      }
+    }
+
+    return (
+      '<div class="bloque-seguro">' +
+        '<div class="titulo-seguro">💳 Financiación</div>' +
+        lineas.map(l => '<div class="linea-seguro">' + l + '</div>').join('') +
+      '</div>'
+    );
   },
 
   /* ----- Bloque de datos del seguro (v8) ----- */
@@ -1960,6 +2251,7 @@ const Pantallas = {
           '<h1>' + Util.escapar(v.nombre) + '</h1>' +
           '<p class="subtitulo" style="margin-bottom:10px">' +
             Util.escapar(v.marca) + ' ' + Util.escapar(v.modelo) + ' · ' + Util.escapar(v.anio) + ' · ' + Util.escapar(v.combustible) +
+            ((v.bateriaKwh !== null && v.bateriaKwh !== undefined && v.bateriaKwh !== '') ? ' · ' + Util.escapar(v.bateriaKwh) + ' kWh' : '') +
             (v.color ? ' · ' + Util.escapar(v.color) : '') +
           '</p>' +
           '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">' +
@@ -1971,6 +2263,10 @@ const Pantallas = {
       Pantallas._visionGeneralHTML(v, lista) + // panel inteligente (v4)
 
       Pantallas._bloqueSeguroHTML(v) + // datos del seguro (v8)
+
+      Pantallas._bloqueAdquisicionHTML(v) + // datos de adquisición (v14)
+
+      Pantallas._bloqueFinanciacionHTML(v) + // datos de financiación (v15)
 
       '<div class="stats">' +
         '<div class="stat"><div class="valor">' + Util.formatearDinero(gastoTotal) + '</div><div class="etiqueta">Gasto total</div></div>' +
@@ -2499,7 +2795,7 @@ const Pantallas = {
       '<div class="panel">' +
         barra('Mantenimiento', porCategoria.mantenimiento, maxCategoria, 'mantenimiento') +
         barra('Averías', porCategoria.averia, maxCategoria, 'averia') +
-        barra('Documentación', porCategoria.documentacion, maxCategoria, 'documentacion') +
+        barra('Trámites', porCategoria.documentacion, maxCategoria, 'documentacion') +
       '</div>' +
       '<h2>Gasto por año</h2>' +
       '<div class="panel">' +
@@ -2591,6 +2887,57 @@ const Acciones = {
     Config.guardar({ nombre, pais });
   },
 
+  // Muestra el campo de batería solo si el combustible lo necesita (v14):
+  // híbridos enchufables y eléctricos. Para el resto, lo oculta y lo vacía.
+  toggleCampoBateria() {
+    // Leemos el combustible (puede venir del "Otro" en texto libre)
+    const combustible = Util.valorConOtro('v-combustible', 'v-combustible-otro');
+    // Pasamos a minúsculas para comparar sin importar mayúsculas/acentos del usuario
+    const texto = (combustible || '').toLowerCase();
+    const necesitaBateria = texto.includes('enchufable') || texto.includes('eléctrico') || texto.includes('electrico');
+
+    const campo = document.getElementById('campo-bateria');
+    if (necesitaBateria) {
+      campo.style.display = '';        // '' = vuelve a su display normal y se ve
+    } else {
+      campo.style.display = 'none';    // se oculta
+      document.getElementById('v-bateria').value = ''; // y se vacía por si tenía algo
+    }
+  },
+
+  // Muestra los campos de financiación según la modalidad (v15).
+  // "Al contado" o vacío: se oculta y vacía todo. Otras: se muestran.
+  // La cuota final solo aparece en leasing.
+  toggleCamposFinanciacion() {
+    const modalidad = Util.valorConOtro('v-fin-modalidad', 'v-fin-modalidad-otro');
+    const texto = (modalidad || '').toLowerCase();
+    const esContado = texto.includes('contado');
+    // Hay pagos si se ha elegido algo y NO es "al contado"
+    const hayPagos = texto !== '' && !esContado;
+
+    // Aviso de "Al contado": remite al precio de adquisición de arriba
+    document.getElementById('aviso-contado').style.display = esContado ? '' : 'none';
+
+    const bloque = document.getElementById('campos-financiacion');
+    if (hayPagos) {
+      bloque.style.display = '';
+    } else {
+      bloque.style.display = 'none';
+      // Vaciamos los campos para no guardar datos de un coche pagado al contado
+      ['v-fin-entidad','v-fin-entrada','v-fin-cuota','v-fin-meses','v-fin-inicio','v-fin-cuota-final']
+        .forEach(id => document.getElementById(id).value = '');
+    }
+
+    // La cuota/aportación final aparece en préstamo Y leasing (ambos pueden tener un pago final grande)
+    const campoFinal = document.getElementById('campo-cuota-final');
+    if (hayPagos && (texto.includes('leasing') || texto.includes('préstamo') || texto.includes('prestamo'))) {
+      campoFinal.style.display = '';
+    } else {
+      campoFinal.style.display = 'none';
+      document.getElementById('v-fin-cuota-final').value = '';
+    }
+  },
+
   guardarVehiculo(evento) {
     evento.preventDefault(); // evita que el formulario recargue la página
 
@@ -2611,6 +2958,32 @@ const Acciones = {
     const seguroPoliza = document.getElementById('v-seguro-poliza').value.trim();
     const seguroVencimiento = document.getElementById('v-seguro-vencimiento').value || null;
     const seguroTelefono = document.getElementById('v-seguro-telefono').value.trim();
+    // Capacidad de batería en kWh (v14). Solo aplica a enchufables/eléctricos.
+    // Si está vacío guardamos null; si tiene valor, lo convertimos a número.
+    const bateriaTexto = document.getElementById('v-bateria').value.trim();
+    const bateriaKwh = bateriaTexto === '' ? null : parseFloat(bateriaTexto);
+    // Datos de adquisición (v14). Todos opcionales.
+    // Forma puede venir de "Otro" (texto libre). El resto: vacío => null.
+    const adqForma = Util.valorConOtro('v-adq-forma', 'v-adq-forma-otro');
+    const adqFecha = document.getElementById('v-adq-fecha').value || null;
+    const adqKmTexto = document.getElementById('v-adq-km').value.trim();
+    const adqKm = adqKmTexto === '' ? null : parseInt(adqKmTexto, 10);
+    const adqPrecioTexto = document.getElementById('v-adq-precio').value.trim();
+    const adqPrecio = adqPrecioTexto === '' ? null : parseFloat(adqPrecioTexto);
+    // Datos de financiación (v15). Todos opcionales.
+    // La modalidad puede venir de "Otro" (texto libre). Si es "Al contado"
+    // o vacío, los campos numéricos ya se vaciaron al ocultarlos.
+    const finModalidad = Util.valorConOtro('v-fin-modalidad', 'v-fin-modalidad-otro');
+    const finEntidad = document.getElementById('v-fin-entidad').value.trim();
+    const finEntradaTexto = document.getElementById('v-fin-entrada').value.trim();
+    const finEntrada = finEntradaTexto === '' ? null : parseFloat(finEntradaTexto);
+    const finCuotaTexto = document.getElementById('v-fin-cuota').value.trim();
+    const finCuota = finCuotaTexto === '' ? null : parseFloat(finCuotaTexto);
+    const finMesesTexto = document.getElementById('v-fin-meses').value.trim();
+    const finMeses = finMesesTexto === '' ? null : parseInt(finMesesTexto, 10);
+    const finInicio = document.getElementById('v-fin-inicio').value || null;
+    const finCuotaFinalTexto = document.getElementById('v-fin-cuota-final').value.trim();
+    const finCuotaFinal = finCuotaFinalTexto === '' ? null : parseFloat(finCuotaFinalTexto);
 
     // --- Validaciones ---
     let error = '';
@@ -2622,6 +2995,10 @@ const Acciones = {
     else if (matricula && BD.existeMatricula(matricula, Estado.editandoVehiculoId)) {
       error = 'Ya existe un vehículo con la matrícula ' + matricula + '.';
     }
+    // Validación suave (v14): los km al adquirir no pueden superar los actuales
+    else if (adqKm !== null && !isNaN(adqKm) && adqKm > km) {
+      error = 'Los kilómetros al adquirir el vehículo no pueden ser mayores que los kilómetros actuales.';
+    }
 
     const cajaError = document.getElementById('error-vehiculo');
     if (error) {
@@ -2632,7 +3009,9 @@ const Acciones = {
     }
 
     const datos = { nombre, tipo, combustible, marca, modelo, anio, kmActuales: km, matricula, color, vin,
-      seguroCompania, seguroTipo, seguroPoliza, seguroVencimiento, seguroTelefono,
+      seguroCompania, seguroTipo, seguroPoliza, seguroVencimiento, seguroTelefono, bateriaKwh,
+      adqForma, adqFecha, adqKm, adqPrecio,
+      finModalidad, finEntidad, finEntrada, finCuota, finMeses, finInicio, finCuotaFinal,
       foto: Estado.fotoVehiculoTemp };
 
     if (Estado.editandoVehiculoId) {
@@ -2977,6 +3356,7 @@ const Informe = {
         Informe._fila('Nombre', e(v.nombre)) +
         Informe._fila('Vehículo', e(v.marca) + ' ' + e(v.modelo) + ' (' + e(v.anio) + ')') +
         Informe._fila('Tipo / Combustible', e(v.tipo) + ' · ' + e(v.combustible)) +
+        ((v.bateriaKwh !== null && v.bateriaKwh !== undefined && v.bateriaKwh !== '') ? Informe._fila('Capacidad batería', e(v.bateriaKwh) + ' kWh') : '') +
         (v.matricula ? Informe._fila('Matrícula', e(v.matricula)) : '') +
         (v.vin ? Informe._fila('Nº de bastidor (VIN)', e(v.vin)) : '') +
         (v.color ? Informe._fila('Color', e(v.color)) : '') +
@@ -2995,6 +3375,66 @@ const Informe = {
           (v.seguroVencimiento ? Informe._fila('Vencimiento', Util.formatearFecha(v.seguroVencimiento)) : '') +
           (v.seguroTelefono ? Informe._fila('Teléfono de asistencia', e(v.seguroTelefono)) : '') +
         '</tbody></table>');
+
+    // Sección de adquisición (v14): solo si hay algún dato relleno
+    const hayAdq = v.adqForma || v.adqFecha ||
+                   (v.adqKm !== null && v.adqKm !== undefined) ||
+                   (v.adqPrecio !== null && v.adqPrecio !== undefined);
+    let adqFilas = '';
+    if (hayAdq) {
+      if (v.adqForma) adqFilas += Informe._fila('Modalidad', e(v.adqForma));
+      if (v.adqFecha) adqFilas += Informe._fila('Fecha de adquisición', Util.formatearFecha(v.adqFecha));
+      if (v.adqKm !== null && v.adqKm !== undefined) adqFilas += Informe._fila('Km al adquirir', Util.formatearKm(v.adqKm));
+      if (v.adqPrecio !== null && v.adqPrecio !== undefined) adqFilas += Informe._fila('Precio de adquisición', Util.formatearDinero(v.adqPrecio));
+      // Cálculos derivados
+      if (v.adqKm !== null && v.adqKm !== undefined && v.kmActuales >= v.adqKm) {
+        adqFilas += Informe._fila('Km recorridos contigo', '<strong>' + Util.formatearKm(v.kmActuales - v.adqKm) + '</strong>');
+      }
+      if (v.adqFecha) {
+        const t = Util.tiempoEnPropiedad(v.adqFecha);
+        if (t) adqFilas += Informe._fila('Tiempo en propiedad', '<strong>' + t + '</strong>');
+      }
+    }
+    const adquisicionHTML =
+      '<h2>1.c · Adquisición</h2>' +
+      (!hayAdq ? Informe._vacio('Sin datos de adquisición registrados.') :
+        '<table class="tabla-datos"><tbody>' + adqFilas + '</tbody></table>');
+
+    // Sección de financiación (v15): solo si hay algún dato relleno
+    const hayFin = v.finModalidad || v.finEntidad ||
+                   (v.finEntrada !== null && v.finEntrada !== undefined) ||
+                   (v.finCuota !== null && v.finCuota !== undefined) ||
+                   (v.finMeses !== null && v.finMeses !== undefined) ||
+                   v.finInicio ||
+                   (v.finCuotaFinal !== null && v.finCuotaFinal !== undefined);
+    let finFilas = '';
+    if (hayFin) {
+      if (v.finModalidad) finFilas += Informe._fila('Modalidad', e(v.finModalidad));
+      if (v.finEntidad) finFilas += Informe._fila('Entidad', e(v.finEntidad));
+      if (v.finEntrada !== null && v.finEntrada !== undefined) finFilas += Informe._fila('Entrada / cuota inicial', Util.formatearDinero(v.finEntrada));
+      if (v.finCuota !== null && v.finCuota !== undefined) finFilas += Informe._fila('Cuota mensual', Util.formatearDinero(v.finCuota));
+      if (v.finMeses !== null && v.finMeses !== undefined) finFilas += Informe._fila('Duración', v.finMeses + (v.finMeses === 1 ? ' mes' : ' meses'));
+      if (v.finInicio) finFilas += Informe._fila('Fecha de inicio', Util.formatearFecha(v.finInicio));
+      if (v.finCuotaFinal !== null && v.finCuotaFinal !== undefined) finFilas += Informe._fila('Cuota / aportación final', Util.formatearDinero(v.finCuotaFinal));
+      // Cálculos derivados
+      const calcFin = Util.calcularFinanciacion(v);
+      if (calcFin) {
+        if (calcFin.costeTotal !== undefined) finFilas += Informe._fila('Coste total del contrato', '<strong>' + Util.formatearDinero(calcFin.costeTotal) + '</strong>');
+        if (calcFin.cuotasRestantes !== undefined) {
+          if (calcFin.terminado) {
+            finFilas += Informe._fila('Estado', '<strong>Contrato finalizado</strong>');
+          } else {
+            finFilas += Informe._fila('Cuotas pagadas', '<strong>' + calcFin.cuotasPagadas + ' de ' + v.finMeses + '</strong>');
+            finFilas += Informe._fila('Cuotas restantes', '<strong>' + calcFin.cuotasRestantes + '</strong>');
+            finFilas += Informe._fila('Fin de pago', Util.formatearFecha(calcFin.fechaFin));
+          }
+        }
+      }
+    }
+    const financiacionHTML =
+      '<h2>1.d · Financiación</h2>' +
+      (!hayFin ? Informe._vacio('Sin datos de financiación registrados.') :
+        '<table class="tabla-datos"><tbody>' + finFilas + '</tbody></table>');
 
     const resumen =
       '<h2>2 · Resumen general</h2>' +
@@ -3072,7 +3512,7 @@ const Informe = {
       return '—';
     };
     const documentosHTML =
-      '<h2>7 · Documentación y obligaciones</h2>' +
+      '<h2>7 · Trámites y obligaciones</h2>' +
       (documentos.length === 0 ? Informe._vacio() :
         '<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Estado / Resultado</th><th>Vencimiento</th><th class="num">Importe</th></tr></thead><tbody>' +
         documentos.map(a =>
@@ -3155,7 +3595,7 @@ const Informe = {
         '@media print { .no-imprimir { display: none; } body { padding: 0; } }' +
         '@page { margin: 14mm; }' +
       '</style></head><body>' +
-        cabecera + datosVehiculo + seguroHTML + resumen + gastosAnio + gastosCategoria +
+        cabecera + datosVehiculo + seguroHTML + adquisicionHTML + financiacionHTML + resumen + gastosAnio + gastosCategoria +
         averiasHTML + proximosHTML + documentosHTML + historialHTML + fotosHTML + pie +
       '</body></html>';
   }
