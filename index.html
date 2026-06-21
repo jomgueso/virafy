@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VehicleTrack v13 — Libro de vida de tus vehículos</title>
+<title>Virafy v15 — Libro de vida de tus vehículos</title>
 <style>
 /* ============================================================
-   VEHICLETRACK v2 — Estilos (mobile-first, CSS puro)
+   VIRAFY v15 — Estilos (mobile-first, CSS puro)
    ============================================================ */
 :root {
   --tinta: #1b2a38;
@@ -144,6 +144,13 @@ main { max-width: 720px; margin: 0 auto; padding: 16px 16px 110px; }
 h1 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 4px; }
 h2 { font-size: 1.05rem; font-weight: 700; margin: 22px 0 10px; }
 .subtitulo { color: var(--tinta-suave); font-size: 0.9rem; margin-bottom: 16px; }
+/* (v31) Lema/promesa de la app, destacado en color de marca. Puntos 1 y 3. */
+.lema-app {
+  color: var(--ambar);
+  font-size: 1.02rem; font-weight: 700;
+  letter-spacing: -0.2px; line-height: 1.3;
+  margin: 2px 0 10px;
+}
 
 /* ---------- Botones ---------- */
 button {
@@ -155,7 +162,81 @@ button:active { transform: scale(.98); }
 button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--ambar); outline-offset: 2px; }
 .btn-primario { background: var(--ambar); color: var(--ambar-texto); width: 100%; font-size: 1rem; }
 .btn-primario:hover { filter: brightness(1.05); }
+/* (v17) Botones de acción de la pantalla del vehículo: separados entre sí */
+.btn-accion-vehiculo { margin-top: 10px; }
+/* (v20) Selector de estado realizado/programado */
+.selector-estado { margin-bottom: 18px; }
+.selector-estado-titulo { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
+.selector-estado-botones { display: flex; gap: 8px; }
+.selector-estado-botones .seg {
+  flex: 1; padding: 12px 8px; border-radius: 10px;
+  border: 2px solid var(--borde); background: var(--fondo-suave, transparent);
+  color: var(--tinta-suave); font-size: 0.92rem; font-weight: 600; cursor: pointer;
+  transition: all .15s;
+}
+.selector-estado-botones .seg.activo {
+  border-color: var(--ambar); background: var(--ambar);
+  color: var(--ambar-texto);
+}
+.ayuda-estado { display: block; margin-top: 8px; font-size: 0.82rem; color: var(--tinta-suave); line-height: 1.4; }
+/* Tarjeta de pendientes en el detalle del vehículo */
+.bloque-pendientes { margin: 4px 0 18px; }
+.pendiente {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px; border-radius: 10px; margin-bottom: 8px;
+  border: 1px solid var(--borde); border-left: 4px solid var(--ambar);
+  background: var(--ambar-suave, rgba(232,149,12,0.06));
+}
+.pendiente.vencida { border-left-color: var(--rojo); background: rgba(220,53,69,0.06); }
+.pendiente .pend-info { flex: 1; min-width: 0; }
+.pendiente .pend-titulo { font-weight: 600; }
+.pendiente .pend-meta { font-size: 0.82rem; color: var(--tinta-suave); }
+.pendiente .btn-marcar-hecho {
+  flex-shrink: 0; padding: 6px 10px; border-radius: 8px;
+  border: 1px solid var(--verde); background: transparent;
+  color: var(--verde); font-weight: 600; font-size: 0.75rem; cursor: pointer;
+  line-height: 1.2;
+}
+.pendiente .btn-marcar-hecho:hover { background: var(--verde-suave, rgba(40,167,69,0.08)); }
+.banner-programada {
+  background: var(--ambar-suave, rgba(232,149,12,0.10));
+  border-left: 4px solid var(--ambar); border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 16px; font-weight: 600; color: var(--tinta);
+}
+.banner-programada.vencida { border-left-color: var(--rojo); background: rgba(220,53,69,0.08); }
+.banner-programada small { display: block; margin-top: 6px; font-weight: 400; font-size: 0.82rem; color: var(--tinta-suave); }
+/* (v18) Aviso que invita a completar datos opcionales, sin presionar */
+.aviso-completar {
+  background: var(--ambar-suave, rgba(232,149,12,0.10));
+  border-left: 3px solid var(--ambar);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 4px 0 18px;
+  font-size: 0.85rem;
+  color: var(--tinta-suave);
+  line-height: 1.4;
+}
 .btn-secundario { background: var(--tarjeta); color: var(--tinta); border: 1.5px solid var(--borde); width: 100%; }
+/* (v29) Botón propio en español para elegir archivos. El <input type="file">
+   real se oculta accesiblemente (sigue siendo clicable vía su <label>) y este
+   label estilizado hace de botón. Así evitamos el "Choose File" del navegador. */
+.input-archivo-oculto {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.btn-archivo {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--tarjeta); color: var(--tinta);
+  border: 1.5px solid var(--borde); border-radius: 12px;
+  padding: 12px 18px; font-weight: 600; cursor: pointer;
+  transition: filter .15s ease, transform .05s ease;
+  margin-top: 2px;
+}
+.btn-archivo:hover { filter: brightness(0.97); }
+.btn-archivo:active { transform: scale(.98); }
+/* El foco del teclado se ve en el botón aunque el input esté oculto */
+.input-archivo-oculto:focus-visible + .btn-archivo { outline: 3px solid var(--ambar); outline-offset: 2px; }
 .btn-peligro { background: var(--rojo-suave); color: var(--rojo); width: 100%; }
 .btn-texto { background: none; color: var(--tinta-suave); padding: 8px 10px; font-weight: 600; }
 .btn-mini { padding: 7px 12px; font-size: 0.8rem; border-radius: 999px; }
@@ -196,6 +277,50 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--a
   margin-top: 12px; gap: 8px; flex-wrap: wrap;
 }
 
+/* (v35) Vehículos dados de baja: atenuados, sin hover ámbar.
+   Se conservan en "Mis vehículos" en su propio bloque, separados de los activos. */
+.tarjeta-vehiculo.baja { opacity: 0.62; }
+.tarjeta-vehiculo.baja:hover { border-color: var(--borde); }
+.tarjeta-vehiculo.baja .foto img { filter: grayscale(0.7); }
+/* Etiqueta del motivo de baja (vendido, achatarrado...) sobre la tarjeta */
+.chip-baja {
+  display: inline-block; background: var(--borde); color: var(--tinta-suave);
+  font-size: 0.72rem; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+  margin-top: 8px; text-transform: uppercase; letter-spacing: 0.4px;
+}
+/* Cabecera del bloque "Dados de baja" dentro de la lista */
+.cabecera-bloque-lista {
+  font-size: 0.92rem; font-weight: 800; color: var(--tinta-suave);
+  margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 1.5px solid var(--borde);
+}
+
+/* (v35) Panel de balance final del coche dado de baja (cierre económico) */
+.balance-baja {
+  background: var(--tarjeta); border: 1.5px solid var(--borde);
+  border-radius: var(--radio); padding: 16px; margin-bottom: 16px;
+}
+.balance-baja .titulo-balance {
+  font-weight: 800; margin-bottom: 12px; font-size: 1rem;
+}
+.balance-baja .linea-balance {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0; font-size: 0.92rem; border-bottom: 1px dashed var(--borde);
+}
+.balance-baja .linea-balance:last-child { border-bottom: none; }
+.balance-baja .linea-balance.total {
+  margin-top: 6px; padding-top: 12px; border-top: 2px solid var(--borde);
+  border-bottom: none; font-weight: 800; font-size: 1.02rem;
+}
+.balance-baja .linea-balance .cifra { font-variant-numeric: tabular-nums; font-weight: 700; }
+.balance-baja .nota-balance { font-size: 0.8rem; color: var(--tinta-suave); margin-top: 10px; line-height: 1.4; }
+
+/* (v35) Aviso/cinta en la ficha de un vehículo dado de baja */
+.cinta-baja {
+  background: var(--rojo-suave); color: var(--rojo); border-radius: var(--radio);
+  padding: 12px 14px; margin-bottom: 16px; font-size: 0.9rem; line-height: 1.45;
+}
+.cinta-baja strong { font-weight: 800; }
+
 /* Matrícula española (firma visual) */
 .matricula {
   display: inline-flex; align-items: stretch;
@@ -223,8 +348,18 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--a
 .alerta strong { display: block; }
 .alerta small { color: var(--tinta-suave); }
 .alerta .btn-hecho { background: var(--verde-suave); color: var(--verde); white-space: nowrap; }
+/* (v21) Vencida = rojo (urgente); ITV sin fecha = neutra (informativa) */
+.alerta.vencida { background: var(--rojo-suave); border-color: var(--rojo); }
+.alerta.itv-falta { background: var(--fondo-suave, rgba(0,0,0,0.03)); border-color: var(--borde); border-style: dashed; }
 
 /* ---------- Obligaciones legales (v12) ---------- */
+/* (v26) Dos bloques separados: trámites y mantenimiento. */
+.bloque-oblig { margin-bottom: 26px; }
+.bloque-oblig:last-child { margin-bottom: 0; }
+.seccion-oblig {
+  margin: 0 0 2px; padding-bottom: 8px;
+  border-bottom: 2px solid var(--borde); font-size: 1.15rem;
+}
 .oblig {
   display: flex; align-items: center; gap: 12px;
   background: var(--tarjeta); border: 1px solid var(--borde);
@@ -321,6 +456,11 @@ form, .panel { background: var(--tarjeta); border-radius: var(--radio); box-shad
   border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
   font-size: 0.88rem; font-weight: 600; display: none;
 }
+/* (v20) Variante informativa, no de error, para guiar al confirmar una cita */
+.mensaje-error.aviso-suave {
+  background: var(--ambar-suave, rgba(232,149,12,0.12));
+  color: var(--ambar-texto, #7a4f00);
+}
 .mensaje-error.visible { display: block; }
 
 /* Fotos */
@@ -359,6 +499,9 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
 .bienvenida-intro .logo-grande { font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; }
 .bienvenida-intro .logo-grande span { color: var(--ambar); }
 .bienvenida-intro .emoji { font-size: 3rem; margin-bottom: 8px; }
+.bienvenida-intro .logo-img { width: 200px; max-width: 70%; height: auto; margin: 0 auto 4px; display: block; }
+/* El logo ya incluye el texto "VIRAFY AUTO", así que ocultamos el título de texto para no duplicarlo */
+.bienvenida-intro .logo-grande { display: none; }
 .bienvenida-intro p { color: var(--tinta-suave); margin-top: 6px; }
 
 /* ---------- Ficha de vehículo ---------- */
@@ -369,6 +512,29 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
 }
 .cabecera-vehiculo .foto-grande img { width: 100%; height: 100%; object-fit: cover; }
 .cabecera-vehiculo .cuerpo { padding: 16px; }
+
+/* (v32) Punto 8: fotos ampliables y visor a pantalla completa. */
+.ampliable { cursor: zoom-in; }
+#visor-imagen {
+  display: none;
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0, 0, 0, 0.92);
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+#visor-imagen.abierto { display: flex; }
+#visor-imagen img {
+  max-width: 100%; max-height: 100%;
+  object-fit: contain; border-radius: 8px;
+}
+.visor-cerrar {
+  position: absolute; top: 14px; right: 16px;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15); color: #fff;
+  font-size: 1.3rem; line-height: 1; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.visor-cerrar:hover { background: rgba(255, 255, 255, 0.28); }
 
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
 .stat { background: var(--tarjeta); border-radius: 12px; box-shadow: var(--sombra); padding: 12px 10px; text-align: center; }
@@ -419,6 +585,13 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
   border: 1.5px solid var(--borde); border-radius: 10px; width: 100%;
 }
 .filtros .busqueda { grid-column: 1 / -1; }
+/* (v33) Punto 14: contenedor del buscador con lupa fija a la izquierda. */
+.busqueda-wrap { grid-column: 1 / -1; position: relative; }
+.busqueda-lupa {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  font-size: 0.95rem; pointer-events: none; opacity: 0.7;
+}
+.busqueda-wrap .busqueda { padding-left: 34px; }
 .filtros label {
   font-size: 0.76rem; font-weight: 600; color: var(--tinta-suave);
   display: flex; flex-direction: column; gap: 4px;
@@ -472,7 +645,7 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
 <body>
 
 <header>
-  <div class="logo" onclick="Pantallas.lista()">Vehicle<span>Track</span></div>
+  <div class="logo" onclick="Pantallas.lista()">Vira<span>fy</span></div>
   <button class="btn-ajustes" onclick="Pantallas.ajustes()" aria-label="Ajustes">⚙️ Ajustes</button>
 </header>
 
@@ -481,9 +654,12 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
   <!-- ============ PANTALLA: BIENVENIDA / ONBOARDING (v9) ============ -->
   <section id="pantalla-bienvenida" class="screen">
     <div class="bienvenida-intro">
-      <div class="emoji">🚗</div>
-      <div class="logo-grande">Vehicle<span>Track</span></div>
-      <p>El libro de vida de tus vehículos. Antes de empezar, cuéntanos un par de cosas.</p>
+      <img class="logo-img" src="data:image/png;base64,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" alt="Virafy">
+      <div class="logo-grande">Vira<span>fy</span></div>
+      <!-- (v31) Punto 3: damos peso al lema en la pág. de bienvenida, coherente
+           con el punto 1. Lo separamos de la instrucción y lo destacamos. -->
+      <p class="lema-app">El libro de vida de tus vehículos</p>
+      <p>Antes de empezar, cuéntanos un par de cosas.</p>
     </div>
     <div id="error-bienvenida" class="mensaje-error"></div>
     <form id="form-bienvenida" onsubmit="Acciones.completarBienvenida(event)">
@@ -493,22 +669,32 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
       </div>
       <div class="campo">
         <label for="b-pais">País</label>
-        <select id="b-pais" onchange="Pantallas.paisPreseleccionaMoneda()"></select>
-        <input id="b-pais-otro" class="input-otro" type="text" placeholder="Escribe tu país" maxlength="40">
-        <div class="ayuda">Nos sirve para proponerte la moneda. Podrás cambiarla.</div>
+        <select id="b-pais" onchange="Util.toggleOtro('b-pais','b-pais-otro')">
+          <option value="España" selected>España</option>
+          <option value="__otro__">Otro (especificar)…</option>
+        </select>
+        <input id="b-pais-otro" class="input-otro" type="text" placeholder="Escribe tu país" maxlength="40" style="display:none">
       </div>
       <div class="campo">
         <label for="b-moneda">Moneda de tus gastos *</label>
-        <select id="b-moneda"></select>
-        <div class="ayuda">Todos los importes se mostrarán con esta moneda. No se hace conversión de divisas: una cifra es una cifra.</div>
+        <select id="b-moneda" onchange="Util.toggleOtro('b-moneda','b-moneda-otro')">
+          <option value="EUR" selected>Euro (€)</option>
+          <option value="__otro__">Otra (especificar)…</option>
+        </select>
+        <input id="b-moneda-otro" class="input-otro" type="text" placeholder="Símbolo o nombre corto (ej: $, Bs, soles)" maxlength="20" style="display:none">
+        <div class="ayuda">Todos los importes se mostrarán con esta moneda. Te recomendamos un símbolo o abreviatura corta, porque aparecerá junto a cada cifra. No se hace conversión de divisas: una cifra es una cifra.</div>
       </div>
-      <button type="submit" class="btn-primario" style="margin-top:6px">Empezar a usar VehicleTrack</button>
+      <button type="submit" class="btn-primario" style="margin-top:6px">Empezar a usar Virafy</button>
     </form>
   </section>
 
   <!-- ============ PANTALLA: LISTA DE VEHÍCULOS ============ -->
   <section id="pantalla-lista" class="screen">
     <h1 id="saludo-lista">Mis vehículos</h1>
+    <!-- (v31) Punto 1: el lema "El libro de vida de tus vehículos" es la promesa
+         de la app; antes solo salía en el onboarding. Lo destacamos aquí, en la
+         pantalla más vista. La instrucción funcional pasa debajo, en pequeño. -->
+    <p class="lema-app">El libro de vida de tus vehículos</p>
     <p class="subtitulo">Toca un vehículo para ver su ficha e historial.</p>
     <div id="zona-acceso-obligaciones"></div>
     <div id="zona-alertas"></div>
@@ -522,11 +708,13 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
       <button class="btn-texto" onclick="Pantallas.atras()">← Volver</button>
     </div>
     <h1 id="titulo-form-vehiculo">Añadir vehículo</h1>
-    <p class="subtitulo">Los campos marcados con * son obligatorios.</p>
+    <p class="subtitulo">Solo necesitas unos pocos datos para empezar. Los campos marcados con * son obligatorios.</p>
     <div id="error-vehiculo" class="mensaje-error"></div>
     <form id="form-vehiculo" onsubmit="Acciones.guardarVehiculo(event)">
+
+      <h2>Datos básicos</h2>
       <div class="campo">
-        <label for="v-nombre">Nombre del vehículo *</label>
+        <label for="v-nombre">Nombre o alias del vehículo *</label>
         <input id="v-nombre" type="text" placeholder="Ej: Mi Seat León" maxlength="40">
       </div>
       <div class="dos-columnas">
@@ -541,24 +729,9 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
           <input id="v-tipo-otro" class="input-otro" type="text" placeholder="Escribe el tipo" maxlength="20">
         </div>
         <div class="campo">
-          <label for="v-combustible">Combustible *</label>
-          <select id="v-combustible" onchange="Util.toggleOtro('v-combustible','v-combustible-otro'); Acciones.toggleCampoBateria()">
-            <option value="gasolina">Gasolina</option>
-            <option value="diésel">Diésel</option>
-            <option value="híbrido enchufable">Híbrido enchufable (PHEV)</option>
-            <option value="híbrido no enchufable">Híbrido no enchufable (HEV)</option>
-            <option value="eléctrico">Eléctrico</option>
-            <option value="GLP">GLP</option>
-            <option value="__otro__">Otro (especificar)…</option>
-          </select>
-          <input id="v-combustible-otro" class="input-otro" type="text" placeholder="Escribe el combustible" maxlength="20">
-        </div>
-      </div>
-      <!-- Capacidad de batería: solo visible para enchufables y eléctricos (v14) -->
-      <div class="dos-columnas">
-        <div class="campo" id="campo-bateria" style="display:none;">
-          <label for="v-bateria">Capacidad de batería (kWh) <span class="opc">(opcional)</span></label>
-          <input id="v-bateria" type="number" min="0" step="0.1" placeholder="Ej: 13.8">
+          <label for="v-km">Km actuales <span class="opc">(opcional)</span></label>
+          <input id="v-km" type="number" min="0" step="1" placeholder="Ej: 145230">
+          <div class="ayuda">Aunque sea aproximado, ayuda mucho: con los km podemos avisarte de las revisiones y llevar el seguimiento del vehículo.</div>
         </div>
       </div>
       <div class="dos-columnas">
@@ -571,14 +744,37 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
           <input id="v-modelo" type="text" placeholder="Ej: León" maxlength="30">
         </div>
       </div>
+
+      <div class="aviso-completar">
+        Cuantos más datos añadas, más completo será el libro de vida y mejor te avisaremos de tus obligaciones. Puedes completarlos ahora o más tarde desde «Editar datos del vehículo».
+      </div>
+
+      <h2>Datos adicionales <span class="opc" style="font-weight:400;font-size:0.8rem;color:var(--tinta-suave)">(opcional)</span></h2>
       <div class="dos-columnas">
         <div class="campo">
-          <label for="v-anio">Año *</label>
-          <input id="v-anio" type="number" min="1900" max="2100" placeholder="Ej: 2018">
+          <label for="v-combustible">Combustible <span class="opc">(opcional)</span></label>
+          <select id="v-combustible" onchange="Util.toggleOtro('v-combustible','v-combustible-otro'); Acciones.toggleCampoBateria()">
+            <option value="">— Sin especificar —</option>
+            <option value="gasolina">Gasolina</option>
+            <option value="diésel">Diésel</option>
+            <option value="híbrido enchufable">Híbrido enchufable (PHEV)</option>
+            <option value="híbrido no enchufable">Híbrido no enchufable (HEV)</option>
+            <option value="eléctrico">Eléctrico</option>
+            <option value="GLP">GLP</option>
+            <option value="__otro__">Otro (especificar)…</option>
+          </select>
+          <input id="v-combustible-otro" class="input-otro" type="text" placeholder="Escribe el combustible" maxlength="20">
         </div>
         <div class="campo">
-          <label for="v-km">Km actuales *</label>
-          <input id="v-km" type="number" min="0" step="1" placeholder="Ej: 145230">
+          <label for="v-anio">Año <span class="opc">(opcional)</span></label>
+          <input id="v-anio" type="number" min="1900" max="2100" placeholder="Ej: 2018">
+        </div>
+      </div>
+      <!-- Capacidad de batería: solo visible para enchufables y eléctricos (v14) -->
+      <div class="dos-columnas">
+        <div class="campo" id="campo-bateria" style="display:none;">
+          <label for="v-bateria">Capacidad de batería (kWh) <span class="opc">(opcional)</span></label>
+          <input id="v-bateria" type="number" min="0" step="0.1" placeholder="Ej: 13.8">
         </div>
       </div>
       <div class="dos-columnas">
@@ -686,44 +882,13 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
         <div class="ayuda">La app calculará las cuotas que te quedan, cuándo terminas de pagar y el coste total del contrato.</div>
       </div>
 
-      <h2>Seguro <span class="opc" style="font-weight:400;font-size:0.8rem;color:var(--tinta-suave)">(opcional)</span></h2>
-      <div class="dos-columnas">
-        <div class="campo">
-          <label for="v-seguro-compania">Compañía aseguradora</label>
-          <input id="v-seguro-compania" type="text" placeholder="Ej: Mapfre, Línea Directa..." maxlength="40">
-        </div>
-        <div class="campo">
-          <label for="v-seguro-tipo">Tipo de seguro</label>
-          <select id="v-seguro-tipo" onchange="Util.toggleOtro('v-seguro-tipo','v-seguro-tipo-otro')">
-            <option value="">— Sin especificar —</option>
-            <option value="Terceros">Terceros</option>
-            <option value="Terceros ampliado">Terceros ampliado</option>
-            <option value="Todo riesgo con franquicia">Todo riesgo con franquicia</option>
-            <option value="Todo riesgo">Todo riesgo</option>
-            <option value="__otro__">Otro (especificar)…</option>
-          </select>
-          <input id="v-seguro-tipo-otro" class="input-otro" type="text" placeholder="Escribe el tipo de seguro" maxlength="40">
-        </div>
-      </div>
-      <div class="dos-columnas">
-        <div class="campo">
-          <label for="v-seguro-poliza">Nº de póliza</label>
-          <input id="v-seguro-poliza" type="text" placeholder="Ej: 0012345678" maxlength="30">
-        </div>
-        <div class="campo">
-          <label for="v-seguro-vencimiento">Vencimiento / renovación</label>
-          <input id="v-seguro-vencimiento" type="date">
-        </div>
-      </div>
-      <div class="campo">
-        <label for="v-seguro-telefono">Teléfono de asistencia</label>
-        <input id="v-seguro-telefono" type="tel" placeholder="Ej: 900 123 456" maxlength="20">
-        <div class="ayuda">Si rellenas el vencimiento, la app te avisará cuando se acerque la renovación.</div>
-      </div>
-
       <div class="campo">
         <label for="v-foto">Foto del vehículo <span class="opc">(opcional, se optimiza sola)</span></label>
-        <input id="v-foto" type="file" accept="image/*" onchange="Fotos.cargarFotoVehiculo(this)">
+        <!-- (v29) El input nativo trae un botón "Choose File" en idioma del sistema
+             que no se puede traducir. Lo ocultamos y usamos un <label> estilizado
+             como botón: al pulsarlo se abre el selector igual, sin necesidad de JS. -->
+        <input id="v-foto" type="file" accept="image/*" class="input-archivo-oculto" onchange="Fotos.cargarFotoVehiculo(this)">
+        <label for="v-foto" class="btn-archivo">📷 Elegir foto</label>
         <div id="previa-foto-vehiculo" class="previas"></div>
       </div>
       <div class="fila-botones">
@@ -739,6 +904,69 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
       <button class="btn-texto" onclick="Pantallas.lista()">← Mis vehículos</button>
     </div>
     <div id="contenido-detalle-vehiculo"></div>
+  </section>
+
+  <!-- ============ PANTALLA: DAR DE BAJA UN VEHÍCULO (v35) ============ -->
+  <!-- Cierra el "libro de vida": el coche sale de tu propiedad (venta,
+       achatarramiento, entrega...). NO borra nada: el historial se conserva
+       y el vehículo pasa a "dado de baja" (archivado, sin avisos). -->
+  <section id="pantalla-baja-vehiculo" class="screen">
+    <div class="nav-pantalla">
+      <button class="btn-texto" onclick="Pantallas.detalleVehiculo(Estado.vehiculoActualId)">← Ficha del vehículo</button>
+    </div>
+    <h1 id="titulo-baja">Dar de baja</h1>
+    <p class="subtitulo" style="margin-bottom:18px">
+      El vehículo dejará de ser tuyo, pero su libro de vida se conserva entero.
+      No recibirás más avisos suyos y podrás consultarlo cuando quieras.
+    </p>
+
+    <form id="form-baja" onsubmit="Acciones.guardarBaja(event)">
+      <div class="campo">
+        <label for="baja-motivo">¿Por qué lo das de baja?</label>
+        <select id="baja-motivo" onchange="Pantallas.cambiarMotivoBaja()">
+          <option value="vendido">Vendido</option>
+          <option value="entregado">Entregado a cuenta de otro vehículo</option>
+          <option value="achatarrado">Achatarrado / desguace</option>
+          <option value="siniestro">Siniestro total</option>
+          <option value="otro">Otro motivo</option>
+        </select>
+      </div>
+
+      <!-- Motivo libre: solo visible si elige "Otro motivo" -->
+      <div class="campo" id="campo-baja-motivo-otro" style="display:none">
+        <label for="baja-motivo-otro">Especifica el motivo</label>
+        <input id="baja-motivo-otro" type="text" placeholder="Ej: donado, exportado…">
+      </div>
+
+      <div class="dos-columnas">
+        <div class="campo">
+          <label for="baja-fecha">Fecha de baja <span class="opc">(opcional)</span></label>
+          <input id="baja-fecha" type="date">
+        </div>
+        <div class="campo">
+          <label for="baja-km">Km finales <span class="opc">(opcional)</span></label>
+          <input id="baja-km" type="number" min="0" step="1" placeholder="Ej: 145000">
+        </div>
+      </div>
+
+      <!-- Importe recibido: solo tiene sentido si vende o entrega.
+           Se oculta para achatarramiento/siniestro. -->
+      <div class="campo" id="campo-baja-importe">
+        <label for="baja-importe" id="label-baja-importe">Importe recibido <span class="opc">(opcional)</span></label>
+        <input id="baja-importe" type="number" min="0" step="0.01" placeholder="Ej: 4500">
+        <small class="ayuda">Lo que te dieron por el coche. Servirá para calcular el coste real de haberlo tenido.</small>
+      </div>
+
+      <div class="campo">
+        <label for="baja-notas">Notas <span class="opc">(opcional)</span></label>
+        <textarea id="baja-notas" rows="2" placeholder="Ej: vendido a un particular por Wallapop"></textarea>
+      </div>
+
+      <div class="fila-botones" style="margin-top:8px">
+        <button type="button" class="btn-secundario" onclick="Pantallas.detalleVehiculo(Estado.vehiculoActualId)">Cancelar</button>
+        <button type="submit" class="btn-primario">Confirmar baja</button>
+      </div>
+    </form>
   </section>
 
   <!-- ============ PANTALLA: DETALLE DE ACTUACIÓN ============ -->
@@ -758,16 +986,8 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
     <p class="subtitulo" id="subtitulo-form-actuacion"></p>
     <div id="error-actuacion" class="mensaje-error"></div>
     <form id="form-actuacion" onsubmit="Acciones.guardarActuacion(event)">
-      <div class="dos-columnas">
-        <div class="campo">
-          <label for="a-fecha">Fecha *</label>
-          <input id="a-fecha" type="date">
-        </div>
-        <div class="campo" id="campo-km">
-          <label for="a-km">Kilometraje *</label>
-          <input id="a-km" type="number" min="0" step="1" placeholder="Km del vehículo">
-        </div>
-      </div>
+      <!-- (v22) Primero QUÉ es: categoría, sistema y título. Así el usuario
+           define la actuación antes de decir si ya está hecha o la programa. -->
       <div class="dos-columnas">
         <div class="campo">
           <label for="a-categoria">Categoría *</label>
@@ -778,14 +998,37 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
           </select>
         </div>
         <div class="campo">
-          <label for="a-subcategoria">Sistema *</label>
-          <select id="a-subcategoria" onchange="Util.toggleOtro('a-subcategoria','a-subcategoria-otro'); Pantallas.aplicarCamposSubcategoria(); Pantallas.actualizarObligacion()"></select>
-          <input id="a-subcategoria-otro" class="input-otro" type="text" placeholder="Escribe el sistema" maxlength="40">
+          <label for="a-subcategoria" id="label-subcategoria">Tipo *</label>
+          <select id="a-subcategoria" onchange="Util.toggleOtro('a-subcategoria','a-subcategoria-otro'); Pantallas.aplicarCamposSubcategoria(); Pantallas.actualizarObligacion(); Pantallas._aplicarVisibilidadEstado(); Pantallas.actualizarFechaLimite()"></select>
+          <input id="a-subcategoria-otro" class="input-otro" type="text" placeholder="Escribe el tipo" maxlength="40">
         </div>
       </div>
       <div class="campo">
         <label for="a-titulo">Título *</label>
         <input id="a-titulo" type="text" placeholder="Ej: breve descripción de la actuación" maxlength="80">
+      </div>
+
+      <!-- (v20/v22) Estado: ¿ya ocurrió o se está programando? Ahora va DESPUÉS
+           de definir qué es, porque primero hay que saber "qué" está hecho. -->
+      <div class="selector-estado" id="selector-estado">
+        <span class="selector-estado-titulo">¿Ya está hecho?</span>
+        <div class="selector-estado-botones">
+          <button type="button" id="btn-estado-realizado" class="seg activo" onclick="Pantallas.cambiarEstadoActuacion(false)">✓ Ya realizado</button>
+          <button type="button" id="btn-estado-programado" class="seg" onclick="Pantallas.cambiarEstadoActuacion(true)">📅 Lo estoy programando</button>
+        </div>
+        <small id="ayuda-estado" class="ayuda-estado">Lo que registras ya ha ocurrido: irá al historial y sumará a tus gastos.</small>
+      </div>
+
+      <div class="dos-columnas">
+        <div class="campo">
+          <label for="a-fecha" id="label-fecha-actuacion">Fecha *</label>
+          <input id="a-fecha" type="date">
+        </div>
+        <div class="campo" id="campo-km">
+          <label for="a-km">Kilometraje <span class="opc">(opcional)</span></label>
+          <input id="a-km" type="number" min="0" step="1" placeholder="Km del vehículo">
+          <div class="ayuda">Si lo tienes a mano, anótalo: mantiene al día el seguimiento del vehículo. Si no, puedes dejarlo y añadirlo en otra ocasión.</div>
+        </div>
       </div>
 
       <!-- 🆕 v12: campos ESPECÍFICOS de Documentación. Ocultos por defecto;
@@ -805,7 +1048,7 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
       </div>
       <div class="dos-columnas campo-doc" id="campo-pagada-puntos" style="display:none">
         <label class="campo-casilla" style="align-self:center">
-          <input id="a-pagada" type="checkbox">
+          <input id="a-pagada" type="checkbox" onchange="Pantallas.actualizarFechaLimite()">
           <span class="texto-casilla">Pagada
             <small>Márcala si ya la has abonado (con descuento por pronto pago si aplicaba).</small>
           </span>
@@ -815,13 +1058,49 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
           <input id="a-puntos" type="number" min="0" max="8" step="1" placeholder="Ej: 2">
         </div>
       </div>
+      <!-- (v24) Bloque "pagado" para impuestos (equivalente al de la multa). -->
+      <label class="campo-casilla campo-doc" id="campo-impuesto-pagado" style="display:none">
+        <input id="a-impuesto-pagado" type="checkbox" onchange="Pantallas.actualizarFechaLimite()">
+        <span class="texto-casilla">Pagado
+          <small>Márcalo cuando lo hayas abonado. Si no, te avisaremos según la fecha límite de pago.</small>
+        </span>
+      </label>
+      <!-- (v24) Fecha límite de pago, común a multa e impuesto. Si la obligación
+           no está pagada, esta fecha genera el aviso en portada. -->
+      <div class="campo campo-doc" id="campo-fecha-limite" style="display:none">
+        <label for="a-fecha-limite">Fecha límite de pago <span class="opc">(opcional)</span></label>
+        <input id="a-fecha-limite" type="date">
+        <div class="ayuda">Hasta cuándo puedes pagar sin recargo. Mientras no marques como pagado, te avisaremos al acercarse.</div>
+      </div>
+      <div class="dos-columnas campo-doc" id="campo-seguro-tipo-poliza" style="display:none">
+        <div class="campo">
+          <label for="a-seguro-tipo">Tipo / cobertura</label>
+          <select id="a-seguro-tipo" onchange="Util.toggleOtro('a-seguro-tipo','a-seguro-tipo-otro')">
+            <option value="">Sin especificar</option>
+            <option value="Terceros">Terceros</option>
+            <option value="Terceros ampliado">Terceros ampliado</option>
+            <option value="Todo riesgo con franquicia">Todo riesgo con franquicia</option>
+            <option value="Todo riesgo">Todo riesgo</option>
+            <option value="__otro__">Otro (especificar)…</option>
+          </select>
+          <input id="a-seguro-tipo-otro" class="input-otro" type="text" placeholder="Escribe la cobertura" maxlength="40" style="display:none">
+        </div>
+        <div class="campo">
+          <label for="a-seguro-poliza">Nº de póliza</label>
+          <input id="a-seguro-poliza" type="text" placeholder="Ej: 0012345678" maxlength="30">
+        </div>
+      </div>
+      <div class="campo campo-doc" id="campo-seguro-telefono" style="display:none">
+        <label for="a-seguro-telefono">Teléfono de asistencia</label>
+        <input id="a-seguro-telefono" type="tel" placeholder="Ej: 900 123 456" maxlength="20">
+      </div>
       <div id="campo-preaviso" class="campo campo-doc" style="display:none">
         <label for="a-preaviso">Avisarme antes del vencimiento</label>
         <div style="display:flex;align-items:center;gap:8px">
-          <input id="a-preaviso" type="number" min="0" max="120" step="1" value="45" style="max-width:90px">
+          <input id="a-preaviso" type="number" min="0" max="120" step="1" value="60" style="max-width:90px">
           <span>días antes</span>
         </div>
-        <div class="ayuda">Para cambiar de seguro normalmente hay que preavisar con margen. 45 días da tiempo de comparar y decidir.</div>
+        <div class="ayuda">Para cambiar de compañía hay que avisar de la no renovación con un mes de antelación. 60 días te dan margen para comparar y decidir antes de que sea tarde.</div>
       </div>
       <div id="campo-garantia-hasta" class="campo campo-doc" style="display:none">
         <label for="a-garantia-hasta">Garantía válida hasta <span class="opc">(opcional)</span></label>
@@ -880,7 +1159,9 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
       </div>
       <div class="campo">
         <label for="a-fotos">Fotos / facturas <span class="opc">(opcional, hasta 3, se optimizan solas)</span></label>
-        <input id="a-fotos" type="file" accept="image/*" multiple onchange="Fotos.cargarFotosActuacion(this)">
+        <!-- (v29) Igual que la foto del vehículo: input oculto + botón propio en español. -->
+        <input id="a-fotos" type="file" accept="image/*" multiple class="input-archivo-oculto" onchange="Fotos.cargarFotosActuacion(this)">
+        <label for="a-fotos" class="btn-archivo">📎 Añadir fotos o facturas</label>
         <div id="previa-fotos-actuacion" class="previas"></div>
       </div>
       <div class="fila-botones">
@@ -898,7 +1179,13 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
     <h1>Historial completo</h1>
     <p class="subtitulo" id="subtitulo-historial"></p>
     <div class="filtros">
-      <input id="filtro-busqueda" class="busqueda" type="search" placeholder="🔍 Buscar por título, taller o notas..." oninput="Pantallas.renderHistorial()">
+      <!-- (v33) Punto 14: el buscador se nota más con una lupa FIJA a la
+           izquierda (antes el 🔍 iba en el placeholder y desaparecía al
+           escribir). El icono ahora se queda siempre visible. -->
+      <div class="busqueda-wrap">
+        <span class="busqueda-lupa" aria-hidden="true">🔍</span>
+        <input id="filtro-busqueda" class="busqueda" type="search" placeholder="Buscar por título, taller o notas..." oninput="Pantallas.renderHistorial()">
+      </div>
       <label>Categoría
         <select id="filtro-categoria" onchange="Pantallas.cambioFiltroCategoria()">
           <option value="">Todas las categorías</option>
@@ -907,9 +1194,9 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
           <option value="documentacion">Trámites y obligaciones</option>
         </select>
       </label>
-      <label>Sistema
+      <label>Tipo
         <select id="filtro-sistema" onchange="Pantallas.renderHistorial()">
-          <option value="">Todos los sistemas</option>
+          <option value="">Todos los tipos</option>
         </select>
       </label>
       <!-- 📅 Búsqueda por rango de fechas -->
@@ -936,7 +1223,7 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
       <button class="btn-texto" onclick="Pantallas.lista()">← Mis vehículos</button>
     </div>
     <h1>Obligaciones legales</h1>
-    <p class="subtitulo">ITV, seguros e impuestos de todos tus vehículos, ordenados por vencimiento.</p>
+    <p class="subtitulo">Tus avisos de todos los vehículos, separados por tipo y ordenados por vencimiento.</p>
     <div id="contenido-obligaciones"></div>
   </section>
 
@@ -966,13 +1253,21 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
       </div>
       <div class="campo">
         <label for="aj-pais">País</label>
-        <select id="aj-pais" onchange="Util.toggleOtro('aj-pais','aj-pais-otro'); Acciones.guardarPerfil()"></select>
-        <input id="aj-pais-otro" class="input-otro" type="text" placeholder="Escribe tu país" maxlength="40" onchange="Acciones.guardarPerfil()">
+        <select id="aj-pais" onchange="Util.toggleOtro('aj-pais','aj-pais-otro'); Acciones.guardarPerfil()">
+          <option value="España">España</option>
+          <option value="__otro__">Otro (especificar)…</option>
+        </select>
+        <input id="aj-pais-otro" class="input-otro" type="text" placeholder="Escribe tu país" maxlength="40" style="display:none" onchange="Acciones.guardarPerfil()">
       </div>
       <div class="campo" style="margin-bottom:0">
         <label for="aj-moneda">Moneda</label>
-        <select id="aj-moneda" onchange="Acciones.cambiarMoneda(this.value)"></select>
-        <div class="ayuda">Cambiar la moneda solo cambia el símbolo, no convierte las cifras ya registradas.</div>
+        <select id="aj-moneda" onchange="Util.toggleOtro('aj-moneda','aj-moneda-otro')">
+          <option value="EUR">Euro (€)</option>
+          <option value="__otro__">Otra (especificar)…</option>
+        </select>
+        <input id="aj-moneda-otro" class="input-otro" type="text" placeholder="Símbolo o nombre corto (ej: $, Bs, soles)" maxlength="20" style="display:none">
+        <button type="button" class="btn-secundario" style="margin-top:10px" onclick="Acciones.cambiarMoneda()">Guardar moneda</button>
+        <div class="ayuda">Cambiar la moneda solo cambia el símbolo, no convierte las cifras ya registradas. Te recomendamos un símbolo o abreviatura corta.</div>
       </div>
     </div>
 
@@ -1004,11 +1299,18 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
     </div>
   </section>
 
+  <!-- (v32) Punto 8: visor de imagen a pantalla completa. Oculto por defecto;
+       se abre con Fotos.ampliar(src). Al tocar el fondo o la X, se cierra. -->
+  <div id="visor-imagen" onclick="Fotos.cerrarVisor()">
+    <button class="visor-cerrar" aria-label="Cerrar">✕</button>
+    <img id="visor-imagen-img" src="" alt="Imagen ampliada">
+  </div>
+
 </main>
 
 <script>
 /* ============================================================
-   VEHICLETRACK v2 — Lógica de la aplicación
+   VIRAFY v15 — Lógica de la aplicación
    ============================================================
    ARQUITECTURA EN 4 CAPAS (pensada para migrar a React Native):
 
@@ -1052,9 +1354,24 @@ const Util = {
   // Da formato a un importe en la MONEDA elegida por el usuario (v9).
   // Importante: NO convierte divisas. Solo cambia el símbolo y su posición.
   // El número en sí se muestra siempre con separadores españoles (1.234,56).
+  // Resuelve la moneda activa, venga de la tabla MONEDAS (ej: 'EUR')
+  // o sea un símbolo libre escrito por el usuario (ej: 'Bs', 'S/').
+  // Devuelve siempre { simbolo, antes, espacio } para formatear igual.
+  // Si es libre, el símbolo va DETRÁS con espacio, como el euro.
+  monedaActiva() {
+    const codigo = Config.moneda();
+    if (MONEDAS[codigo]) return MONEDAS[codigo];        // moneda conocida
+    return { simbolo: codigo, antes: false, espacio: true }; // símbolo libre
+  },
+
+  // Solo el símbolo de la moneda activa (para etiquetas tipo "Coste (€)")
+  simboloMoneda() {
+    return Util.monedaActiva().simbolo;
+  },
+
   formatearDinero(num) {
     if (num === null || num === undefined || num === '') return '—';
-    const m = MONEDAS[Config.moneda()] || MONEDAS.EUR;
+    const m = Util.monedaActiva();
     const cifra = Util.formatearNumero(num, 2);
     const sep = m.espacio ? ' ' : '';
     return m.antes ? (m.simbolo + sep + cifra) : (cifra + sep + m.simbolo);
@@ -1180,9 +1497,34 @@ const Util = {
     return div.innerHTML;
   },
 
+  /* (v18) Une varios datos con " · " omitiendo los vacíos o nulos.
+     Así, si el año o el combustible no se han rellenado, no aparecen
+     separadores sueltos tipo "SEAT León ·  · ". Cada valor se escapa. */
+  unirDatos(...valores) {
+    return valores
+      .filter(v => v !== null && v !== undefined && String(v).trim() !== '')
+      .map(v => Util.escapar(v))
+      .join(' · ');
+  },
+
   // Diálogos centralizados. En React Native se cambiarán por Alert.alert()
   // tocando SOLO estas dos funciones, no toda la app.
   confirmar(mensaje) { return confirm(mensaje); },
+
+  // (v35) Texto legible del motivo de baja a partir del objeto v.baja.
+  // Si el motivo es "otro", usa el texto libre que escribió el usuario.
+  textoMotivoBaja(baja) {
+    if (!baja) return 'Dado de baja';
+    const ETIQUETAS = {
+      vendido: 'Vendido',
+      entregado: 'Entregado',
+      achatarrado: 'Achatarrado',
+      siniestro: 'Siniestro total',
+      otro: 'Baja'
+    };
+    if (baja.motivo === 'otro' && baja.motivoTexto) return baja.motivoTexto;
+    return ETIQUETAS[baja.motivo] || 'Dado de baja';
+  },
   avisar(mensaje) { alert(mensaje); },
 
   /* ----- Opción "Otro (especificar)" en desplegables (v10) -----
@@ -1259,7 +1601,7 @@ const CATEGORIAS = {
     combustible: 'Combustible (pérdida de potencia, bomba...)'
   },
   documentacion: {
-    itv: 'ITV / Inspección técnica',
+    itv: 'ITV (inspección técnica obligatoria)',
     seguro: 'Seguro',
     multas: 'Multas',
     impuestos: 'Impuestos (IVTM, matriculación...)',
@@ -1292,61 +1634,101 @@ const Obligaciones = {
     impuestos: { icono: '🏛️', nombre: 'Impuesto de circulación' }
   },
 
+  /* (v21) Ventana de aviso por tipo: con cuántos días de antelación empieza
+     a avisar cada tipo de trámite. Valores fijos por ahora (no configurables).
+     - Seguro 60 días: en España la no renovación se notifica con 1 mes; avisar
+       a 30 ya es tarde para comparar compañías, por eso 60.
+     - ITV 45 días: conseguir cita puede llevar semanas.
+     - Mantenimiento 20 días: pedir cita en taller es más rápido.
+     - Por defecto 30 para cualquier otro trámite.                            */
+  VENTANAS: { seguro: 60, itv: 45, impuestos: 30, mantenimiento: 20, averia: 20, _defecto: 30 },
+
+  /* (v36) Constantes del PANEL resumen dentro de cada coche (_visionGeneralHTML).
+     Ese panel NO usa las ventanas por tipo de arriba: usa un único umbral
+     general (no distingue seguro/ITV/etc.) porque es un resumen, no la lista
+     de avisos accionables. Antes estos números estaban "sueltos" (hardcodeados)
+     dentro de la función; los nombramos aquí para que se vean y se cambien en
+     un solo sitio. Si algún día quieres que el panel también respete las
+     ventanas por tipo, este es el punto a tocar. */
+  VENTANA_PANEL_DIAS: 30,   // a cuántos días se considera "próximo" en el panel
+  MARGEN_KM: 1000,          // a cuántos km se considera "próxima" una revisión por km
+
+  // Días de antelación con que avisa un tipo concreto.
+  ventanaDe(subcategoria, categoria) {
+    if (this.VENTANAS[subcategoria] != null) return this.VENTANAS[subcategoria];
+    if (this.VENTANAS[categoria] != null) return this.VENTANAS[categoria];
+    return this.VENTANAS._defecto;
+  },
+
   /* Recolecta TODAS las obligaciones con fecha de todos los vehículos y las
      devuelve ordenadas de la más urgente a la más lejana.
 
-     Dos fuentes:
-     1. Actuaciones de tipo ITV/seguro/impuesto que tengan proximaRevisionFecha.
-     2. El seguroVencimiento que cada vehículo guarda en su ficha (v8).
+     (v17) Una sola fuente: actuaciones de tipo ITV/seguro/impuesto que tengan
+     proximaRevisionFecha. El seguro ya no se guarda en la ficha del vehículo,
+     así que desaparece la duplicidad que antes había que evitar.
 
      Cada elemento devuelto lleva: vehículo, tipo (icono+nombre), la fecha,
      los días que faltan (negativo = vencida) y un "nivel" para el color.   */
   recolectar() {
     const items = [];
 
-    // Fuente 1: actuaciones marcadas como obligación con fecha de próxima
     BD.obtenerActuaciones().forEach(a => {
-      if (!a.proximaRevisionFecha) return;
-      if (!this.esObligacion(a.categoria, a.subcategoria)) return;
       const v = BD.obtenerVehiculo(a.vehiculoId);
       if (!v) return;
-      const et = this.ETIQUETAS[a.subcategoria] || { icono: '📄', nombre: a.subcategoria };
-      items.push({
-        vehiculoId: v.id,
-        vehiculo: v.nombre,
-        icono: et.icono,
-        tipo: et.nombre,
-        fecha: a.proximaRevisionFecha,
-        dias: Util.diasHasta(a.proximaRevisionFecha),
-        // El seguro avisa con su propio margen de preaviso (45 días por defecto);
-        // el resto de obligaciones, con el margen estándar de 30 días.
-        umbral: (a.subcategoria === 'seguro' && a.preavisoDias != null) ? a.preavisoDias : 30,
-        origenActuacionId: a.id   // para poder abrir la actuación al tocar
-      });
+      // (v35) Un vehículo dado de baja ya no es del usuario: no debe generar
+      // avisos (ITV, seguro, pagos pendientes...). Se ignora aquí.
+      if (v.dadoBaja) return;
+      const et = this.ETIQUETAS[a.subcategoria] ||
+                 { icono: (a.categoria === 'documentacion' ? '📄' : '🔧'), nombre: a.titulo || a.subcategoria };
+
+      // (v21) Dos orígenes de fecha futura:
+      //  1. Citas PROGRAMADAS (v20): la propia actuación es la cita.
+      //  2. Próximas revisiones (sistema antiguo): recordatorio colgado de una
+      //     actuación ya realizada. Solo si no se ha marcado como atendido.
+      if (a.programada) {
+        items.push({
+          vehiculoId: v.id, vehiculo: v.nombre, icono: et.icono, tipo: et.nombre,
+          categoria: a.categoria, // (v26) para separar trámites de mantenimiento en la pantalla
+          fecha: a.fecha, dias: Util.diasHasta(a.fecha),
+          umbral: (a.subcategoria === 'seguro' && a.preavisoDias != null)
+                    ? a.preavisoDias : this.ventanaDe(a.subcategoria, a.categoria),
+          origenActuacionId: a.id
+        });
+      } else if (a.proximaRevisionFecha && !a.completada) {
+        items.push({
+          vehiculoId: v.id, vehiculo: v.nombre, icono: et.icono, tipo: et.nombre,
+          categoria: a.categoria, // (v26)
+          fecha: a.proximaRevisionFecha, dias: Util.diasHasta(a.proximaRevisionFecha),
+          umbral: (a.subcategoria === 'seguro' && a.preavisoDias != null)
+                    ? a.preavisoDias : this.ventanaDe(a.subcategoria, a.categoria),
+          origenActuacionId: a.id
+        });
+      }
+
+      // (v24) Multa o impuesto registrados pero SIN pagar: son una obligación
+      // de pago pendiente. Avisan hasta marcarse como pagados. Si tienen fecha
+      // límite, el aviso se calcula sobre ella; si no, se muestra como pendiente
+      // permanente (urgencia media) para que no se olvide.
+      if (!a.programada && (a.subcategoria === 'multas' || a.subcategoria === 'impuestos') && a.pagada === false) {
+        const tieneLimite = !!a.fechaLimitePago;
+        items.push({
+          vehiculoId: v.id, vehiculo: v.nombre, icono: et.icono,
+          tipo: et.nombre + ' sin pagar',
+          categoria: a.categoria, // (v26) multa/impuesto son 'documentacion'
+          fecha: tieneLimite ? a.fechaLimitePago : a.fecha,
+          dias: tieneLimite ? Util.diasHasta(a.fechaLimitePago) : 0,
+          umbral: this.ventanaDe(a.subcategoria, a.categoria),
+          origenActuacionId: a.id,
+          esPago: true,            // marca para tratarlo como "pendiente de pago"
+          sinLimite: !tieneLimite  // sin fecha límite: pendiente permanente
+        });
+      }
     });
 
-    // Fuente 2: el vencimiento del seguro guardado en la ficha del vehículo.
-    // Evitamos duplicar si ya hay una actuación de seguro con la MISMA fecha.
-    BD.obtenerVehiculos().forEach(v => {
-      if (!v.seguroVencimiento) return;
-      const yaEsta = items.some(it =>
-        it.vehiculoId === v.id && it.tipo === 'Seguro' && it.fecha === v.seguroVencimiento);
-      if (yaEsta) return;
-      items.push({
-        vehiculoId: v.id,
-        vehiculo: v.nombre,
-        icono: this.ETIQUETAS.seguro.icono,
-        tipo: 'Seguro' + (v.seguroCompania ? ' · ' + v.seguroCompania : ''),
-        fecha: v.seguroVencimiento,
-        dias: Util.diasHasta(v.seguroVencimiento),
-        umbral: 45,   // el seguro de la ficha usa el preaviso por defecto (45 días)
-        origenActuacionId: null   // viene de la ficha, no de una actuación
-      });
-    });
-
-    // Nivel de urgencia: cada obligación usa su propio umbral de preaviso
+    // Nivel de urgencia: cada obligación usa su propio umbral (ventana por tipo)
     items.forEach(it => {
-      if (it.dias < 0) it.nivel = 'vencida';
+      if (it.sinLimite) it.nivel = 'proxima';        // pago pendiente sin fecha: siempre visible
+      else if (it.dias < 0) it.nivel = 'vencida';
       else if (it.dias <= (it.umbral || 30)) it.nivel = 'proxima';
       else it.nivel = 'aldia';
     });
@@ -1370,17 +1752,6 @@ const MONEDAS = {
 
 // Cada país propone una moneda por defecto (solo en la bienvenida).
 // El usuario siempre puede cambiarla a mano después.
-const PAISES = {
-  'España':         'EUR',
-  'Portugal':       'EUR',
-  'Francia':        'EUR',
-  'Alemania':       'EUR',
-  'Italia':         'EUR',
-  'Reino Unido':    'GBP',
-  'Estados Unidos': 'USD',
-  'Suiza':          'CHF'
-};
-
 /* ================= CONFIG (preferencias del usuario, v9) =========
    Guarda nombre, país y moneda. Vive en localStorage (es diminuto
    y así se lee al instante, sin esperar a IndexedDB). Mantenemos
@@ -1426,16 +1797,16 @@ const Config = {
      'vehiculos' y 'actuaciones'. Cada registro se guarda por su 'id'.
    · "transacción" = una operación de lectura o escritura.        */
 const BD = {
-  NOMBRE_BD: 'vehicletrack',
+  NOMBRE_BD: 'virafy',
   VERSION_BD: 1,
   _db: null,            // conexión abierta a IndexedDB
   _vehiculos: [],       // copia en memoria (para lecturas rápidas)
   _actuaciones: [],
 
   // Claves de la antigua versión en localStorage (solo para migrar)
-  CLAVE_VEHICULOS: 'vehicletrack_vehicles',
-  CLAVE_ACTUACIONES: 'vehicletrack_actuaciones',
-  CLAVE_MIGRADO: 'vehicletrack_migrado_idb',
+  CLAVE_VEHICULOS: 'virafy_vehicles',
+  CLAVE_ACTUACIONES: 'virafy_actuaciones',
+  CLAVE_MIGRADO: 'virafy_migrado_idb',
 
   /* ----- Apertura de la base de datos ----- */
   // Abre (o crea la primera vez) la base de datos. Devuelve una PROMESA:
@@ -1537,6 +1908,7 @@ const BD = {
     for (const v of vs) await this._guardar('vehiculos', v);
     for (const a of as) {
       if (a.completada === undefined) a.completada = false;
+      if (a.programada === undefined) a.programada = false; // (v20) datos antiguos = realizados
       await this._guardar('actuaciones', a);
     }
     localStorage.setItem(this.CLAVE_MIGRADO, '1');
@@ -1574,6 +1946,30 @@ const BD = {
     const v = this.obtenerVehiculo(id);
     if (!v) return false;
     Object.assign(v, datos);
+    this._guardar('vehiculos', v).catch(e => this._avisarError(e));
+    return true;
+  },
+
+  // (v35) Dar de baja: el vehículo deja de ser del usuario pero se conserva.
+  // No borra nada; solo marca dadoBaja=true y guarda los datos del cierre
+  // (motivo, fecha, km finales, importe recibido, notas). Un vehículo dado
+  // de baja no genera avisos (se filtra en Obligaciones.recolectar).
+  darDeBajaVehiculo(id, datosBaja) {
+    const v = this.obtenerVehiculo(id);
+    if (!v) return false;
+    v.dadoBaja = true;
+    v.baja = datosBaja; // { motivo, motivoTexto, fecha, km, importe, notas }
+    this._guardar('vehiculos', v).catch(e => this._avisarError(e));
+    return true;
+  },
+
+  // (v35) Reactivar: deshace la baja (recompra o error). Vuelve a estar activo
+  // y a generar avisos. Borramos el objeto 'baja' para no dejar datos huérfanos.
+  reactivarVehiculo(id) {
+    const v = this.obtenerVehiculo(id);
+    if (!v) return false;
+    v.dadoBaja = false;
+    delete v.baja;
     this._guardar('vehiculos', v).catch(e => this._avisarError(e));
     return true;
   },
@@ -1621,7 +2017,7 @@ const BD = {
   /* ----- Preferencias (v5) -----
      El tema lo dejamos en localStorage a propósito: es un dato diminuto
      y así se aplica al instante al cargar, sin esperar a IndexedDB. */
-  CLAVE_TEMA: 'vehicletrack_tema',
+  CLAVE_TEMA: 'virafy_tema',
 
   obtenerTema() {
     return localStorage.getItem(this.CLAVE_TEMA) || 'claro';
@@ -1632,7 +2028,7 @@ const BD = {
   },
 
   /* ----- Configuración del usuario (v9): nombre, país, moneda ----- */
-  CLAVE_CONFIG: 'vehicletrack_config',
+  CLAVE_CONFIG: 'virafy_config',
 
   obtenerConfig() {
     try {
@@ -1665,7 +2061,7 @@ const BD = {
       actuaciones.push(Object.assign({}, a, { fotos: fotos }));
     }
     return JSON.stringify({
-      app: 'VehicleTrack',
+      app: 'Virafy',
       version: 2,
       exportadoEl: new Date().toISOString(),
       vehiculos: vehiculos,
@@ -1676,8 +2072,8 @@ const BD = {
   // Importar es ASÍNCRONO: reemplaza memoria y reescribe IndexedDB entero.
   async importarTodo(texto) {
     const datos = JSON.parse(texto); // lanza error si el archivo no es JSON
-    if (datos.app !== 'VehicleTrack' || !Array.isArray(datos.vehiculos) || !Array.isArray(datos.actuaciones)) {
-      throw new Error('El archivo no es una copia de seguridad válida de VehicleTrack.');
+    if (datos.app !== 'Virafy' || !Array.isArray(datos.vehiculos) || !Array.isArray(datos.actuaciones)) {
+      throw new Error('El archivo no es una copia de seguridad válida de Virafy.');
     }
     // Las fotos vienen como base64 (texto) en el archivo: las pasamos a Blob
     // para guardarlas ligeras, igual que las fotos nuevas.
@@ -1713,7 +2109,8 @@ const Estado = {
   editandoActuacionId: null, // null = creando nueva
   pantallaAnterior: 'pantalla-lista',
   fotoVehiculoTemp: null,    // foto del formulario, aún sin guardar
-  fotosActuacionTemp: []     // hasta 3 fotos del formulario
+  fotosActuacionTemp: [],    // hasta 3 fotos del formulario
+  programandoActuacion: false // (v20) true = se está programando algo futuro
 };
 
 /* ================= CAPA 3: PANTALLAS ================= */
@@ -1738,43 +2135,20 @@ const Pantallas = {
     document.body.classList.add('onboarding'); // oculta la cabecera
     document.getElementById('error-bienvenida').classList.remove('visible');
 
-    // Rellenamos los desplegables de país y moneda
-    document.getElementById('b-pais').innerHTML = Pantallas._opcionesPais('España');
-    document.getElementById('b-moneda').innerHTML = Pantallas._opcionesMoneda('EUR');
+    // Los desplegables de país y moneda ya tienen sus opciones en el HTML
+    // (España y Euro por defecto). Aquí solo reseteamos el estado por si
+    // el usuario vuelve a esta pantalla: campos "Otro" ocultos y vacíos.
+    document.getElementById('b-pais').value = 'España';
     document.getElementById('b-pais-otro').style.display = 'none';
     document.getElementById('b-pais-otro').value = '';
+    document.getElementById('b-moneda').value = 'EUR';
+    document.getElementById('b-moneda-otro').style.display = 'none';
+    document.getElementById('b-moneda-otro').value = '';
 
     Pantallas._mostrar('pantalla-bienvenida');
   },
 
   // Genera las <option> de monedas (ej: "Euro (€)")
-  _opcionesMoneda(seleccionada) {
-    return Object.keys(MONEDAS).map(codigo => {
-      const m = MONEDAS[codigo];
-      const sel = codigo === seleccionada ? ' selected' : '';
-      return '<option value="' + codigo + '"' + sel + '>' + m.nombre + ' (' + m.simbolo + ')</option>';
-    }).join('');
-  },
-
-  // Genera las <option> de países (+ "Otro" al final)
-  _opcionesPais(seleccionado) {
-    const paises = Object.keys(PAISES).map(pais => {
-      const sel = pais === seleccionado ? ' selected' : '';
-      return '<option value="' + pais + '"' + sel + '>' + pais + '</option>';
-    }).join('');
-    return paises + '<option value="__otro__">Otro (especificar)…</option>';
-  },
-
-  // Al elegir país en la bienvenida, se propone su moneda por defecto.
-  // Si elige "Otro", mostramos el campo de texto (la moneda queda a su elección).
-  paisPreseleccionaMoneda() {
-    const pais = document.getElementById('b-pais').value;
-    Util.toggleOtro('b-pais', 'b-pais-otro');
-    if (pais !== Util.VALOR_OTRO) {
-      document.getElementById('b-moneda').value = PAISES[pais] || 'EUR';
-    }
-  },
-
   /* ----- Lista de vehículos ----- */
   lista() {
     Estado.vehiculoActualId = null;
@@ -1800,28 +2174,60 @@ const Pantallas = {
       return;
     }
 
-    contenedor.innerHTML = vehiculos.map(v => {
-      const foto = v.foto
-        ? '<img src="' + Fotos.urlDe(v.foto) + '" alt="Foto de ' + Util.escapar(v.nombre) + '">'
-        : (ICONO_TIPO[v.tipo] || '🚗');
-      const matricula = v.matricula
-        ? '<span class="matricula"><span class="banda">E</span><span class="numero">' + Util.escapar(v.matricula) + '</span></span>'
-        : '<span></span>';
-      return (
-        '<div class="tarjeta-vehiculo" role="button" tabindex="0" onclick="Pantallas.detalleVehiculo(\'' + v.id + '\')">' +
-          '<div class="foto">' + foto + '</div>' +
-          '<div class="cuerpo">' +
-            '<div class="nombre">' + Util.escapar(v.nombre) + '</div>' +
-            '<div class="detalle">' + Util.escapar(v.marca) + ' ' + Util.escapar(v.modelo) + ' · ' + Util.escapar(v.anio) + ' · ' + Util.escapar(v.combustible) + '</div>' +
-            '<div class="pie">' + matricula + '<span class="odometro">' + Util.formatearKm(v.kmActuales) + '</span></div>' +
-          '</div>' +
-        '</div>'
-      );
-    }).join('');
+    // (v35) Separamos activos de los dados de baja. Los activos van arriba
+    // como siempre; los dados de baja, en su propio bloque debajo, atenuados.
+    const activos = vehiculos.filter(v => !v.dadoBaja);
+    const baja = vehiculos.filter(v => v.dadoBaja);
+
+    let html = activos.map(v => Pantallas._tarjetaVehiculoHTML(v)).join('');
+
+    if (baja.length > 0) {
+      html += '<div class="cabecera-bloque-lista">📕 Dados de baja (' + baja.length + ')</div>';
+      html += baja.map(v => Pantallas._tarjetaVehiculoHTML(v)).join('');
+    }
+
+    contenedor.innerHTML = html;
 
     Pantallas._renderAccesoObligaciones();
     Pantallas._renderAlertas();
     Pantallas._mostrar('pantalla-lista');
+  },
+
+  // (v35) Extraído a helper para reutilizarlo en activos y dados de baja.
+  // Una tarjeta dada de baja lleva la clase .baja (atenuada) y un chip con
+  // el motivo en lugar del odómetro.
+  _tarjetaVehiculoHTML(v) {
+    const foto = v.foto
+      ? '<img src="' + Fotos.urlDe(v.foto) + '" alt="Foto de ' + Util.escapar(v.nombre) + '">'
+      : (ICONO_TIPO[v.tipo] || '🚗');
+    const matricula = v.matricula
+      ? '<span class="matricula"><span class="banda">E</span><span class="numero">' + Util.escapar(v.matricula) + '</span></span>'
+      : '<span></span>';
+
+    if (v.dadoBaja) {
+      const motivo = Util.textoMotivoBaja(v.baja);
+      return (
+        '<div class="tarjeta-vehiculo baja" role="button" tabindex="0" onclick="Pantallas.detalleVehiculo(\'' + v.id + '\')">' +
+          '<div class="foto">' + foto + '</div>' +
+          '<div class="cuerpo">' +
+            '<div class="nombre">' + Util.escapar(v.nombre) + '</div>' +
+            '<div class="detalle">' + Util.unirDatos(v.marca + ' ' + v.modelo, v.anio, v.combustible) + '</div>' +
+            '<span class="chip-baja">📕 ' + Util.escapar(motivo) + '</span>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    return (
+      '<div class="tarjeta-vehiculo" role="button" tabindex="0" onclick="Pantallas.detalleVehiculo(\'' + v.id + '\')">' +
+        '<div class="foto">' + foto + '</div>' +
+        '<div class="cuerpo">' +
+          '<div class="nombre">' + Util.escapar(v.nombre) + '</div>' +
+          '<div class="detalle">' + Util.unirDatos(v.marca + ' ' + v.modelo, v.anio, v.combustible) + '</div>' +
+          '<div class="pie">' + matricula + '<span class="odometro">' + Util.formatearKm(v.kmActuales) + '</span></div>' +
+        '</div>' +
+      '</div>'
+    );
   },
 
   /* Botón de acceso a "Obligaciones legales" en el inicio. Muestra un badge
@@ -1832,7 +2238,8 @@ const Pantallas = {
     const items = Obligaciones.recolectar();
     if (items.length === 0) { zona.innerHTML = ''; return; }
 
-    // Contamos las que piden atención (vencidas o próximas en 30 días)
+    // Contamos las que piden atención: vencidas o dentro de su ventana de aviso
+    // (cada tipo tiene la suya: seguro 60, ITV 45, mantenimiento 20…).
     const atencion = items.filter(it => it.nivel !== 'aldia').length;
     const badge = atencion > 0
       ? '<span class="ao-badge">' + atencion + '</span>'
@@ -1850,47 +2257,122 @@ const Pantallas = {
       '</button>';
   },
 
-  // Recordatorios pendientes (no completados): vencidos o cercanos.
-  // ✅ Novedad v2: botón "Hecho" para marcar el recordatorio como atendido.
+  // (v21) Avisos de portada: usa el recolector central de Obligaciones, que
+  // aplica la ventana por tipo (seguro 60, ITV 45, mantenimiento 20…). Muestra
+  // solo lo vencido o lo próximo (dentro de su ventana); lo lejano no molesta.
   _renderAlertas() {
+    // (v36) OJO – ACOPLAMIENTO: la regla "la fecha manda sobre el km" para no
+    // duplicar avisos vive AQUÍ y también en _visionGeneralHTML (el panel
+    // resumen dentro de cada coche). Si cambias el criterio de avisos, revisa
+    // LOS DOS sitios. No comparten código a propósito: esto es una lista de
+    // avisos accionables; aquello es un resumen en prosa.
     const zona = document.getElementById('zona-alertas');
-    const hoy = Util.hoyISO();
-    const limite = new Date();
-    limite.setDate(limite.getDate() + 30);
-    const fechaLimite = Util.fechaISOLocal(limite); // hora local, no UTC
-    const avisos = [];
+    const avisos = Obligaciones.recolectar().filter(it => it.nivel !== 'aldia');
 
+    // (v25) Para no duplicar, anotamos qué actuaciones YA tienen aviso por fecha.
+    // A esas, si además tienen km, les añadimos el km dentro del mismo aviso,
+    // en vez de crear un segundo aviso aparte.
+    const conAvisoFecha = new Set(avisos.map(it => it.origenActuacionId).filter(Boolean));
+
+    // Avisos SOLO por km: para revisiones que tienen km pero NO fecha (o cuya
+    // fecha aún no entra en ventana). Si ya hay aviso por fecha, se omite aquí.
+    const avisosKm = [];
     BD.obtenerActuaciones().forEach(a => {
-      if (a.completada) return; // ya atendido: no molestar más
+      if (a.completada || a.programada) return;
+      if (!a.proximaRevisionKm) return;
+      if (conAvisoFecha.has(a.id)) return; // ya avisado por fecha: no duplicar
       const v = BD.obtenerVehiculo(a.vehiculoId);
-      if (!v) return;
-
-      if (a.proximaRevisionFecha && a.proximaRevisionFecha <= fechaLimite) {
-        const vencida = a.proximaRevisionFecha < hoy;
-        avisos.push({
-          a,
-          texto: (vencida ? '⚠️ Revisión vencida' : '🔔 Revisión próxima') + ' · ' + Util.escapar(v.nombre),
-          detalle: Util.escapar(a.titulo) + ' — fecha límite ' + Util.formatearFecha(a.proximaRevisionFecha)
-        });
-        return;
-      }
-      if (a.proximaRevisionKm && v.kmActuales >= a.proximaRevisionKm - 1000) {
-        avisos.push({
-          a,
+      if (!v || v.kmActuales == null) return;
+      if (v.kmActuales >= a.proximaRevisionKm - 1000) {
+        const faltanKm = a.proximaRevisionKm - v.kmActuales;
+        avisosKm.push({
+          id: a.id,
           texto: '🔔 Revisión por km · ' + Util.escapar(v.nombre),
-          detalle: Util.escapar(a.titulo) + ' — toca a los ' + Util.formatearKm(a.proximaRevisionKm)
+          detalle: Util.escapar(a.titulo) + ' — ' + (faltanKm <= 0
+            ? 'superada en ' + Util.formatearKm(Math.abs(faltanKm))
+            : 'faltan ' + Util.formatearKm(faltanKm))
         });
       }
     });
 
-    zona.innerHTML = avisos.map(av =>
+    let html = avisos.map(it => {
+      const vencida = it.nivel === 'vencida';
+      const cuando = vencida
+        ? 'venció hace ' + Math.abs(it.dias) + ' días'
+        : (it.dias === 0 ? 'es hoy' : 'en ' + it.dias + ' días');
+      const texto = (vencida ? '⚠️ ' : '🔔 ') + it.icono + ' ' + Util.escapar(it.tipo) + ' · ' + Util.escapar(it.vehiculo);
+      let detalle;
+      if (it.esPago) {
+        detalle = it.sinLimite
+          ? 'Pendiente de pago'
+          : (vencida ? 'Plazo de pago vencido el ' : 'Pagar antes del ') + Util.formatearFecha(it.fecha) + ' (' + cuando + ')';
+      } else {
+        detalle = (vencida ? 'Venció el ' : 'Vence el ') + Util.formatearFecha(it.fecha) + ' (' + cuando + ')';
+        // (v25) Si esta misma revisión también tiene objetivo de km, lo añadimos
+        // aquí dentro (la fecha manda, el km es complementario). Un solo aviso.
+        const a = it.origenActuacionId ? BD.obtenerActuacion(it.origenActuacionId) : null;
+        if (a && a.proximaRevisionKm) {
+          const v = BD.obtenerVehiculo(a.vehiculoId);
+          if (v && v.kmActuales != null) {
+            const faltanKm = a.proximaRevisionKm - v.kmActuales;
+            detalle += faltanKm <= 0
+              ? ' · o por km (superada)'
+              : ' · o a los ' + Util.formatearKm(a.proximaRevisionKm) + ' (faltan ' + Util.formatearKm(faltanKm) + ')';
+          } else {
+            detalle += ' · o a los ' + Util.formatearKm(a.proximaRevisionKm);
+          }
+        }
+      }
+      const onclick = it.origenActuacionId
+        ? 'Pantallas.detalleActuacion(\'' + it.origenActuacionId + '\')'
+        : 'Pantallas.detalleVehiculo(\'' + it.vehiculoId + '\')';
+      return (
+        '<div class="alerta' + (vencida ? ' vencida' : '') + '">' +
+          '<div class="cuerpo-alerta" role="button" tabindex="0" onclick="' + onclick + '">' +
+            '<strong>' + texto + '</strong><small>' + detalle + '</small>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+
+    html += avisosKm.map(av =>
       '<div class="alerta">' +
-        '<div class="cuerpo-alerta" role="button" tabindex="0" onclick="Pantallas.detalleActuacion(\'' + av.a.id + '\')">' +
+        '<div class="cuerpo-alerta" role="button" tabindex="0" onclick="Pantallas.detalleActuacion(\'' + av.id + '\')">' +
           '<strong>' + av.texto + '</strong><small>' + av.detalle + '</small>' +
         '</div>' +
-        '<button class="btn-mini btn-hecho" onclick="Acciones.marcarRecordatorioHecho(\'' + av.a.id + '\')">✓ Hecho</button>' +
+        '<button class="btn-mini btn-hecho" onclick="Acciones.marcarRecordatorioHecho(\'' + av.id + '\')">✓ Hecho</button>' +
       '</div>'
     ).join('');
+
+    // (v21) ITV siempre presente: por cada vehículo sin ninguna ITV con fecha
+    // futura, invitamos a añadirla para poder avisar. La ITV es la obligación
+    // legal central; no debe quedar en silencio solo porque falte el dato.
+    html += Pantallas._recordatoriosITV();
+
+    zona.innerHTML = html;
+  },
+
+  /* (v21) Genera el aviso "añade la fecha de tu ITV" para los vehículos que
+     no tengan ninguna ITV registrada con fecha futura (programada o próxima
+     revisión). Si ya hay una ITV con fecha, ese vehículo no necesita el aviso. */
+  _recordatoriosITV() {
+    const vehiculos = BD.obtenerVehiculos();
+    return vehiculos.map(v => {
+      const actuaciones = BD.obtenerActuaciones(v.id);
+      const tieneITVconFecha = actuaciones.some(a =>
+        a.subcategoria === 'itv' &&
+        ((a.programada && a.fecha) || (a.proximaRevisionFecha && !a.completada))
+      );
+      if (tieneITVconFecha) return '';
+      return (
+        '<div class="alerta itv-falta">' +
+          '<div class="cuerpo-alerta" role="button" tabindex="0" onclick="Pantallas.detalleVehiculo(\'' + v.id + '\')">' +
+            '<strong>🔧 ITV · ' + Util.escapar(v.nombre) + '</strong>' +
+            '<small>Añade la fecha de tu ITV para que te avisemos a tiempo.</small>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
   },
 
   /* ----- Formulario de vehículo ----- */
@@ -1907,7 +2389,6 @@ const Pantallas = {
     // Ocultamos los campos de texto "Otro" (form.reset no los oculta)
     document.getElementById('v-tipo-otro').style.display = 'none';
     document.getElementById('v-combustible-otro').style.display = 'none';
-    document.getElementById('v-seguro-tipo-otro').style.display = 'none';
     document.getElementById('v-adq-forma-otro').style.display = 'none';
     document.getElementById('v-fin-modalidad-otro').style.display = 'none';
     // El campo de batería empieza oculto (v14); se mostrará si el combustible lo pide
@@ -1923,19 +2404,14 @@ const Pantallas = {
         document.getElementById('v-nombre').value = v.nombre;
         // tipo, combustible y tipo de seguro pueden ser un valor "Otro" libre
         Util.cargarConOtro('v-tipo', 'v-tipo-otro', v.tipo);
-        Util.cargarConOtro('v-combustible', 'v-combustible-otro', v.combustible);
+        Util.cargarConOtro('v-combustible', 'v-combustible-otro', v.combustible || '');
         document.getElementById('v-marca').value = v.marca;
         document.getElementById('v-modelo').value = v.modelo;
-        document.getElementById('v-anio').value = v.anio;
-        document.getElementById('v-km').value = v.kmActuales;
+        document.getElementById('v-anio').value = v.anio || '';
+        document.getElementById('v-km').value = (v.kmActuales != null) ? v.kmActuales : '';
         document.getElementById('v-matricula').value = v.matricula || '';
         document.getElementById('v-color').value = v.color || '';
         document.getElementById('v-vin').value = v.vin || '';
-        document.getElementById('v-seguro-compania').value = v.seguroCompania || '';
-        Util.cargarConOtro('v-seguro-tipo', 'v-seguro-tipo-otro', v.seguroTipo || '');
-        document.getElementById('v-seguro-poliza').value = v.seguroPoliza || '';
-        document.getElementById('v-seguro-vencimiento').value = v.seguroVencimiento || '';
-        document.getElementById('v-seguro-telefono').value = v.seguroTelefono || '';
         // Cargamos la capacidad de batería y mostramos el campo si el combustible lo pide (v14)
         document.getElementById('v-bateria').value = (v.bateriaKwh !== null && v.bateriaKwh !== undefined) ? v.bateriaKwh : '';
         Acciones.toggleCampoBateria();
@@ -1958,6 +2434,93 @@ const Pantallas = {
       }
     }
     Pantallas._mostrar('pantalla-form-vehiculo');
+  },
+
+  /* ----- (v35) Formulario para dar de baja un vehículo ----- */
+  // Abre la pantalla de baja con la fecha de hoy por defecto y los campos
+  // limpios. El importe se muestra/oculta según el motivo.
+  formBaja(id) {
+    Estado.vehiculoActualId = id;
+    const v = BD.obtenerVehiculo(id);
+    if (!v) { Pantallas.lista(); return; }
+
+    document.getElementById('titulo-baja').textContent = 'Dar de baja: ' + v.nombre;
+
+    // Campos limpios; fecha = hoy por defecto.
+    document.getElementById('baja-motivo').value = 'vendido';
+    document.getElementById('baja-motivo-otro').value = '';
+    document.getElementById('campo-baja-motivo-otro').style.display = 'none';
+    document.getElementById('baja-fecha').value = Util.hoyISO();
+    // Km finales: precargamos el km actual del vehículo si lo hay (es lo más probable).
+    document.getElementById('baja-km').value =
+      (v.kmActuales !== null && v.kmActuales !== undefined) ? v.kmActuales : '';
+    document.getElementById('baja-importe').value = '';
+    document.getElementById('baja-notas').value = '';
+
+    // Etiqueta del importe con el símbolo de la moneda elegida.
+    Pantallas.cambiarMotivoBaja(); // ajusta visibilidad del importe según el motivo
+
+    Pantallas._mostrar('pantalla-baja-vehiculo');
+  },
+
+  // (v35) Al cambiar el motivo: el campo "Otro" aparece solo si elige "otro",
+  // y el importe recibido se oculta en achatarramiento/siniestro (no aplica).
+  cambiarMotivoBaja() {
+    const motivo = document.getElementById('baja-motivo').value;
+    document.getElementById('campo-baja-motivo-otro').style.display =
+      (motivo === 'otro') ? '' : 'none';
+
+    // El importe solo tiene sentido si recibes algo: venta o entrega.
+    const conImporte = (motivo === 'vendido' || motivo === 'entregado' || motivo === 'otro');
+    document.getElementById('campo-baja-importe').style.display = conImporte ? '' : 'none';
+  },
+
+  /* ----- (v35) Cinta informativa en la ficha de un vehículo dado de baja ----- */
+  // Resume el cierre del libro de vida: motivo, fecha y a quién/por qué.
+  _cintaBajaHTML(v) {
+    const b = v.baja || {};
+    const motivo = Util.textoMotivoBaja(b);
+    let texto = '<strong>📕 Este vehículo está dado de baja.</strong> ';
+    texto += 'Su historial se conserva, pero ya no genera avisos. ';
+    const detalles = [];
+    detalles.push('Motivo: ' + Util.escapar(motivo));
+    if (b.fecha) detalles.push('fecha: ' + Util.formatearFecha(b.fecha));
+    if (b.km !== null && b.km !== undefined && b.km !== '') {
+      detalles.push('km finales: ' + Util.formatearKm(b.km));
+    }
+    texto += detalles.join(' · ') + '.';
+    if (b.notas) texto += '<br>' + Util.escapar(b.notas);
+    return '<div class="cinta-baja">' + texto + '</div>';
+  },
+
+  /* ----- (v35) Balance final del coche dado de baja (cierre económico) ----- */
+  // Gastado en toda su vida − importe recibido = coste real de haberlo tenido.
+  // El "gastoTotal" ya viene calculado (suma de actuaciones realizadas).
+  _balanceBajaHTML(v, gastoTotal) {
+    const b = v.baja || {};
+    const tieneImporte = b.importe !== null && b.importe !== undefined && b.importe !== '';
+    const importe = tieneImporte ? Number(b.importe) : 0;
+
+    // Coste real: lo gastado menos lo recuperado al venderlo/entregarlo.
+    const costeReal = gastoTotal - importe;
+
+    let html = '<div class="balance-baja">' +
+      '<div class="titulo-balance">📊 Balance del vehículo</div>' +
+      '<div class="linea-balance"><span>Gasto total en su vida</span>' +
+        '<span class="cifra">' + Util.formatearDinero(gastoTotal) + '</span></div>';
+
+    if (tieneImporte) {
+      html += '<div class="linea-balance"><span>Importe recibido al darlo de baja</span>' +
+        '<span class="cifra">− ' + Util.formatearDinero(importe) + '</span></div>' +
+        '<div class="linea-balance total"><span>Coste real de tenerlo</span>' +
+          '<span class="cifra">' + Util.formatearDinero(costeReal) + '</span></div>' +
+        '<div class="nota-balance">Es lo que te costó este vehículo después de descontar lo que recuperaste al darlo de baja.</div>';
+    } else {
+      html += '<div class="nota-balance">No registraste un importe recibido. El gasto total es lo que te costó mantenerlo durante su vida.</div>';
+    }
+
+    html += '</div>';
+    return html;
   },
 
   /* ----- Bloque de adquisición (v14) ----- */
@@ -2055,38 +2618,6 @@ const Pantallas = {
     );
   },
 
-  /* ----- Bloque de datos del seguro (v8) ----- */
-  // Solo se muestra si el vehículo tiene al menos un dato de seguro.
-  _bloqueSeguroHTML(v) {
-    // ¿Hay algún dato de seguro relleno?
-    const hayDatos = v.seguroCompania || v.seguroTipo || v.seguroPoliza ||
-                     v.seguroVencimiento || v.seguroTelefono;
-    if (!hayDatos) return '';
-
-    const lineas = [];
-    if (v.seguroTipo) lineas.push('Tipo: <strong>' + Util.escapar(v.seguroTipo) + '</strong>');
-    if (v.seguroPoliza) lineas.push('Póliza: <strong>' + Util.escapar(v.seguroPoliza) + '</strong>');
-    if (v.seguroTelefono) lineas.push('Asistencia: <strong>' + Util.escapar(v.seguroTelefono) + '</strong>');
-
-    // El vencimiento se resalta si está cerca o pasado
-    if (v.seguroVencimiento) {
-      const dias = Util.diasHasta(v.seguroVencimiento);
-      let aviso = '';
-      if (dias < 0) aviso = ' ⚠️ (vencido)';
-      else if (dias <= 30) aviso = ' 🔔 (en ' + dias + ' días)';
-      lineas.push('Vencimiento: <strong>' + Util.formatearFecha(v.seguroVencimiento) + '</strong>' + aviso);
-    }
-
-    const titulo = v.seguroCompania ? Util.escapar(v.seguroCompania) : 'Seguro del vehículo';
-
-    return (
-      '<div class="bloque-seguro">' +
-        '<div class="titulo-seguro">🛡 ' + titulo + '</div>' +
-        lineas.map(l => '<div class="linea-seguro">' + l + '</div>').join('') +
-      '</div>'
-    );
-  },
-
   /* ----- Visión general inteligente (novedad v4) ----- */
   // Recibe el vehículo y su lista de actuaciones (ya ordenada de más
   // reciente a más antigua) y devuelve el HTML del panel-resumen.
@@ -2099,9 +2630,14 @@ const Pantallas = {
     const frases = [];   // cada frase será una línea del panel
     let nivel = 'ok';    // ok | aviso | alerta → decide el color del borde
 
-    /* 1. Recordatorios pendientes (mismo criterio que las alertas: 30 días / 1.000 km) */
+    /* 1. Recordatorios pendientes (criterio general del panel: ventana en días
+       y margen en km, definidos como constantes en Obligaciones).
+       (v36) OJO – ACOPLAMIENTO: la regla "fecha manda sobre km" y el conteo de
+       vencidos/próximos están escritos AQUÍ y también en _renderAlertas (la
+       lista de avisos de la portada). Son dos vistas distintas que comparten
+       la misma regla: si cambias el criterio, revisa LOS DOS sitios. */
     const limite = new Date();
-    limite.setDate(limite.getDate() + 30);
+    limite.setDate(limite.getDate() + Obligaciones.VENTANA_PANEL_DIAS);
     const fechaLimite = Util.fechaISOLocal(limite);
 
     let vencidos = 0, proximos = 0;
@@ -2125,7 +2661,10 @@ const Pantallas = {
           }
         }
       }
-      if (a.proximaRevisionKm) {
+      // (v19/v25) Avisos por km. La FECHA manda: si esta revisión ya tiene
+      // fecha, no la contamos otra vez por km (evita el duplicado). El km solo
+      // cuenta por sí mismo cuando la revisión NO tiene fecha asociada.
+      if (a.proximaRevisionKm && !a.proximaRevisionFecha && v.kmActuales !== null && v.kmActuales !== undefined) {
         const faltan = a.proximaRevisionKm - v.kmActuales;
         if (faltan <= 0) {
           vencidos++;
@@ -2133,7 +2672,7 @@ const Pantallas = {
             id: a.id,
             texto: Util.escapar(a.titulo) + ' — superada en ' + Util.formatearKm(Math.abs(faltan))
           });
-        } else if (faltan <= 1000) proximos++;
+        } else if (faltan <= Obligaciones.MARGEN_KM) proximos++;
       }
     });
 
@@ -2151,21 +2690,17 @@ const Pantallas = {
       frases.push('🔔 ' + proximos + (proximos === 1 ? ' recordatorio próximo.' : ' recordatorios próximos.'));
     }
     if (avisoMasCercano) {
-      frases.push('📅 Próximo aviso: ' + Util.escapar(avisoMasCercano.titulo) + ' en ' +
-        Util.diasHasta(avisoMasCercano.proximaRevisionFecha) + ' días.');
-    }
-
-    /* 1.b Vencimiento del seguro (v8): vive en el vehículo, no en una actuación */
-    if (v.seguroVencimiento) {
-      const diasSeguro = Util.diasHasta(v.seguroVencimiento);
-      const cia = v.seguroCompania ? ' (' + Util.escapar(v.seguroCompania) + ')' : '';
-      if (diasSeguro < 0) {
-        nivel = 'alerta';
-        frases.push('🛡 El seguro' + cia + ' está vencido desde hace ' + Math.abs(diasSeguro) + ' días.');
-      } else if (diasSeguro <= 30) {
-        if (nivel === 'ok') nivel = 'aviso';
-        frases.push('🛡 El seguro' + cia + ' vence en ' + diasSeguro + ' días.');
+      let fraseAviso = '📅 Próximo aviso: ' + Util.escapar(avisoMasCercano.titulo) + ' en ' +
+        Util.diasHasta(avisoMasCercano.proximaRevisionFecha) + ' días';
+      // (v25) Si esa misma revisión también tiene objetivo por km, lo añadimos
+      // dentro del mismo aviso (la fecha manda, el km es complementario).
+      if (avisoMasCercano.proximaRevisionKm && v.kmActuales != null) {
+        const faltanKm = avisoMasCercano.proximaRevisionKm - v.kmActuales;
+        fraseAviso += faltanKm <= 0
+          ? ' (o por km, ya superada)'
+          : ' (o a los ' + Util.formatearKm(avisoMasCercano.proximaRevisionKm) + ', faltan ' + Util.formatearKm(faltanKm) + ')';
       }
+      frases.push(fraseAviso + '.');
     }
 
     /* 2. Última actuación con tiempo relativo */
@@ -2191,22 +2726,28 @@ const Pantallas = {
         ' (' + Util.formatearDinero(masCara.costeTotalEuros) + ').');
     }
 
-    /* 5. Km recorridos desde los últimos mantenimientos clave.
-       lista.find() devuelve la PRIMERA coincidencia y, como la lista
-       está ordenada de reciente a antigua, es el mantenimiento más reciente. */
-    const ultimoMantenimiento = (sistema) =>
-      lista.find(a => a.categoria === 'mantenimiento' && a.subcategoria === sistema);
-
-    const neumaticos = ultimoMantenimiento('neumaticos');
-    if (neumaticos && v.kmActuales > neumaticos.kilometraje) {
-      frases.push('🛞 Neumáticos: ' + Util.formatearKm(v.kmActuales - neumaticos.kilometraje) +
-        ' desde la última revisión.');
-    }
-    const motor = ultimoMantenimiento('motor');
-    if (motor && v.kmActuales > motor.kilometraje) {
-      frases.push('🛢 Motor (aceite/filtros): ' + Util.formatearKm(v.kmActuales - motor.kilometraje) +
-        ' desde el último mantenimiento.');
-    }
+    /* 5. (v25) Próximas revisiones POR KM: mostramos los km que FALTAN para la
+       siguiente, no los transcurridos. Si la revisión también tiene fecha, ya
+       se avisa por fecha arriba, así que aquí solo tratamos las de SOLO km. */
+    lista.forEach(a => {
+      if (a.completada || a.programada) return;
+      if (!a.proximaRevisionKm) return;
+      if (a.proximaRevisionFecha) return;      // tiene fecha: ya se avisa por fecha
+      if (v.kmActuales == null) return;
+      const faltan = a.proximaRevisionKm - v.kmActuales;
+      // Solo avisamos si está cerca (≤ MARGEN_KM) o ya superada; si falta
+      // mucho, no llenamos el panel.
+      if (faltan > Obligaciones.MARGEN_KM) return;
+      if (faltan <= 0) {
+        if (nivel === 'ok') nivel = 'aviso';
+        frases.push('🔧 ' + Util.escapar(a.titulo) + ': revisión por km superada en ' +
+          Util.formatearKm(Math.abs(faltan)) + '.');
+      } else {
+        if (nivel === 'ok') nivel = 'aviso';
+        frases.push('🔧 ' + Util.escapar(a.titulo) + ': faltan ' + Util.formatearKm(faltan) +
+          ' para la próxima revisión.');
+      }
+    });
 
     /* Cabecera según el estado */
     const cabeceras = {
@@ -2229,14 +2770,19 @@ const Pantallas = {
     const v = BD.obtenerVehiculo(id);
     if (!v) { Pantallas.lista(); return; }
 
-    const lista = BD.obtenerActuaciones(id)
+    const todas = BD.obtenerActuaciones(id)
       .sort((a, b) => b.fecha.localeCompare(a.fecha));
+    // (v20) Separamos: las realizadas alimentan historial y gasto; las
+    // programadas (futuras, pendientes) van a su propia sección.
+    const lista = todas.filter(a => !a.programada);
+    const pendientes = todas.filter(a => a.programada)
+      .sort((a, b) => a.fecha.localeCompare(b.fecha)); // la más próxima primero
 
     const gastoTotal = lista.reduce((s, a) => s + (Number(a.costeTotalEuros) || 0), 0);
     const ultimaFecha = lista.length > 0 ? Util.formatearFecha(lista[0].fecha) : '—';
 
     const foto = v.foto
-      ? '<img src="' + Fotos.urlDe(v.foto) + '" alt="Foto de ' + Util.escapar(v.nombre) + '">'
+      ? '<img src="' + Fotos.urlDe(v.foto) + '" alt="Foto de ' + Util.escapar(v.nombre) + '" class="ampliable" onclick="Fotos.ampliar(this.src)">'
       : (ICONO_TIPO[v.tipo] || '🚗');
     const matricula = v.matricula
       ? '<span class="matricula"><span class="banda">E</span><span class="numero">' + Util.escapar(v.matricula) + '</span></span>'
@@ -2250,7 +2796,7 @@ const Pantallas = {
         '<div class="cuerpo">' +
           '<h1>' + Util.escapar(v.nombre) + '</h1>' +
           '<p class="subtitulo" style="margin-bottom:10px">' +
-            Util.escapar(v.marca) + ' ' + Util.escapar(v.modelo) + ' · ' + Util.escapar(v.anio) + ' · ' + Util.escapar(v.combustible) +
+            Util.unirDatos(v.marca + ' ' + v.modelo, v.anio, v.combustible) +
             ((v.bateriaKwh !== null && v.bateriaKwh !== undefined && v.bateriaKwh !== '') ? ' · ' + Util.escapar(v.bateriaKwh) + ' kWh' : '') +
             (v.color ? ' · ' + Util.escapar(v.color) : '') +
           '</p>' +
@@ -2260,13 +2806,18 @@ const Pantallas = {
         '</div>' +
       '</div>' +
 
-      Pantallas._visionGeneralHTML(v, lista) + // panel inteligente (v4)
+      // (v35) Si está dado de baja: cinta informativa arriba del todo.
+      (v.dadoBaja ? Pantallas._cintaBajaHTML(v) : '') +
 
-      Pantallas._bloqueSeguroHTML(v) + // datos del seguro (v8)
+      // (v35) El panel de avisos solo tiene sentido en vehículos activos.
+      (v.dadoBaja ? '' : Pantallas._visionGeneralHTML(v, lista)) + // panel inteligente (v4)
 
       Pantallas._bloqueAdquisicionHTML(v) + // datos de adquisición (v14)
 
       Pantallas._bloqueFinanciacionHTML(v) + // datos de financiación (v15)
+
+      // (v35) Balance final (cierre económico) solo en dados de baja.
+      (v.dadoBaja ? Pantallas._balanceBajaHTML(v, gastoTotal) : '') +
 
       '<div class="stats">' +
         '<div class="stat"><div class="valor">' + Util.formatearDinero(gastoTotal) + '</div><div class="etiqueta">Gasto total</div></div>' +
@@ -2274,25 +2825,81 @@ const Pantallas = {
         '<div class="stat"><div class="valor">' + ultimaFecha + '</div><div class="etiqueta">Última</div></div>' +
       '</div>' +
 
-      '<button class="btn-primario" onclick="Pantallas.formActuacion()">+ Registrar actuación</button>' +
+      // (v35) En un coche dado de baja no se registran actuaciones nuevas
+      // (ya no es tuyo). Ocultamos los botones de registrar.
+      (v.dadoBaja ? '' :
+        '<button class="btn-primario btn-accion-vehiculo" onclick="Pantallas.formActuacion(null, \'actuacion\')">🔧 Registrar actuación</button>' +
+        '<button class="btn-primario btn-accion-vehiculo" onclick="Pantallas.formActuacion(null, \'tramite\')">📋 Trámite u obligación</button>'
+      ) +
       '<button class="btn-informe" onclick="Informe.generar(\'' + v.id + '\')">📄 Generar informe de vida del vehículo</button>' +
+
+      // (v35) Las pendientes (citas futuras) no se muestran en dados de baja.
+      (v.dadoBaja ? '' : Pantallas._bloquePendientesHTML(pendientes)) +
 
       '<h2>Últimas actuaciones</h2>' +
       (ultimas || '<div class="vacio" style="padding:30px"><p>Sin actuaciones todavía. Registra la primera.</p></div>') +
       (lista.length > 0
         ? '<div class="fila-botones" style="margin-top:8px">' +
             '<button class="btn-secundario" onclick="Pantallas.historial()">📋 Historial (' + lista.length + ')</button>' +
-            '<button class="btn-secundario" onclick="Pantallas.estadisticas()">📊 Estadísticas</button>' +
+            '<button class="btn-secundario" onclick="Pantallas.estadisticas()">📊 Estadísticas de gasto</button>' +
           '</div>'
         : '') +
 
       '<h2>Vehículo</h2>' +
-      '<div class="fila-botones" style="margin-top:0">' +
-        '<button class="btn-secundario" onclick="Pantallas.formVehiculo(\'' + v.id + '\')">✏️ Editar vehículo</button>' +
-        '<button class="btn-peligro" onclick="Acciones.eliminarVehiculo(\'' + v.id + '\')">🗑 Eliminar</button>' +
-      '</div>';
+      // (v35) Botonera según el estado del vehículo:
+      //  - Activo: Editar · Dar de baja · Eliminar
+      //  - Dado de baja: Editar · Reactivar · Eliminar
+      (v.dadoBaja
+        ? '<div class="fila-botones" style="margin-top:0">' +
+            '<button class="btn-secundario" onclick="Pantallas.formVehiculo(\'' + v.id + '\')">✏️ Editar vehículo</button>' +
+            '<button class="btn-secundario" onclick="Acciones.reactivarVehiculo(\'' + v.id + '\')">↩️ Reactivar</button>' +
+          '</div>' +
+          '<button class="btn-peligro" style="margin-top:10px" onclick="Acciones.eliminarVehiculo(\'' + v.id + '\')">🗑 Eliminar definitivamente</button>'
+        : '<div class="fila-botones" style="margin-top:0">' +
+            '<button class="btn-secundario" onclick="Pantallas.formVehiculo(\'' + v.id + '\')">✏️ Editar vehículo</button>' +
+            '<button class="btn-secundario" onclick="Pantallas.formBaja(\'' + v.id + '\')">📕 Dar de baja</button>' +
+          '</div>' +
+          '<button class="btn-peligro" style="margin-top:10px" onclick="Acciones.eliminarVehiculo(\'' + v.id + '\')">🗑 Eliminar</button>'
+      );
 
     Pantallas._mostrar('pantalla-detalle-vehiculo');
+  },
+
+  /* (v20) Banner del detalle cuando la actuación es una cita programada. */
+  _bannerProgramada(a) {
+    const dias = Util.diasHasta(a.fecha);
+    let texto;
+    if (dias < 0) texto = '📅 Cita programada · estaba prevista hace ' + Math.abs(dias) + ' días';
+    else if (dias === 0) texto = '📅 Cita programada · prevista para hoy';
+    else texto = '📅 Cita programada · faltan ' + dias + ' días';
+    return '<div class="banner-programada' + (dias < 0 ? ' vencida' : '') + '">' + texto +
+           '<small>Esta cita aún no suma a tus gastos. Cuando la realices, márcala como hecha.</small></div>';
+  },
+
+  /* (v20) Sección de citas programadas (pendientes) del vehículo.
+     Cada una muestra su fecha prevista, los días que faltan (o el retraso si
+     ya pasó) y un botón para marcarla como realizada. No suman al gasto. */
+  _bloquePendientesHTML(pendientes) {
+    if (!pendientes || pendientes.length === 0) return '';
+    const filas = pendientes.map(a => {
+      const dias = Util.diasHasta(a.fecha);
+      const vencida = dias < 0;
+      let meta;
+      if (vencida) meta = 'Estaba prevista para ' + Util.formatearFecha(a.fecha) + ' (hace ' + Math.abs(dias) + ' días)';
+      else if (dias === 0) meta = 'Prevista para hoy';
+      else meta = 'Prevista para ' + Util.formatearFecha(a.fecha) + ' (en ' + dias + ' días)';
+      return (
+        '<div class="pendiente' + (vencida ? ' vencida' : '') + '">' +
+          '<div class="pend-info" role="button" tabindex="0" onclick="Pantallas.detalleActuacion(\'' + a.id + '\')">' +
+            '<div class="pend-titulo">' + Util.escapar(a.titulo) + '</div>' +
+            '<div class="pend-meta">📅 ' + meta + '</div>' +
+          '</div>' +
+          '<button class="btn-marcar-hecho" onclick="Acciones.realizarProgramada(\'' + a.id + '\')">Marcar hecho</button>' +
+        '</div>'
+      );
+    }).join('');
+    return '<h2>📅 Pendientes (' + pendientes.length + ')</h2>' +
+           '<div class="bloque-pendientes">' + filas + '</div>';
   },
 
   // HTML de una actuación en lista (reutilizado en ficha e historial)
@@ -2302,7 +2909,7 @@ const Pantallas = {
       '<div class="item-actuacion ' + a.categoria + '" role="button" tabindex="0" onclick="Pantallas.detalleActuacion(\'' + a.id + '\')">' +
         '<div class="info">' +
           '<div class="titulo">' + Util.escapar(a.titulo) + '</div>' +
-          '<div class="meta">' + Util.formatearFecha(a.fecha) + ' · ' + Util.formatearKm(a.kilometraje) +
+          '<div class="meta">' + Util.formatearFecha(a.fecha) + (a.kilometraje != null ? ' · ' + Util.formatearKm(a.kilometraje) : '') +
             ' · <span class="chip ' + a.categoria + '">' + NOMBRE_CATEGORIA[a.categoria] + '</span>' + selloSeguro + '</div>' +
         '</div>' +
         '<div class="coste">' + Util.formatearDinero(a.costeTotalEuros) + '</div>' +
@@ -2313,7 +2920,23 @@ const Pantallas = {
   /* ----- Detalle de actuación ----- */
   detalleActuacion(id) {
     const a = BD.obtenerActuacion(id);
-    if (!a) return;
+    // (v30) Punto 11: antes hacíamos "if (!a) return;" y la app se quedaba
+    // muda — el usuario pulsaba el aviso y no pasaba nada (parecía que llevaba
+    // a la pantalla equivocada). Eso ocurre cuando el aviso apunta a una
+    // actuación que ya no existe (borrada, o un aviso de portada que quedó
+    // obsoleto). Ahora avisamos con claridad y llevamos a un sitio coherente:
+    // la ficha del vehículo si lo conocemos, o la lista de vehículos si no.
+    if (!a) {
+      Util.avisar(
+        'Ese recordatorio ya no está disponible.\n\n' +
+        'Es posible que la actuación se haya eliminado o modificado. ' +
+        'Te llevamos a tus vehículos para que puedas revisarlo.'
+      );
+      const vId = Estado.vehiculoActualId;
+      if (vId && BD.obtenerVehiculo(vId)) Pantallas.detalleVehiculo(vId);
+      else Pantallas.lista();
+      return;
+    }
     Estado.vehiculoActualId = a.vehiculoId;
     const v = BD.obtenerVehiculo(a.vehiculoId);
 
@@ -2338,16 +2961,22 @@ const Pantallas = {
       '<h1>' + Util.escapar(a.titulo) + '</h1>' +
       '<p class="subtitulo">' + (v ? Util.escapar(v.nombre) + ' · ' : '') +
         '<span class="chip ' + a.categoria + '">' + NOMBRE_CATEGORIA[a.categoria] + '</span></p>' +
+      // (v20) Aviso destacado si es una cita programada (aún no realizada)
+      (a.programada ? Pantallas._bannerProgramada(a) : '') +
       '<div class="ficha-datos">' +
-        fila('Fecha', Util.formatearFecha(a.fecha)) +
+        fila(a.programada ? 'Fecha prevista' : 'Fecha', Util.formatearFecha(a.fecha)) +
         // El kilometraje no aplica a seguro/impuestos/multas
         ((doc === 'seguro' || doc === 'impuestos' || doc === 'multas') ? '' : fila('Kilometraje', Util.formatearKm(a.kilometraje))) +
-        fila('Sistema', Util.escapar(etiquetaSubcat)) +
+        fila('Tipo', Util.escapar(etiquetaSubcat)) +
         // Resultado de la ITV (solo ITV)
         (doc === 'itv' && a.resultadoItv ? fila('Resultado', RESULTADO_ITV[a.resultadoItv] || a.resultadoItv) : '') +
         // Motivo (solo multas)
         (doc === 'multas' && a.motivo ? fila('Motivo', Util.escapar(a.motivo)) : '') +
         (a.tallerOMismo ? fila(etqRealizado, Util.escapar(a.tallerOMismo)) : '') +
+        // Datos del seguro (v17): cobertura, póliza y teléfono de asistencia
+        (doc === 'seguro' && a.seguroTipo ? fila('Tipo / cobertura', Util.escapar(a.seguroTipo)) : '') +
+        (doc === 'seguro' && a.seguroPoliza ? fila('Nº de póliza', Util.escapar(a.seguroPoliza)) : '') +
+        (doc === 'seguro' && a.seguroTelefono ? fila('Teléfono de asistencia', Util.escapar(a.seguroTelefono)) : '') +
         (a.porSeguro ? fila('Cubierto por el seguro', '🛡 Sí') : '') +
         fila(etqCoste, Util.formatearDinero(a.costeTotalEuros)) +
         // Pagada y puntos (solo multas)
@@ -2371,12 +3000,13 @@ const Pantallas = {
 
     if (a.fotos && a.fotos.length > 0) {
       html += '<h2>Fotos y documentos</h2><div class="galeria">' +
-        a.fotos.map(f => '<img src="' + Fotos.urlDe(f) + '" alt="Foto de la actuación" onclick="window.open(this.src)">').join('') +
+        a.fotos.map(f => '<img src="' + Fotos.urlDe(f) + '" alt="Foto de la actuación" class="ampliable" onclick="Fotos.ampliar(this.src)">').join('') +
         '</div>';
     }
 
     html +=
       '<div class="fila-botones">' +
+        (a.programada ? '<button class="btn-primario" onclick="Acciones.realizarProgramada(\'' + a.id + '\')">✓ Marcar como realizada</button>' : '') +
         '<button class="btn-secundario" onclick="Pantallas.formActuacion(\'' + a.id + '\')">✏️ Editar</button>' +
         '<button class="btn-peligro" onclick="Acciones.eliminarActuacion(\'' + a.id + '\')">🗑 Eliminar</button>' +
       '</div>';
@@ -2386,7 +3016,7 @@ const Pantallas = {
   },
 
   /* ----- Formulario de actuación ----- */
-  formActuacion(idEditar) {
+  formActuacion(idEditar, modo) {
     Estado.editandoActuacionId = idEditar || null;
     Estado.pantallaAnterior = 'pantalla-detalle-vehiculo';
     Estado.fotosActuacionTemp = [];
@@ -2395,28 +3025,46 @@ const Pantallas = {
     if (!v) { Pantallas.lista(); return; }
 
     document.getElementById('form-actuacion').reset();
-    document.getElementById('error-actuacion').classList.remove('visible');
+    document.getElementById('error-actuacion').classList.remove('visible', 'aviso-suave');
     document.getElementById('previa-fotos-actuacion').innerHTML = '';
+
+    // (v17) Dos bloques de entrada:
+    //  - 'actuacion' = mantenimiento + avería (lo que LE HACES al vehículo)
+    //  - 'tramite'   = documentación/obligaciones (lo administrativo/legal)
+    // Si editamos, el modo lo deduce la propia categoría de la actuación.
+    let modoFinal = modo;
+    if (idEditar) {
+      const aEdit = BD.obtenerActuacion(idEditar);
+      modoFinal = (aEdit && aEdit.categoria === 'documentacion') ? 'tramite' : 'actuacion';
+    }
+    if (modoFinal !== 'tramite' && modoFinal !== 'actuacion') modoFinal = 'actuacion';
+    Estado.modoActuacion = modoFinal;
+    Pantallas._configurarSelectorCategoria(modoFinal);
+
+    const tituloAccion = modoFinal === 'tramite' ? 'trámite' : 'actuación';
     document.getElementById('titulo-form-actuacion').textContent =
-      idEditar ? 'Editar actuación' : 'Registrar actuación';
+      (idEditar ? 'Editar ' : 'Registrar ') + tituloAccion;
     document.getElementById('subtitulo-form-actuacion').textContent =
-      'Vehículo: ' + v.nombre + ' · ' + Util.formatearKm(v.kmActuales);
+      'Vehículo: ' + v.nombre + (v.kmActuales != null ? ' · ' + Util.formatearKm(v.kmActuales) : '');
 
     // La etiqueta del coste muestra el símbolo de la moneda elegida (v9)
-    const simbolo = (MONEDAS[Config.moneda()] || MONEDAS.EUR).simbolo;
+    const simbolo = Util.simboloMoneda();
     document.getElementById('label-coste').innerHTML =
       'Coste total (' + simbolo + ') <span class="opc">(opcional)</span>';
 
     // Valores por defecto: hoy y los km actuales del vehículo
     document.getElementById('a-fecha').value = Util.hoyISO();
-    document.getElementById('a-km').value = v.kmActuales;
+    document.getElementById('a-km').value = (v.kmActuales != null) ? v.kmActuales : '';
     Pantallas.actualizarSubcategorias();
+
+    // (v20) Por defecto el formulario abre en modo "ya realizado".
+    Pantallas.cambiarEstadoActuacion(false);
 
     if (idEditar) {
       const a = BD.obtenerActuacion(idEditar);
       if (a) {
         document.getElementById('a-fecha').value = a.fecha;
-        document.getElementById('a-km').value = a.kilometraje;
+        document.getElementById('a-km').value = (a.kilometraje != null) ? a.kilometraje : '';
         document.getElementById('a-categoria').value = a.categoria;
         Pantallas.actualizarSubcategorias();
         // El sistema puede ser un valor "Otro" libre que no esté en la lista
@@ -2435,7 +3083,18 @@ const Pantallas = {
         document.getElementById('a-motivo').value = a.motivo || '';
         document.getElementById('a-pagada').checked = !!a.pagada;
         document.getElementById('a-puntos').value = a.puntos ?? '';
-        document.getElementById('a-preaviso').value = a.preavisoDias ?? 45;
+        // (v24) Estado pagado del impuesto y fecha límite de pago (multa/impuesto)
+        document.getElementById('a-impuesto-pagado').checked = !!a.pagada;
+        document.getElementById('a-fecha-limite').value = a.fechaLimitePago || '';
+        // (v37) Tras fijar la casilla "pagado", reaplicamos la visibilidad de la
+        // fecha límite: si la multa/impuesto ya está pagada, debe quedar oculta
+        // al abrir la edición (antes podía quedar visible incorrectamente).
+        Pantallas.actualizarFechaLimite();
+        document.getElementById('a-preaviso').value = a.preavisoDias ?? 60;
+        // Datos del seguro (v17): tipo/cobertura, póliza y teléfono
+        Util.cargarConOtro('a-seguro-tipo', 'a-seguro-tipo-otro', a.seguroTipo || '');
+        document.getElementById('a-seguro-poliza').value = a.seguroPoliza || '';
+        document.getElementById('a-seguro-telefono').value = a.seguroTelefono || '';
         document.getElementById('a-garantia-hasta').value = a.garantiaHasta || '';
         // Si la actuación que editamos ya tenía fecha de próxima, damos por hecho
         // que estaba "programada"; si no, la casilla queda desmarcada.
@@ -2443,9 +3102,150 @@ const Pantallas = {
         Pantallas.actualizarObligacion(); // refresca la casilla y la obligatoriedad
         Estado.fotosActuacionTemp = (a.fotos || []).slice();
         Fotos.renderPreviasFotosActuacion();
+        // (v20) Restauramos el estado realizado/programado de la actuación
+        Pantallas.cambiarEstadoActuacion(!!a.programada);
       }
     }
     Pantallas._mostrar('pantalla-form-actuacion');
+  },
+
+  /* (v20) Alterna el formulario entre "ya realizado" y "programado".
+     - realizado: fecha pasada, coste real, suma al gasto, va al historial.
+     - programado: fecha prevista (futura), coste estimado opcional, no suma
+       gasto y aparece como pendiente hasta marcarse como realizada.        */
+  cambiarEstadoActuacion(programando) {
+    Estado.programandoActuacion = programando;
+
+    document.getElementById('btn-estado-realizado').classList.toggle('activo', !programando);
+    document.getElementById('btn-estado-programado').classList.toggle('activo', programando);
+
+    const ayuda = document.getElementById('ayuda-estado');
+    const labelFecha = document.getElementById('label-fecha-actuacion');
+    const labelCoste = document.getElementById('label-coste');
+    const simbolo = Util.simboloMoneda();
+
+    if (programando) {
+      ayuda.textContent = 'Es una cita futura: no sumará a tus gastos y aparecerá como pendiente hasta que la marques como realizada.';
+      labelFecha.innerHTML = 'Fecha prevista *';
+      labelCoste.innerHTML = 'Coste estimado (' + simbolo + ') <span class="opc">(opcional)</span>';
+    } else {
+      ayuda.textContent = 'Lo que registras ya ha ocurrido: irá al historial y sumará a tus gastos.';
+      labelFecha.innerHTML = 'Fecha *';
+      labelCoste.innerHTML = 'Coste total (' + simbolo + ') <span class="opc">(opcional)</span>';
+    }
+
+    // (v23) Los campos que solo tienen sentido en algo YA HECHO se ocultan al
+    // programar: kilometraje, desglose, "cubierto por seguro", "programar la
+    // siguiente" y toda la sección de próxima revisión. Son datos del pasado o
+    // de un seguimiento que aún no existe para una cita futura.
+    Pantallas._aplicarVisibilidadEstado();
+  },
+
+  /* (v23) Aplica la visibilidad de campos según el estado (programado vs
+     realizado) Y la subcategoría. Se llama tanto al cambiar de estado como al
+     cambiar de subcategoría, porque ambos influyen en qué campos tienen sentido. */
+  _aplicarVisibilidadEstado() {
+    const subcat = Util.valorConOtro('a-subcategoria', 'a-subcategoria-otro');
+
+    // (v23) Subcategorías que NO se programan: una multa, un impuesto ya emitido,
+    // una garantía o un documento histórico no son citas futuras. En ellas
+    // ocultamos el selector de estado y forzamos "ya realizado".
+    const NO_PROGRAMABLES = ['multas', 'impuestos', 'garantia', 'otros'];
+    const selector = document.getElementById('selector-estado');
+    if (NO_PROGRAMABLES.includes(subcat)) {
+      if (selector) selector.style.display = 'none';
+      // Si estaba programando, forzamos realizado actualizando solo el estado y
+      // los botones, SIN volver a llamar a esta función (evita recursión).
+      if (Estado.programandoActuacion) {
+        Estado.programandoActuacion = false;
+        document.getElementById('btn-estado-realizado').classList.add('activo');
+        document.getElementById('btn-estado-programado').classList.remove('activo');
+        const simbolo0 = Util.simboloMoneda();
+        document.getElementById('label-fecha-actuacion').innerHTML = 'Fecha *';
+        document.getElementById('label-coste').innerHTML = 'Coste total (' + simbolo0 + ') <span class="opc">(opcional)</span>';
+        document.getElementById('ayuda-estado').textContent = 'Lo que registras ya ha ocurrido: irá al historial y sumará a tus gastos.';
+      }
+    } else {
+      if (selector) selector.style.display = '';
+    }
+
+    const prog = Estado.programandoActuacion;
+
+    // Campos que NO tienen sentido en una cita futura (se ocultan al programar).
+    const soloPasado = ['campo-km', 'campo-desglose', 'campo-por-seguro',
+                        'bloque-programar', 'titulo-prox-revision', 'fila-prox-revision'];
+    soloPasado.forEach(idC => {
+      const el = document.getElementById(idC);
+      if (!el) return;
+      if (prog) {
+        el.style.display = 'none';
+      } else {
+        // Al volver a "realizado" restauramos; aplicarCamposSubcategoria
+        // afinará después los que dependan de la subcategoría.
+        el.style.display = '';
+      }
+    });
+
+    // ITV programada: sin "resultado" (no sabemos lo que dirán hasta hacerla).
+    const resultadoItv = document.getElementById('campo-resultado-itv');
+    if (resultadoItv && prog) resultadoItv.style.display = 'none';
+
+    // Seguro programado: sin nº de póliza (aún no hay póliza). El bloque agrupa
+    // tipo + póliza; ocultamos solo la póliza dejando el tipo visible.
+    const poliza = document.getElementById('a-seguro-poliza');
+    const campoPoliza = poliza ? poliza.closest('.campo') : null;
+    if (campoPoliza) campoPoliza.style.display = (prog && subcat === 'seguro') ? 'none' : '';
+
+    // Seguro programado: el coste pasa a "Presupuesto ofrecido".
+    if (subcat === 'seguro') {
+      const simbolo = Util.simboloMoneda();
+      document.getElementById('label-coste').innerHTML = prog
+        ? 'Presupuesto ofrecido (' + simbolo + ') <span class="opc">(opcional)</span>'
+        : 'Coste (prima) <span class="opc">(opcional)</span>';
+    }
+  },
+
+  /* (v17) Configura el selector de Categoría según el bloque de entrada.
+     - modo 'actuacion': solo Mantenimiento y Avería (lo que le haces al coche).
+     - modo 'tramite':   solo Trámites y obligaciones (lo administrativo).
+     Ocultamos las opciones que no tocan y dejamos seleccionada la primera
+     válida. Así cada botón de la pantalla del vehículo entra a su bloque. */
+  _configurarSelectorCategoria(modo) {
+    const select = document.getElementById('a-categoria');
+    const opciones = select.options;
+    const permitidas = (modo === 'tramite') ? ['documentacion'] : ['mantenimiento', 'averia'];
+    let primera = null;
+    for (let i = 0; i < opciones.length; i++) {
+      const visible = permitidas.includes(opciones[i].value);
+      opciones[i].hidden = !visible;
+      opciones[i].disabled = !visible;
+      if (visible && primera === null) primera = opciones[i].value;
+    }
+    if (primera) select.value = primera;
+    // En modo trámite no tiene sentido cambiar de categoría (solo hay una),
+    // así que ocultamos el desplegable y dejamos solo el de subcategoría.
+    const campoCategoria = select.closest('.campo');
+    if (campoCategoria) campoCategoria.style.display = (modo === 'tramite') ? 'none' : '';
+  },
+
+  /* (v24) Si la multa/impuesto ya está pagada, la fecha límite de pago deja de
+     tener sentido (no hay que avisar de un pago hecho). La ocultamos.
+     (v37) BUGFIX: esta función SOLO debe tocar el campo cuando la subcategoría
+     es multa o impuesto. Antes, para cualquier otra subcategoría hacía
+     display='' (mostrar), y como se llama DESPUÉS de aplicarCamposSubcategoria
+     en el onchange, pisaba la ocultación y el campo aparecía en casi todos los
+     trámites. Ahora: si no es multa/impuesto, no tocamos nada (ya lo ocultó
+     aplicarCamposSubcategoria); si lo es, mostramos u ocultamos según pagado. */
+  actualizarFechaLimite() {
+    const subcat = Util.valorConOtro('a-subcategoria', 'a-subcategoria-otro');
+    const campoLimite = document.getElementById('campo-fecha-limite');
+    if (!campoLimite) return;
+    // Solo multa e impuesto usan fecha límite de pago. En el resto, ni lo tocamos.
+    if (subcat !== 'multas' && subcat !== 'impuestos') return;
+    const pagado = (subcat === 'multas')
+      ? document.getElementById('a-pagada').checked
+      : document.getElementById('a-impuesto-pagado').checked;
+    campoLimite.style.display = pagado ? 'none' : '';
   },
 
   // Rellena el desplegable de subcategorías según la categoría elegida
@@ -2463,6 +3263,7 @@ const Pantallas = {
     // Personalizamos los campos según la subcategoría y revisamos obligación
     Pantallas.aplicarCamposSubcategoria();
     Pantallas.actualizarObligacion();
+    Pantallas._aplicarVisibilidadEstado(); // (v23) reaplica ocultaciones de estado
   },
 
   /* 🆕 v12: PERSONALIZACIÓN DE CAMPOS POR SUBCATEGORÍA.
@@ -2472,13 +3273,13 @@ const Pantallas = {
      fácil ajustar o añadir casos sin tocar el resto del código. */
   CONFIG_CAMPOS: {
     seguro: {
-      mostrar: ['campo-preaviso'],
+      mostrar: ['campo-seguro-tipo-poliza', 'campo-seguro-telefono', 'campo-preaviso'],
       ocultar: ['campo-km', 'campo-desglose', 'campo-prox-km', 'campo-por-seguro'],
       etiquetas: { 'label-taller': 'Compañía / aseguradora', 'label-coste': 'Coste (prima)' },
       placeholders: { 'a-taller': 'Ej: Mapfre, Línea Directa...', 'a-titulo': 'Ej: Renovación del seguro a todo riesgo' }
     },
     impuestos: {
-      mostrar: [],
+      mostrar: ['campo-impuesto-pagado', 'campo-fecha-limite'],
       ocultar: ['campo-km', 'campo-desglose', 'campo-prox-km', 'campo-por-seguro'],
       etiquetas: { 'label-taller': 'Ayuntamiento / organismo', 'label-coste': 'Importe pagado' },
       placeholders: { 'a-taller': 'Ej: Ayuntamiento de Granada', 'a-titulo': 'Ej: Impuesto de circulación 2026' }
@@ -2490,7 +3291,7 @@ const Pantallas = {
       placeholders: { 'a-taller': 'Ej: ITV Granada Norte', 'a-titulo': 'Ej: ITV periódica' }
     },
     multas: {
-      mostrar: ['campo-motivo', 'campo-pagada-puntos'],
+      mostrar: ['campo-motivo', 'campo-pagada-puntos', 'campo-fecha-limite'],
       ocultar: ['campo-km', 'campo-desglose', 'campo-por-seguro', 'campo-prox-km', 'titulo-prox-revision', 'fila-prox-revision'],
       etiquetas: { 'label-taller': 'Organismo', 'label-coste': 'Importe de la multa', 'label-prox-fecha': 'Fecha límite de pago' },
       placeholders: { 'a-taller': 'Ej: DGT, Ayuntamiento...', 'a-titulo': 'Ej: Multa por exceso de velocidad' }
@@ -2516,20 +3317,64 @@ const Pantallas = {
   // Lista de TODOS los campos específicos y comunes-ocultables, para poder
   // resetear el formulario a su estado normal antes de aplicar una config.
   _TODOS_DOC: ['campo-resultado-itv', 'campo-motivo', 'campo-pagada-puntos', 'campo-preaviso',
+               'campo-impuesto-pagado', 'campo-fecha-limite',
+               'campo-seguro-tipo-poliza', 'campo-seguro-telefono',
                'campo-garantia-hasta', 'ayuda-otros'],
   _OCULTABLES: ['campo-km', 'campo-desglose', 'campo-por-seguro', 'campo-taller-fila', 'campo-coste-fila',
                 'titulo-prox-revision', 'fila-prox-revision', 'campo-prox-fecha', 'campo-prox-km'],
 
+  // (v27) Guarda el orden ORIGINAL de TODOS los campos del formulario la primera
+  // vez. Guardamos la lista completa de hijos en orden: así, para restaurar,
+  // basta con reinsertarlos todos en ese mismo orden (evita el problema de que
+  // mover un nodo invalide la referencia "hermano siguiente" de otro).
+  _ordenOriginalSeguro: null,
+  _guardarOrdenOriginal() {
+    if (this._ordenOriginalSeguro) return; // ya guardado
+    const form = document.getElementById('form-actuacion');
+    if (!form) return;
+    this._ordenOriginalSeguro = Array.from(form.children); // copia del orden actual
+  },
+
+  // (v27) Reordena los campos SOLO para el seguro. Petición del usuario:
+  //   Tipo/póliza → Compañía aseguradora → Teléfono → Coste (prima) → Aviso vencimiento.
+  // 'taller' es el campo Compañía y 'coste' es la prima (etiquetas ya renombradas
+  // en la config del seguro). Movemos los nodos reales (no duplicamos) para no
+  // perder lo que el usuario haya escrito al editar.
+  _reordenarSeguro(esSeguro) {
+    this._guardarOrdenOriginal();
+    const form = document.getElementById('form-actuacion');
+    if (!form) return;
+    const get = id => document.getElementById(id);
+
+    if (esSeguro) {
+      // Orden deseado, usando 'preaviso' (aviso de vencimiento) como referencia final.
+      // Insertamos cada bloque justo antes del aviso, en el orden correcto.
+      const aviso = get('campo-preaviso');
+      ['campo-seguro-tipo-poliza', 'campo-taller-fila', 'campo-seguro-telefono', 'campo-coste-fila']
+        .forEach(id => { const el = get(id); if (el && aviso) form.insertBefore(el, aviso); });
+    } else {
+      // Restaurar: reinsertamos TODOS los hijos en su orden original. Al hacer
+      // appendChild en orden, cada nodo se recoloca correctamente al final, uno
+      // tras otro, reconstruyendo la secuencia original sin referencias frágiles.
+      this._ordenOriginalSeguro.forEach(el => {
+        if (el && el.parentNode === form) form.appendChild(el);
+      });
+    }
+  },
+
   aplicarCamposSubcategoria() {
     const categoria = document.getElementById('a-categoria').value;
     const subcategoria = Util.valorConOtro('a-subcategoria', 'a-subcategoria-otro');
+
+    // (v27) Reordenamos los campos del seguro (o restauramos si no lo es)
+    this._reordenarSeguro(categoria === 'documentacion' && subcategoria === 'seguro');
 
     // 1) Reset: ocultamos todos los campos específicos de documentación...
     this._TODOS_DOC.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
     // ...y volvemos a mostrar todos los comunes que se pueden ocultar
     this._OCULTABLES.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = ''; });
     // ...y restauramos las etiquetas y placeholders por defecto
-    const simbolo = (MONEDAS[Config.moneda()] || MONEDAS.EUR).simbolo;
+    const simbolo = Util.simboloMoneda();
     document.getElementById('label-taller').innerHTML = 'Taller / Realizado por <span class="opc">(opcional)</span>';
     document.getElementById('label-coste').innerHTML = 'Coste total (' + simbolo + ') <span class="opc">(opcional)</span>';
     document.getElementById('label-prox-fecha').textContent = 'Por fecha';
@@ -2539,6 +3384,17 @@ const Pantallas = {
     // 2) Si hay configuración para esta subcategoría, la aplicamos
     const cfg = (categoria === 'documentacion') ? this.CONFIG_CAMPOS[subcategoria] : null;
     if (!cfg) {
+      // (v28) Caso "Trámites y obligaciones" + tipo libre (Otro/especificar):
+      // no hay config fija porque el usuario escribe el tipo a mano. Aquí el
+      // "taller" no aplica (si hace falta mencionar uno, va en notas). Ocultamos
+      // ese campo y dejamos lo esencial: fecha, km (opc.), título, notas,
+      // coste (opc.) y próxima revisión (opc.).
+      if (categoria === 'documentacion') {
+        const taller = document.getElementById('campo-taller-fila');
+        if (taller) taller.style.display = 'none';
+        document.getElementById('a-titulo').placeholder = 'Ej: Cambio de titularidad';
+        return;
+      }
       // Mantenimiento y Avería no llevan config especial, pero les damos un
       // ejemplo de título acorde para que el campo siga siendo orientativo.
       const ejemplo = { mantenimiento: 'Ej: Cambio de aceite y filtro 5W30', averia: 'Ej: Avería del alternador' }[categoria];
@@ -2575,6 +3431,15 @@ const Pantallas = {
       // No es obligación: ocultamos la casilla y la fecha es opcional (como siempre)
       bloque.style.display = 'none';
       hint.textContent = '(opcional, crea un recordatorio)';
+      ayuda.style.display = 'none';
+      return;
+    }
+
+    // (v23) En modo "programando" no existe la idea de "programar la siguiente"
+    // ni la sección de próxima revisión: la cita ES la fecha prevista. No
+    // mostramos la casilla para no pisar la ocultación del estado.
+    if (Estado.programandoActuacion) {
+      bloque.style.display = 'none';
       ayuda.style.display = 'none';
       return;
     }
@@ -2629,7 +3494,7 @@ const Pantallas = {
   // "motor" existe tanto en mantenimiento como en avería y sería ambiguo.
   _poblarFiltroSistema(categoria) {
     const select = document.getElementById('filtro-sistema');
-    let opciones = '<option value="">Todos los sistemas</option>';
+    let opciones = '<option value="">Todos los tipos</option>';
     if (categoria && CATEGORIAS[categoria]) {
       opciones += Object.keys(CATEGORIAS[categoria])
         .map(clave => '<option value="' + clave + '">' + CATEGORIAS[categoria][clave].split(' (')[0] + '</option>')
@@ -2650,7 +3515,8 @@ const Pantallas = {
     const hasta = document.getElementById('filtro-hasta').value;
     const orden = document.getElementById('filtro-orden').value;
 
-    let lista = BD.obtenerActuaciones(Estado.vehiculoActualId);
+    // (v20) El historial solo muestra actuaciones realizadas, no las programadas.
+    let lista = BD.obtenerActuaciones(Estado.vehiculoActualId).filter(a => !a.programada);
 
     // Cada filtro va recortando la lista. Los filtros se COMBINAN:
     // si pones categoría + fechas + texto, deben cumplirse los tres.
@@ -2739,13 +3605,45 @@ const Pantallas = {
       { nivel: 'aldia',   titulo: '🟢 Al día' }
     ];
 
-    let html = '';
-    grupos.forEach(g => {
-      const delGrupo = items.filter(it => it.nivel === g.nivel);
-      if (delGrupo.length === 0) return;
-      html += '<div class="grupo-oblig-titulo">' + g.titulo + ' (' + delGrupo.length + ')</div>';
-      html += delGrupo.map(tarjeta).join('');
-    });
+    // (v26) Pinta el semáforo (vencidas/próximas/al día) de una LISTA concreta.
+    // Lo usamos dos veces: una para trámites y otra para mantenimiento.
+    const pintarSemaforo = (lista) => {
+      let h = '';
+      grupos.forEach(g => {
+        const delGrupo = lista.filter(it => it.nivel === g.nivel);
+        if (delGrupo.length === 0) return;
+        h += '<div class="grupo-oblig-titulo">' + g.titulo + ' (' + delGrupo.length + ')</div>';
+        h += delGrupo.map(tarjeta).join('');
+      });
+      return h;
+    };
+
+    // (v26) Separamos en DOS listados que no se mezclan:
+    //  · Trámites y obligaciones (categoría 'documentacion': ITV, seguro, impuestos, multas, documentación).
+    //  · Mantenimiento y averías (el resto: cambios de aceite, reparaciones, etc.).
+    // Antes salían revueltos (p. ej. un cambio de aceite junto a un seguro).
+    const tramites = items.filter(it => it.categoria === 'documentacion');
+    const mantenimiento = items.filter(it => it.categoria !== 'documentacion');
+
+    // Cada bloque solo se dibuja si tiene algo; si está vacío, se muestra un aviso suave.
+    const bloque = (titulo, subtitulo, lista) => {
+      const cuerpo = lista.length
+        ? pintarSemaforo(lista)
+        : '<div class="vacio" style="margin:8px 0">Nada por aquí de momento.</div>';
+      return '<div class="bloque-oblig">' +
+               '<h2 class="seccion-oblig">' + titulo + '</h2>' +
+               '<p class="subtitulo" style="margin-top:0">' + subtitulo + '</p>' +
+               cuerpo +
+             '</div>';
+    };
+
+    const html =
+      bloque('📋 Trámites y obligaciones',
+             'ITV, seguros, impuestos y multas.',
+             tramites) +
+      bloque('🔧 Mantenimiento y averías',
+             'Revisiones y reparaciones con próxima cita o recordatorio.',
+             mantenimiento);
 
     zona.innerHTML = html;
     Pantallas._mostrar('pantalla-obligaciones');
@@ -2756,7 +3654,8 @@ const Pantallas = {
     if (!v) { Pantallas.lista(); return; }
     document.getElementById('subtitulo-estadisticas').textContent = 'Vehículo: ' + v.nombre;
 
-    const lista = BD.obtenerActuaciones(Estado.vehiculoActualId);
+    // (v20) Las estadísticas de gasto solo cuentan actuaciones realizadas.
+    const lista = BD.obtenerActuaciones(Estado.vehiculoActualId).filter(a => !a.programada);
 
     // Sumamos el gasto por categoría y por año
     const porCategoria = { mantenimiento: 0, averia: 0, documentacion: 0 };
@@ -2809,11 +3708,13 @@ const Pantallas = {
 
   /* ----- Ajustes ----- */
   ajustes() {
-    // Perfil y moneda (v9): rellenamos con la configuración actual
+    // Perfil y moneda: rellenamos con la configuración actual.
+    // Los desplegables ya tienen sus opciones fijas en el HTML (España/Otro,
+    // Euro/Otra). cargarConOtro selecciona el valor guardado o, si es libre,
+    // marca "Otro" y rellena el campo de texto.
     document.getElementById('aj-nombre').value = Config.nombre();
-    document.getElementById('aj-pais').innerHTML = Pantallas._opcionesPais('España');
-    Util.cargarConOtro('aj-pais', 'aj-pais-otro', Config.pais()); // país puede ser "Otro"
-    document.getElementById('aj-moneda').innerHTML = Pantallas._opcionesMoneda(Config.moneda());
+    Util.cargarConOtro('aj-pais', 'aj-pais-otro', Config.pais());
+    Util.cargarConOtro('aj-moneda', 'aj-moneda-otro', Config.moneda());
 
     const nVehiculos = BD.obtenerVehiculos().length;
     const nActuaciones = BD.obtenerActuaciones().length;
@@ -2835,8 +3736,10 @@ const Acciones = {
   completarBienvenida(evento) {
     evento.preventDefault();
     const nombre = document.getElementById('b-nombre').value.trim();
+    // País: España por defecto, o el texto libre si eligió "Otro".
     const pais = Util.valorConOtro('b-pais', 'b-pais-otro');
-    const moneda = document.getElementById('b-moneda').value;
+    // Moneda: 'EUR' por defecto, o el símbolo libre (ej: '$', 'Bs') si eligió "Otra".
+    const moneda = Util.valorConOtro('b-moneda', 'b-moneda-otro');
 
     if (!nombre) {
       const caja = document.getElementById('error-bienvenida');
@@ -2845,15 +3748,26 @@ const Acciones = {
       return;
     }
 
+    // Si eligió "Otra" moneda pero dejó el símbolo vacío, usamos € por defecto.
+    const monedaFinal = moneda || 'EUR';
+
     // Guardamos la configuración y marcamos el onboarding como completado
-    Config.guardar({ nombre, pais, moneda, configurado: true });
+    Config.guardar({ nombre, pais, moneda: monedaFinal, configurado: true });
     document.body.classList.remove('onboarding'); // vuelve la cabecera
     Pantallas.lista(); // cae en la lista vacía, que invita a añadir vehículo
   },
 
   // Cambiar la moneda desde Ajustes, con AVISO si ya hay gastos registrados.
-  cambiarMoneda(nueva) {
+  // Lee el desplegable: si es "Otra", toma el símbolo/nombre del campo libre.
+  cambiarMoneda() {
     const actual = Config.moneda();
+    const nueva = Util.valorConOtro('aj-moneda', 'aj-moneda-otro');
+
+    // Si eligió "Otra" pero dejó el campo vacío, no hacemos nada.
+    if (!nueva) {
+      Util.avisar('Escribe el símbolo o nombre de la moneda.');
+      return;
+    }
     if (nueva === actual) return;
 
     // ¿Hay alguna actuación con coste ya registrado?
@@ -2861,8 +3775,10 @@ const Acciones = {
       .some(a => a.costeTotalEuros !== null && a.costeTotalEuros !== undefined && a.costeTotalEuros !== '');
 
     if (hayGastos) {
-      const sNueva = MONEDAS[nueva].simbolo;
-      const sActual = MONEDAS[actual].simbolo;
+      // Resolvemos los símbolos de forma segura: la moneda puede ser de la
+      // tabla (EUR, USD…) o un símbolo/nombre libre.
+      const sNueva = MONEDAS[nueva] ? MONEDAS[nueva].simbolo : nueva;
+      const sActual = MONEDAS[actual] ? MONEDAS[actual].simbolo : actual;
       const ok = Util.confirmar(
         'Ya tienes gastos registrados en ' + sActual + '.\n\n' +
         'Cambiar a ' + sNueva + ' NO convierte las cifras: un gasto de 80 ' + sActual +
@@ -2870,8 +3786,8 @@ const Acciones = {
         '¿Quieres cambiar la moneda de todas formas?'
       );
       if (!ok) {
-        // El usuario cancela: devolvemos el desplegable a la moneda anterior
-        document.getElementById('aj-moneda').value = actual;
+        // El usuario cancela: refrescamos Ajustes para revertir la selección.
+        Pantallas.ajustes();
         return;
       }
     }
@@ -2947,17 +3863,15 @@ const Acciones = {
     const combustible = Util.valorConOtro('v-combustible', 'v-combustible-otro');
     const marca = document.getElementById('v-marca').value.trim();
     const modelo = document.getElementById('v-modelo').value.trim();
-    const anio = parseInt(document.getElementById('v-anio').value, 10);
-    const km = parseInt(document.getElementById('v-km').value, 10);
+    const anioTexto = document.getElementById('v-anio').value.trim();
+    const anio = anioTexto === '' ? null : parseInt(anioTexto, 10);
+    const kmTexto = document.getElementById('v-km').value.trim();
+    const km = kmTexto === '' ? null : parseInt(kmTexto, 10);
     const matricula = document.getElementById('v-matricula').value.trim().toUpperCase();
     const color = document.getElementById('v-color').value.trim();
     const vin = document.getElementById('v-vin').value.trim().toUpperCase();
-    // Datos del seguro (todos opcionales)
-    const seguroCompania = document.getElementById('v-seguro-compania').value.trim();
-    const seguroTipo = Util.valorConOtro('v-seguro-tipo', 'v-seguro-tipo-otro');
-    const seguroPoliza = document.getElementById('v-seguro-poliza').value.trim();
-    const seguroVencimiento = document.getElementById('v-seguro-vencimiento').value || null;
-    const seguroTelefono = document.getElementById('v-seguro-telefono').value.trim();
+    // (v17) Los datos del seguro ya no viven en la ficha: ahora se registran
+    // como un trámite de seguro, porque cambian cada vez que se renueva.
     // Capacidad de batería en kWh (v14). Solo aplica a enchufables/eléctricos.
     // Si está vacío guardamos null; si tiene valor, lo convertimos a número.
     const bateriaTexto = document.getElementById('v-bateria').value.trim();
@@ -2986,14 +3900,23 @@ const Acciones = {
     const finCuotaFinal = finCuotaFinalTexto === '' ? null : parseFloat(finCuotaFinalTexto);
 
     // --- Validaciones ---
+    // (v19) Alta en dos niveles: obligatorios mínimos = nombre/alias, tipo,
+    // marca y modelo. Los km pasan a ser opcionales (nadie los sabe exactos
+    // de memoria), pero se recomienda rellenarlos para los avisos.
     let error = '';
     if (!nombre || !marca || !modelo) error = 'Rellena el nombre, la marca y el modelo.';
     else if (!tipo) error = 'Indica el tipo de vehículo (o escríbelo en "Otro").';
-    else if (!combustible) error = 'Indica el combustible (o escríbelo en "Otro").';
-    else if (isNaN(anio) || anio < 1900 || anio > 2100) error = 'El año debe estar entre 1900 y 2100.';
-    else if (isNaN(km) || km < 0) error = 'Los kilómetros deben ser un número igual o mayor que 0.';
+    // Los km son opcionales, pero si se rellenan deben ser válidos.
+    else if (km !== null && (isNaN(km) || km < 0)) error = 'Los kilómetros deben ser un número igual o mayor que 0.';
+    // El año es opcional, pero si se rellena debe ser válido.
+    else if (anio !== null && (isNaN(anio) || anio < 1900 || anio > 2100)) error = 'El año debe estar entre 1900 y 2100.';
     else if (matricula && BD.existeMatricula(matricula, Estado.editandoVehiculoId)) {
       error = 'Ya existe un vehículo con la matrícula ' + matricula + '.';
+    }
+    // Validación suave (v14): los km al adquirir no pueden superar los actuales.
+    // Solo se comprueba si AMBOS datos están presentes.
+    else if (km !== null && adqKm !== null && !isNaN(adqKm) && adqKm > km) {
+      error = 'Los kilómetros al adquirir el vehículo no pueden ser mayores que los kilómetros actuales.';
     }
     // Validación suave (v14): los km al adquirir no pueden superar los actuales
     else if (adqKm !== null && !isNaN(adqKm) && adqKm > km) {
@@ -3009,7 +3932,7 @@ const Acciones = {
     }
 
     const datos = { nombre, tipo, combustible, marca, modelo, anio, kmActuales: km, matricula, color, vin,
-      seguroCompania, seguroTipo, seguroPoliza, seguroVencimiento, seguroTelefono, bateriaKwh,
+      bateriaKwh,
       adqForma, adqFecha, adqKm, adqPrecio,
       finModalidad, finEntidad, finEntrada, finCuota, finMeses, finInicio, finCuotaFinal,
       foto: Estado.fotoVehiculoTemp };
@@ -3026,38 +3949,114 @@ const Acciones = {
   eliminarVehiculo(id) {
     const v = BD.obtenerVehiculo(id);
     const numActuaciones = BD.obtenerActuaciones(id).length;
-    let mensaje = '¿Eliminar "' + v.nombre + '"?';
+    // (v35) Confirmación reforzada: dejamos claro que esto BORRA el historial
+    // y que existe la alternativa de "dar de baja" si solo deja de ser suyo.
+    let mensaje = '¿Eliminar "' + v.nombre + '" para siempre?';
     if (numActuaciones > 0) {
-      mensaje += '\n\nSe borrarán también sus ' + numActuaciones + ' actuaciones registradas. Esta acción no se puede deshacer.';
+      mensaje += '\n\nSe borrará TODO su libro de vida: ' + numActuaciones +
+                 ' actuaciones registradas. Esta acción no se puede deshacer.';
+    }
+    if (!v.dadoBaja) {
+      mensaje += '\n\nSi el coche solo ha dejado de ser tuyo (lo vendiste, ' +
+                 'achatarraste...), mejor usa "Dar de baja": conserva el historial.';
     }
     if (!Util.confirmar(mensaje)) return;
     BD.eliminarVehiculo(id);
     Pantallas.lista();
   },
 
+  // (v35) Guarda la baja del vehículo (cierra su libro de vida).
+  guardarBaja(evento) {
+    evento.preventDefault();
+    const id = Estado.vehiculoActualId;
+    const v = BD.obtenerVehiculo(id);
+    if (!v) { Pantallas.lista(); return; }
+
+    const motivo = document.getElementById('baja-motivo').value;
+    const motivoTexto = document.getElementById('baja-motivo-otro').value.trim();
+
+    // Si eligió "Otro" pero no escribió nada, se lo pedimos.
+    if (motivo === 'otro' && !motivoTexto) {
+      Util.avisar('Escribe el motivo de la baja.');
+      return;
+    }
+
+    const fecha = document.getElementById('baja-fecha').value || null;
+    const kmTexto = document.getElementById('baja-km').value.trim();
+    const km = kmTexto === '' ? null : parseInt(kmTexto, 10);
+    const importeTexto = document.getElementById('baja-importe').value.trim();
+    // El importe solo se guarda si el campo está visible (venta/entrega/otro).
+    const importeVisible = document.getElementById('campo-baja-importe').style.display !== 'none';
+    const importe = (importeVisible && importeTexto !== '') ? parseFloat(importeTexto) : null;
+    const notas = document.getElementById('baja-notas').value.trim() || null;
+
+    // Confirmación final antes de cerrar el libro de vida.
+    if (!Util.confirmar('¿Dar de baja "' + v.nombre + '"?\n\nSe conservará todo su historial, pero dejará de avisarte. Podrás reactivarlo más adelante si hace falta.')) {
+      return;
+    }
+
+    BD.darDeBajaVehiculo(id, {
+      motivo: motivo,
+      motivoTexto: motivo === 'otro' ? motivoTexto : null,
+      fecha: fecha,
+      km: km,
+      importe: importe,
+      notas: notas
+    });
+
+    Pantallas.detalleVehiculo(id);
+  },
+
+  // (v35) Reactivar un vehículo dado de baja (recompra o corrección de error).
+  reactivarVehiculo(id) {
+    const v = BD.obtenerVehiculo(id);
+    if (!v) return;
+    if (!Util.confirmar('¿Reactivar "' + v.nombre + '"?\n\nVolverá a estar activo y a generar avisos de sus obligaciones.')) {
+      return;
+    }
+    BD.reactivarVehiculo(id);
+    Pantallas.detalleVehiculo(id);
+  },
+
   guardarActuacion(evento) {
     evento.preventDefault();
 
     const v = BD.obtenerVehiculo(Estado.vehiculoActualId);
+    // (v20) ¿Se está programando una cita futura o registrando algo ya hecho?
+    const programada = Estado.programandoActuacion;
     const fecha = document.getElementById('a-fecha').value;
-    const km = parseInt(document.getElementById('a-km').value, 10);
+    const kmActTexto = document.getElementById('a-km').value.trim();
+    const km = kmActTexto === '' ? null : parseInt(kmActTexto, 10);
     const categoria = document.getElementById('a-categoria').value;
     // El sistema puede venir de "Otro" (texto libre)
     const subcategoria = Util.valorConOtro('a-subcategoria', 'a-subcategoria-otro');
     const titulo = document.getElementById('a-titulo').value.trim();
-    const taller = document.getElementById('a-taller').value.trim();
+    // (v28) En "Trámites + Otro/especificar" el campo taller está oculto: si por
+    // un cambio de subcategoría quedó algo escrito, no lo guardamos (iría en notas).
+    const tallerOculto = document.getElementById('campo-taller-fila').style.display === 'none';
+    const taller = tallerOculto ? '' : document.getElementById('a-taller').value.trim();
     const costeTexto = document.getElementById('a-coste').value;
     const coste = costeTexto === '' ? null : parseFloat(costeTexto);
-    const desglose = document.getElementById('a-desglose').value.trim();
-    const proxKmTexto = document.getElementById('a-prox-km').value;
-    const proxKm = proxKmTexto === '' ? null : parseInt(proxKmTexto, 10);
-    const proxFecha = document.getElementById('a-prox-fecha').value || null;
+    let desglose = document.getElementById('a-desglose').value.trim();
+    let proxKmTexto = document.getElementById('a-prox-km').value;
+    let proxKm = proxKmTexto === '' ? null : parseInt(proxKmTexto, 10);
+    let proxFecha = document.getElementById('a-prox-fecha').value || null;
+    // (v23) Una cita PROGRAMADA no arrastra datos del pasado ni "próxima
+    // revisión": esos campos están ocultos y se ignoran al guardar. El km y el
+    // desglose tampoco aplican (no han ocurrido). Se rellenarán al realizarla.
+    if (programada) {
+      proxKm = null;
+      proxFecha = null;
+      desglose = '';
+    }
     const notas = document.getElementById('a-notas').value.trim();
     const porSeguro = document.getElementById('a-por-seguro').checked; // true/false
 
     // 🆕 v12: campos ESPECÍFICOS de Documentación. Solo leemos los que
     // corresponden a la subcategoría elegida; el resto se guarda como null.
     let resultadoItv = null, motivo = null, pagada = null, puntos = null, preavisoDias = null, garantiaHasta = null;
+    let seguroTipo = null, seguroPoliza = null, seguroTelefono = null;
+    let fechaLimitePago = null; // (v24) común a multa e impuesto
     if (categoria === 'documentacion') {
       if (subcategoria === 'itv') {
         resultadoItv = document.getElementById('a-resultado-itv').value;
@@ -3066,9 +4065,19 @@ const Acciones = {
         pagada = document.getElementById('a-pagada').checked;
         const pTexto = document.getElementById('a-puntos').value;
         puntos = pTexto === '' ? null : parseInt(pTexto, 10);
+        fechaLimitePago = document.getElementById('a-fecha-limite').value || null;
+      } else if (subcategoria === 'impuestos') {
+        // (v24) El impuesto también puede estar pagado o pendiente, con su fecha límite.
+        pagada = document.getElementById('a-impuesto-pagado').checked;
+        fechaLimitePago = document.getElementById('a-fecha-limite').value || null;
       } else if (subcategoria === 'seguro') {
         const preTexto = document.getElementById('a-preaviso').value;
         preavisoDias = preTexto === '' ? null : parseInt(preTexto, 10);
+        // Datos del seguro que antes vivían en la ficha del vehículo (v17):
+        // ahora se guardan en cada registro de seguro, porque cambian al renovar.
+        seguroTipo = Util.valorConOtro('a-seguro-tipo', 'a-seguro-tipo-otro') || null;
+        seguroPoliza = document.getElementById('a-seguro-poliza').value.trim() || null;
+        seguroTelefono = document.getElementById('a-seguro-telefono').value.trim() || null;
       } else if (subcategoria === 'garantia') {
         garantiaHasta = document.getElementById('a-garantia-hasta').value || null;
       }
@@ -3076,10 +4085,12 @@ const Acciones = {
 
     // --- Validaciones ---
     let error = '';
-    if (!fecha) error = 'Indica la fecha de la actuación.';
-    else if (fecha > Util.hoyISO()) error = 'La fecha no puede ser posterior a hoy.';
-    else if (isNaN(km) || km < 0) error = 'El kilometraje debe ser un número igual o mayor que 0.';
-    else if (!subcategoria) error = 'Indica el sistema (o escríbelo en "Otro").';
+    if (!fecha) error = programada ? 'Indica la fecha prevista.' : 'Indica la fecha de la actuación.';
+    // (v20) Una actuación realizada no puede ser futura; una programada SÍ debe serlo.
+    else if (!programada && fecha > Util.hoyISO()) error = 'La fecha no puede ser posterior a hoy. Si aún no ha ocurrido, usa «Lo estoy programando».';
+    else if (programada && fecha < Util.hoyISO()) error = 'Una cita programada debe tener una fecha futura. Si ya ocurrió, usa «Ya realizado».';
+    else if (km !== null && (isNaN(km) || km < 0)) error = 'El kilometraje debe ser un número igual o mayor que 0.';
+    else if (!subcategoria) error = 'Indica el tipo (o escríbelo en "Otro").';
     else if (!titulo) error = 'Escribe un título breve para la actuación.';
     else if (coste !== null && (isNaN(coste) || coste < 0)) error = 'El coste debe ser un número positivo.';
     else if (puntos !== null && (isNaN(puntos) || puntos < 0 || puntos > 8)) error = 'Los puntos retirados deben estar entre 0 y 8.';
@@ -3087,7 +4098,11 @@ const Acciones = {
     // 🆕 v12 (Opción B): si es ITV/seguro/impuesto Y la casilla "Programar la
     // siguiente" está marcada, la fecha de la próxima es obligatoria. Si está
     // desmarcada (registro histórico), no se exige nada.
-    else if (Obligaciones.esObligacion(categoria, subcategoria)
+    // (v23) Esto SOLO aplica a actuaciones ya realizadas. En una cita
+    // PROGRAMADA la fecha de la cita es la fecha prevista, no una "próxima
+    // revisión", y esa sección está oculta: no se valida.
+    else if (!programada
+             && Obligaciones.esObligacion(categoria, subcategoria)
              && document.getElementById('a-programar-siguiente').checked
              && !proxFecha) {
       const nombre = (Obligaciones.ETIQUETAS[subcategoria] || {}).nombre || 'esta obligación';
@@ -3102,8 +4117,9 @@ const Acciones = {
       return;
     }
 
-    // Aviso (no bloqueo) si los km son menores que los registrados en el vehículo
-    if (km < v.kmActuales) {
+    // Aviso (no bloqueo) si los km son menores que los registrados en el vehículo.
+    // Solo aplica a actuaciones YA realizadas con km, si el vehículo ya tenía km.
+    if (!programada && km !== null && v.kmActuales != null && km < v.kmActuales) {
       const seguir = Util.confirmar(
         'Has indicado ' + Util.formatearKm(km) + ', pero el vehículo tiene registrados ' +
         Util.formatearKm(v.kmActuales) + '.\n\n¿Es una actuación antigua? Pulsa Aceptar para guardarla igualmente.'
@@ -3114,6 +4130,7 @@ const Acciones = {
     const datos = {
       vehiculoId: Estado.vehiculoActualId,
       fecha, kilometraje: km, categoria, subcategoria, titulo,
+      programada, // (v20) true = cita futura pendiente; false = ya realizada
       tallerOMismo: taller,
       costeTotalEuros: coste,
       desgloseCoste: desglose,
@@ -3126,8 +4143,12 @@ const Acciones = {
       motivo,
       pagada,
       puntos,
+      fechaLimitePago,
       preavisoDias,
       garantiaHasta,
+      seguroTipo,
+      seguroPoliza,
+      seguroTelefono,
       fotos: Estado.fotosActuacionTemp.slice()
     };
 
@@ -3137,14 +4158,25 @@ const Acciones = {
       BD.crearActuacion(datos);
     }
 
-    // Si la actuación tiene más km que el vehículo, actualizamos el cuentakilómetros
-    if (km > v.kmActuales) BD.actualizarVehiculo(v.id, { kmActuales: km });
+    // (v19/v20) Mantenemos al día el km del vehículo a partir de las actuaciones
+    // YA REALIZADAS: si traen km y el vehículo no tenía, los adopta; si ya tenía,
+    // solo actualiza cuando son mayores. Las programadas (futuras) no cuentan.
+    if (!programada && km !== null && (v.kmActuales == null || km > v.kmActuales)) {
+      BD.actualizarVehiculo(v.id, { kmActuales: km });
+    }
 
     Pantallas.detalleVehiculo(Estado.vehiculoActualId);
   },
 
   eliminarActuacion(id) {
     const a = BD.obtenerActuacion(id);
+    // (v30) Si la actuación ya no existe, evitamos el error (a.titulo sobre null)
+    // y volvemos a un sitio coherente, igual que en detalleActuacion.
+    if (!a) {
+      Util.avisar('Esa actuación ya no existe.');
+      Pantallas.lista();
+      return;
+    }
     if (!Util.confirmar('¿Eliminar la actuación "' + a.titulo + '"? Esta acción no se puede deshacer.')) return;
     BD.eliminarActuacion(id);
     Pantallas.detalleVehiculo(Estado.vehiculoActualId);
@@ -3154,6 +4186,28 @@ const Acciones = {
   marcarRecordatorioHecho(id) {
     BD.actualizarActuacion(id, { completada: true });
     Pantallas.lista();
+  },
+
+  /* (v20) Convierte una cita programada en una actuación realizada.
+     Reabrimos el formulario en modo "ya realizado" con los datos precargados,
+     para que el usuario ajuste la fecha y el coste reales antes de confirmar.
+     Al guardar, la actuación deja de ser programada y pasa al historial. */
+  realizarProgramada(id) {
+    const a = BD.obtenerActuacion(id);
+    if (!a) return;
+    // Abrimos el formulario de edición de esa actuación...
+    const modo = (a.categoria === 'documentacion') ? 'tramite' : 'actuacion';
+    Pantallas.formActuacion(id, modo);
+    // ...y forzamos el estado a "realizado", ajustando la fecha a hoy si la
+    // prevista era futura (el coste se mantiene como estimación editable).
+    Pantallas.cambiarEstadoActuacion(false);
+    if (a.fecha > Util.hoyISO()) {
+      document.getElementById('a-fecha').value = Util.hoyISO();
+    }
+    // Aviso suave para que el usuario revise los datos reales.
+    const caja = document.getElementById('error-actuacion');
+    caja.textContent = 'Confirma la fecha y el coste reales y pulsa Guardar para pasarla al historial.';
+    caja.classList.add('visible', 'aviso-suave');
   },
 
   /* ----- Tema de la interfaz (v5) ----- */
@@ -3179,7 +4233,7 @@ const Acciones = {
       const blob = new Blob([contenido], { type: 'application/json' });
       const enlace = document.createElement('a');
       enlace.href = URL.createObjectURL(blob);
-      enlace.download = 'vehicletrack-respaldo-' + Util.hoyISO() + '.json';
+      enlace.download = 'virafy-respaldo-' + Util.hoyISO() + '.json';
       enlace.click();
       URL.revokeObjectURL(enlace.href);
     });
@@ -3231,7 +4285,9 @@ const Informe = {
     if (!v) return;
 
     // Historial en orden CRONOLÓGICO (de la más antigua a la más reciente)
+    // (v20) El informe refleja la vida real del vehículo: solo lo realizado.
     const lista = BD.obtenerActuaciones(vehiculoId)
+      .filter(a => !a.programada)
       .sort((a, b) => a.fecha.localeCompare(b.fecha));
 
     // Abrimos la ventana YA (antes de cualquier espera): si abriéramos la
@@ -3329,9 +4385,13 @@ const Informe = {
     // solo si hay al menos 6 meses de historial para que sea fiable
     let kmPorAnio = null;
     if (lista.length >= 2) {
-      const dias = (new Date(lista[lista.length - 1].fecha) - new Date(lista[0].fecha)) / 86400000;
-      const km = lista[lista.length - 1].kilometraje - lista[0].kilometraje;
-      if (dias >= 180 && km > 0) kmPorAnio = Math.round(km / dias * 365);
+      const kmIni = lista[0].kilometraje;
+      const kmFin = lista[lista.length - 1].kilometraje;
+      if (kmIni != null && kmFin != null) {
+        const dias = (new Date(lista[lista.length - 1].fecha) - new Date(lista[0].fecha)) / 86400000;
+        const km = kmFin - kmIni;
+        if (dias >= 180 && km > 0) kmPorAnio = Math.round(km / dias * 365);
+      }
     }
 
     /* ---------- Secciones del informe ---------- */
@@ -3343,8 +4403,10 @@ const Informe = {
       '</div>' +
       '<header class="cab">' +
         '<div>' +
-          '<div class="marca-app">Vehicle<span>Track</span></div>' +
+          '<div class="marca-app">Vira<span>fy</span></div>' +
           '<h1>Informe de vida del vehículo</h1>' +
+          (v.dadoBaja ? '<p class="sello-baja">📕 Vehículo dado de baja' +
+            (v.baja && v.baja.fecha ? ' · ' + Util.formatearFecha(v.baja.fecha) : '') + '</p>' : '') +
           '<p class="gris">Generado el ' + Util.formatearFecha(hoy) + '</p>' +
         '</div>' +
         (v._fotoB64 ? '<img class="foto-v" src="' + v._fotoB64 + '" alt="Foto del vehículo">' : '') +
@@ -3354,8 +4416,8 @@ const Informe = {
       '<h2>1 · Datos del vehículo</h2>' +
       '<table class="tabla-datos"><tbody>' +
         Informe._fila('Nombre', e(v.nombre)) +
-        Informe._fila('Vehículo', e(v.marca) + ' ' + e(v.modelo) + ' (' + e(v.anio) + ')') +
-        Informe._fila('Tipo / Combustible', e(v.tipo) + ' · ' + e(v.combustible)) +
+        Informe._fila('Vehículo', e(v.marca) + ' ' + e(v.modelo) + (v.anio ? ' (' + e(v.anio) + ')' : '')) +
+        Informe._fila('Tipo / Combustible', v.combustible ? (e(v.tipo) + ' · ' + e(v.combustible)) : e(v.tipo)) +
         ((v.bateriaKwh !== null && v.bateriaKwh !== undefined && v.bateriaKwh !== '') ? Informe._fila('Capacidad batería', e(v.bateriaKwh) + ' kWh') : '') +
         (v.matricula ? Informe._fila('Matrícula', e(v.matricula)) : '') +
         (v.vin ? Informe._fila('Nº de bastidor (VIN)', e(v.vin)) : '') +
@@ -3363,18 +4425,37 @@ const Informe = {
         Informe._fila('Kilometraje actual', '<strong>' + Util.formatearKm(v.kmActuales) + '</strong>') +
       '</tbody></table>';
 
-    // Sección de seguro: solo si hay algún dato relleno
-    const haySeguro = v.seguroCompania || v.seguroTipo || v.seguroPoliza || v.seguroVencimiento || v.seguroTelefono;
-    const seguroHTML =
-      '<h2>1.b · Seguro</h2>' +
-      (!haySeguro ? Informe._vacio('Sin datos de seguro registrados.') :
-        '<table class="tabla-datos"><tbody>' +
-          (v.seguroCompania ? Informe._fila('Compañía', e(v.seguroCompania)) : '') +
-          (v.seguroTipo ? Informe._fila('Tipo de seguro', e(v.seguroTipo)) : '') +
-          (v.seguroPoliza ? Informe._fila('Nº de póliza', e(v.seguroPoliza)) : '') +
-          (v.seguroVencimiento ? Informe._fila('Vencimiento', Util.formatearFecha(v.seguroVencimiento)) : '') +
-          (v.seguroTelefono ? Informe._fila('Teléfono de asistencia', e(v.seguroTelefono)) : '') +
-        '</tbody></table>');
+    // (v35) Sección de BAJA: solo aparece si el vehículo está dado de baja.
+    // Cierra el libro de vida con el motivo, las circunstancias y el balance
+    // económico final (gastado − recibido = coste real de tenerlo).
+    let bajaHTML = '';
+    if (v.dadoBaja) {
+      const b = v.baja || {};
+      const motivo = Util.textoMotivoBaja(b);
+      let filasBaja = Informe._fila('Estado', '<strong>📕 Dado de baja</strong>');
+      filasBaja += Informe._fila('Motivo', e(motivo));
+      if (b.fecha) filasBaja += Informe._fila('Fecha de baja', Util.formatearFecha(b.fecha));
+      if (b.km !== null && b.km !== undefined && b.km !== '') {
+        filasBaja += Informe._fila('Kilómetros finales', Util.formatearKm(b.km));
+      }
+      if (b.notas) filasBaja += Informe._fila('Notas', e(b.notas));
+
+      // Balance económico final (cierre de cuentas del vehículo)
+      const tieneImporte = b.importe !== null && b.importe !== undefined && b.importe !== '';
+      filasBaja += Informe._fila('Gasto total en su vida', '<strong>' + Util.formatearDinero(total) + '</strong>');
+      if (tieneImporte) {
+        const importe = Number(b.importe);
+        filasBaja += Informe._fila('Importe recibido', Util.formatearDinero(importe));
+        filasBaja += Informe._fila('Coste real de tenerlo', '<strong>' + Util.formatearDinero(total - importe) + '</strong>');
+      }
+
+      bajaHTML =
+        '<h2>1.b · Baja del vehículo</h2>' +
+        '<table class="tabla-datos"><tbody>' + filasBaja + '</tbody></table>';
+    }
+
+    // (v17) El seguro ya no es una sección de la ficha: aparece en el historial
+    // de trámites como cualquier otra actuación de tipo seguro.
 
     // Sección de adquisición (v14): solo si hay algún dato relleno
     const hayAdq = v.adqForma || v.adqFecha ||
@@ -3475,7 +4556,7 @@ const Informe = {
     const averiasHTML =
       '<h2>5 · Averías más relevantes</h2>' +
       (averias.length === 0 ? Informe._vacio('Sin averías registradas. ¡Buen historial!') :
-        '<table><thead><tr><th>Fecha</th><th>Avería</th><th>Sistema</th><th class="num">Km</th><th class="num">Coste</th></tr></thead><tbody>' +
+        '<table><thead><tr><th>Fecha</th><th>Avería</th><th>Tipo</th><th class="num">Km</th><th class="num">Coste</th></tr></thead><tbody>' +
         averias.map(a =>
           '<tr><td>' + Util.formatearFecha(a.fecha) + '</td><td>' + e(a.titulo) + '</td>' +
           '<td>' + e(Informe._sistema(a)) + '</td>' +
@@ -3526,7 +4607,7 @@ const Informe = {
     const historialHTML =
       '<h2>8 · Historial cronológico completo</h2>' +
       (lista.length === 0 ? Informe._vacio() :
-        '<table><thead><tr><th>Fecha</th><th class="num">Km</th><th>Categoría</th><th>Sistema</th><th>Actuación</th><th>Realizado por</th><th>Seguro</th><th class="num">Coste</th></tr></thead><tbody>' +
+        '<table><thead><tr><th>Fecha</th><th class="num">Km</th><th>Categoría</th><th>Tipo</th><th>Actuación</th><th>Realizado por</th><th>Seguro</th><th class="num">Coste</th></tr></thead><tbody>' +
         lista.map(a =>
           '<tr><td>' + Util.formatearFecha(a.fecha) + '</td>' +
           '<td class="num">' + Util.formatearKm(a.kilometraje) + '</td>' +
@@ -3553,7 +4634,7 @@ const Informe = {
 
     const pie =
       '<footer class="pie-informe">' +
-        'Informe generado con VehicleTrack el ' + Util.formatearFecha(hoy) +
+        'Informe generado con Virafy el ' + Util.formatearFecha(hoy) +
         '. Recoge el historial de mantenimiento registrado por el propietario ' +
         'y puede adjuntarse como documentación en la venta del vehículo.' +
       '</footer>';
@@ -3578,6 +4659,8 @@ const Informe = {
         'h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;' +
         '  margin: 26px 0 8px; padding-bottom: 4px; border-bottom: 2px solid #1b2a38; }' +
         '.gris { color: #51626f; }' +
+        '.sello-baja { display: inline-block; background: #fce9e9; color: #b3261e;' +
+        '  font-weight: 700; font-size: 11px; padding: 4px 10px; border-radius: 20px; margin: 4px 0 2px; }' +
         '.foto-v { width: 150px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #dde3e9; }' +
         'table { width: 100%; border-collapse: collapse; }' +
         'th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #dde3e9; vertical-align: top; }' +
@@ -3595,7 +4678,7 @@ const Informe = {
         '@media print { .no-imprimir { display: none; } body { padding: 0; } }' +
         '@page { margin: 14mm; }' +
       '</style></head><body>' +
-        cabecera + datosVehiculo + seguroHTML + adquisicionHTML + financiacionHTML + resumen + gastosAnio + gastosCategoria +
+        cabecera + datosVehiculo + bajaHTML + adquisicionHTML + financiacionHTML + resumen + gastosAnio + gastosCategoria +
         averiasHTML + proximosHTML + documentosHTML + historialHTML + fotosHTML + pie +
       '</body></html>';
   }
@@ -3623,6 +4706,26 @@ const Fotos = {
   // Caché: por cada Blob que ya hemos convertido, recordamos su URL temporal
   // para no crear una nueva (y gastar memoria) cada vez que se repinta la lista.
   _cacheUrls: new Map(),
+
+  /* (v32) Punto 8: visor de imagen a pantalla completa. Antes el "ampliar" de
+     las fotos de actuación hacía window.open(src), que en el móvil abre una
+     data-URL en otra pestaña y muchas veces falla o muestra texto. Este visor
+     propio funciona igual en móvil y escritorio: muestra la imagen sobre un
+     fondo oscuro y se cierra al tocar en cualquier sitio o pulsar Escape.
+     Se usa tanto en la foto del vehículo como en las fotos/facturas. */
+  ampliar(src) {
+    if (!src) return;
+    const overlay = document.getElementById('visor-imagen');
+    const img = document.getElementById('visor-imagen-img');
+    img.src = src;
+    overlay.classList.add('abierto');
+  },
+  cerrarVisor() {
+    const overlay = document.getElementById('visor-imagen');
+    overlay.classList.remove('abierto');
+    // Soltamos la imagen para no retener memoria mientras está cerrado
+    document.getElementById('visor-imagen-img').src = '';
+  },
 
   // Devuelve una URL que <img> pueda mostrar.
   // · Si la foto es un Blob → crea (o reutiliza) su URL temporal.
@@ -3769,6 +4872,11 @@ const Fotos = {
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' && e.target.getAttribute && e.target.getAttribute('role') === 'button') {
     e.target.click();
+  }
+  // (v32) Cerrar el visor de imagen con Escape si está abierto
+  if (e.key === 'Escape') {
+    const visor = document.getElementById('visor-imagen');
+    if (visor && visor.classList.contains('abierto')) Fotos.cerrarVisor();
   }
 });
 
