@@ -999,7 +999,7 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
         </div>
         <div class="campo">
           <label for="a-subcategoria" id="label-subcategoria">Tipo *</label>
-          <select id="a-subcategoria" onchange="Util.toggleOtro('a-subcategoria','a-subcategoria-otro'); Pantallas.aplicarCamposSubcategoria(); Pantallas.actualizarObligacion(); Pantallas._aplicarVisibilidadEstado(); Pantallas.actualizarFechaLimite()"></select>
+          <select id="a-subcategoria" onchange="Util.toggleOtro('a-subcategoria','a-subcategoria-otro'); Pantallas.aplicarCamposSubcategoria(); Pantallas.actualizarObligacion(); Pantallas._aplicarVisibilidadEstado(); Pantallas.actualizarFechaLimite(); Pantallas.actualizarCamposProximaRevision()"></select>
           <input id="a-subcategoria-otro" class="input-otro" type="text" placeholder="Escribe el tipo" maxlength="40">
         </div>
       </div>
@@ -1136,7 +1136,7 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
            para poder avisar luego en la vista de obligaciones. Si la desmarcas
            (registro histórico, coche vendido...), la fecha vuelve a ser libre. -->
       <label id="bloque-programar" class="campo-casilla" style="display:none">
-        <input id="a-programar-siguiente" type="checkbox" checked onchange="Pantallas.actualizarObligacion()">
+        <input id="a-programar-siguiente" type="checkbox" checked onchange="Pantallas.actualizarObligacion(); Pantallas.actualizarCamposProximaRevision()">
         <span class="texto-casilla">Programar la siguiente
           <small id="texto-programar">Marca esto para que la app vigile el próximo vencimiento. Desmárcalo si solo estás anotando algo del pasado.</small>
         </span>
@@ -3096,9 +3096,13 @@ const Pantallas = {
         document.getElementById('a-seguro-poliza').value = a.seguroPoliza || '';
         document.getElementById('a-seguro-telefono').value = a.seguroTelefono || '';
         document.getElementById('a-garantia-hasta').value = a.garantiaHasta || '';
-        // Si la actuación que editamos ya tenía fecha de próxima, damos por hecho
-        // que estaba "programada"; si no, la casilla queda desmarcada.
-        document.getElementById('a-programar-siguiente').checked = !!a.proximaRevisionFecha;
+        // Si la actuación que editamos ya tenía próxima revisión (por fecha O
+        // por km), damos por hecho que estaba "programada" y marcamos la casilla
+        // para que se vean sus campos; si no, queda desmarcada. (v38: antes solo
+        // miraba la fecha, así que una próxima solo-km abría con la casilla
+        // desmarcada y los campos ocultos pese a tener dato.)
+        document.getElementById('a-programar-siguiente').checked =
+          !!(a.proximaRevisionFecha || a.proximaRevisionKm);
         Pantallas.actualizarObligacion(); // refresca la casilla y la obligatoriedad
         Estado.fotosActuacionTemp = (a.fotos || []).slice();
         Fotos.renderPreviasFotosActuacion();
@@ -3139,6 +3143,7 @@ const Pantallas = {
     // siguiente" y toda la sección de próxima revisión. Son datos del pasado o
     // de un seguimiento que aún no existe para una cita futura.
     Pantallas._aplicarVisibilidadEstado();
+    Pantallas.actualizarCamposProximaRevision(); // (v38) reaplica regla de km/fecha próxima
   },
 
   /* (v23) Aplica la visibilidad de campos según el estado (programado vs
@@ -3264,6 +3269,7 @@ const Pantallas = {
     Pantallas.aplicarCamposSubcategoria();
     Pantallas.actualizarObligacion();
     Pantallas._aplicarVisibilidadEstado(); // (v23) reaplica ocultaciones de estado
+    Pantallas.actualizarCamposProximaRevision(); // (v38) última palabra sobre km/fecha próxima
   },
 
   /* 🆕 v12: PERSONALIZACIÓN DE CAMPOS POR SUBCATEGORÍA.
@@ -3414,9 +3420,16 @@ const Pantallas = {
     });
   },
 
-  /* 🆕 v12: muestra/oculta la casilla "Programar la siguiente" y decide si la
-     fecha de la próxima es obligatoria. Se llama al cambiar categoría, sistema
-     o la propia casilla. Toda la lógica visual de obligaciones vive aquí. */
+  /* 🆕 v12 · reescrito v38: decide DÓNDE aparece la casilla "Programar la
+     siguiente" y si la fecha es obligatoria.
+     - La casilla aparece siempre que tenga sentido programar una próxima
+       revisión: mantenimiento, avería y obligaciones legales (ITV/seguro/
+       impuestos). NO aparece en subcategorías sin próxima revisión (multas,
+       garantía, otros documentos, otro/especificar): de eso se encarga
+       SIN_PROXIMA_REVISION más abajo.
+     - La fecha solo es OBLIGATORIA en las obligaciones legales (para poder
+       avisar del vencimiento). En mantenimiento/avería es opcional.
+     La visibilidad de los campos km/fecha la aplica actualizarCamposProximaRevision(). */
   actualizarObligacion() {
     const categoria = document.getElementById('a-categoria').value;
     const subcategoria = Util.valorConOtro('a-subcategoria', 'a-subcategoria-otro');
@@ -3427,37 +3440,74 @@ const Pantallas = {
     const hint = document.getElementById('hint-prox');
     const ayuda = document.getElementById('ayuda-prox-fecha');
 
-    if (!esOblig) {
-      // No es obligación: ocultamos la casilla y la fecha es opcional (como siempre)
-      bloque.style.display = 'none';
-      hint.textContent = '(opcional, crea un recordatorio)';
-      ayuda.style.display = 'none';
-      return;
-    }
+    // (v38) Subcategorías de documentación SIN próxima revisión: ahí no se
+    // programa nada, así que la casilla no debe aparecer.
+    const SIN_PROXIMA_REVISION = ['multas', 'garantia', 'otros'];
+    const esDocSinProxima = (categoria === 'documentacion') &&
+      (SIN_PROXIMA_REVISION.includes(subcategoria) || !Obligaciones.esObligacion(categoria, subcategoria));
 
-    // (v23) En modo "programando" no existe la idea de "programar la siguiente"
-    // ni la sección de próxima revisión: la cita ES la fecha prevista. No
-    // mostramos la casilla para no pisar la ocultación del estado.
-    if (Estado.programandoActuacion) {
+    // (v23) En modo "programando" la cita ES la fecha prevista: no hay "siguiente".
+    if (Estado.programandoActuacion || esDocSinProxima) {
       bloque.style.display = 'none';
       ayuda.style.display = 'none';
       return;
     }
 
-    // Sí es obligación: mostramos la casilla
+    // En el resto (mantenimiento, avería, ITV, seguro, impuestos) mostramos la casilla.
     bloque.style.display = '';
-    const nombre = (Obligaciones.ETIQUETAS[subcategoria] || {}).nombre || 'esta obligación';
 
-    if (casilla.checked) {
-      // Va a programarse → la fecha es OBLIGATORIA
+    if (esOblig && casilla.checked) {
+      // Obligación legal y se va a programar → la fecha es OBLIGATORIA.
+      const nombre = (Obligaciones.ETIQUETAS[subcategoria] || {}).nombre || 'esta obligación';
       hint.textContent = '(obligatorio para ' + nombre + ')';
       ayuda.style.display = '';
     } else {
-      // Registro histórico → la fecha vuelve a ser opcional
-      hint.textContent = '(opcional)';
+      // Mantenimiento/avería, o registro histórico → fecha opcional.
+      hint.textContent = '(opcional, crea un recordatorio)';
       ayuda.style.display = 'none';
     }
   },
+
+  /* 🆕 v38: aplica la regla pedida por el usuario para "Programar la siguiente".
+     Esta función se llama SIEMPRE la ÚLTIMA en cada cadena de cambio (subcat,
+     categoría, casilla, estado), así que tiene la última palabra sobre TODO lo
+     relativo a la próxima revisión y no la pisa _aplicarVisibilidadEstado().
+     Regla:
+       · Subcategorías SIN próxima revisión (multas, garantía, otros documentos,
+         otro/especificar): la casilla NO aparece y los campos tampoco.
+       · Resto (mantenimiento, avería, ITV/seguro/impuestos): la casilla aparece.
+           - MARCADA   → se muestran km y fecha.
+           - DESMARCADA → se ocultan km y fecha, pero la casilla se queda. */
+  actualizarCamposProximaRevision() {
+    const categoria = document.getElementById('a-categoria').value;
+    const subcategoria = Util.valorConOtro('a-subcategoria', 'a-subcategoria-otro');
+
+    const bloque = document.getElementById('bloque-programar');
+    const casilla = document.getElementById('a-programar-siguiente');
+    const tituloProx = document.getElementById('titulo-prox-revision');
+    const filaProx = document.getElementById('fila-prox-revision');
+
+    // ¿Esta subcategoría NO tiene próxima revisión? (misma condición que en
+    // actualizarObligacion). En documentación, solo ITV/seguro/impuestos la
+    // tienen; el resto de trámites (multas, garantía, otros, otro/especificar) no.
+    const SIN_PROXIMA_REVISION = ['multas', 'garantia', 'otros'];
+    const esDocSinProxima = (categoria === 'documentacion') &&
+      (SIN_PROXIMA_REVISION.includes(subcategoria) || !Obligaciones.esObligacion(categoria, subcategoria));
+
+    // En modo "programando" la cita ES la fecha prevista: no hay "siguiente".
+    const ocultarTodo = esDocSinProxima || Estado.programandoActuacion;
+
+    // (v38) La casilla la gobernamos también aquí, para que ningún paso
+    // posterior de la cadena (como _aplicarVisibilidadEstado) la vuelva a
+    // mostrar donde no debe.
+    if (bloque) bloque.style.display = ocultarTodo ? 'none' : '';
+
+    // Los campos km/fecha: visibles solo si la casilla está visible Y marcada.
+    const mostrarCampos = !ocultarTodo && casilla && casilla.checked;
+    if (tituloProx) tituloProx.style.display = mostrarCampos ? '' : 'none';
+    if (filaProx) filaProx.style.display = mostrarCampos ? '' : 'none';
+  },
+
 
   /* ----- Historial con filtros combinables ----- */
   historial() {
@@ -4048,6 +4098,17 @@ const Acciones = {
       proxKm = null;
       proxFecha = null;
       desglose = '';
+    }
+    // (v38) Coherencia con la casilla "Programar la siguiente": si está
+    // desmarcada o no está visible (subcategorías sin próxima revisión:
+    // multas, garantía, otros, otro/especificar), NO guardamos km/fecha de
+    // próxima aunque hayan quedado valores en campos que luego se ocultaron.
+    const bloqueProg = document.getElementById('bloque-programar');
+    const casillaProg = document.getElementById('a-programar-siguiente');
+    const programarVisible = bloqueProg && bloqueProg.style.display !== 'none';
+    if (!programarVisible || !casillaProg.checked) {
+      proxKm = null;
+      proxFecha = null;
     }
     const notas = document.getElementById('a-notas').value.trim();
     const porSeguro = document.getElementById('a-por-seguro').checked; // true/false
