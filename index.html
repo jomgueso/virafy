@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Virafy v15 — Libro de vida de tus vehículos</title>
+<title>Virafy v39 — Libro de vida de tus vehículos</title>
 <style>
 /* ============================================================
    VIRAFY v15 — Estilos (mobile-first, CSS puro)
@@ -164,6 +164,21 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--a
 .btn-primario:hover { filter: brightness(1.05); }
 /* (v17) Botones de acción de la pantalla del vehículo: separados entre sí */
 .btn-accion-vehiculo { margin-top: 10px; }
+
+/* (v39) Tarjetas de acceso rápido por categoría en la ficha del vehículo */
+.acceso-rapido { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.tarjeta-accion {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--ambar); border: none;
+  border-radius: var(--radio); padding: 14px 16px;
+  cursor: pointer; text-align: left; width: 100%;
+  box-shadow: var(--fab-sombra); transition: filter .15s;
+}
+.tarjeta-accion:hover { filter: brightness(1.05); }
+.tarjeta-accion .ta-icono { font-size: 1.7rem; line-height: 1; flex-shrink: 0; }
+.tarjeta-accion .ta-texto { display: flex; flex-direction: column; gap: 2px; }
+.tarjeta-accion .ta-titulo { font-weight: 700; font-size: 1rem; color: var(--ambar-texto); }
+.tarjeta-accion .ta-desc { font-size: .82rem; color: var(--ambar-texto); opacity: .75; }
 /* (v20) Selector de estado realizado/programado */
 .selector-estado { margin-bottom: 18px; }
 .selector-estado-titulo { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
@@ -2825,11 +2840,33 @@ const Pantallas = {
         '<div class="stat"><div class="valor">' + ultimaFecha + '</div><div class="etiqueta">Última</div></div>' +
       '</div>' +
 
-      // (v35) En un coche dado de baja no se registran actuaciones nuevas
-      // (ya no es tuyo). Ocultamos los botones de registrar.
+      // (v39) En un coche dado de baja no se registran actuaciones nuevas.
+      // Los dos botones planos se sustituyen por tres tarjetas de acceso rápido,
+      // una por categoría, para que el usuario encuentre "Avería" de inmediato.
       (v.dadoBaja ? '' :
-        '<button class="btn-primario btn-accion-vehiculo" onclick="Pantallas.formActuacion(null, \'actuacion\')">🔧 Registrar actuación</button>' +
-        '<button class="btn-primario btn-accion-vehiculo" onclick="Pantallas.formActuacion(null, \'tramite\')">📋 Trámite u obligación</button>'
+        '<div class="acceso-rapido">' +
+          '<button class="tarjeta-accion" onclick="Pantallas.formActuacion(null, \'mantenimiento\')">' +
+            '<span class="ta-icono">🔧</span>' +
+            '<span class="ta-texto">' +
+              '<span class="ta-titulo">Mantenimiento</span>' +
+              '<span class="ta-desc">Revisiones, cambios de aceite, filtros…</span>' +
+            '</span>' +
+          '</button>' +
+          '<button class="tarjeta-accion" onclick="Pantallas.formActuacion(null, \'averia\')">' +
+            '<span class="ta-icono">⚠️</span>' +
+            '<span class="ta-texto">' +
+              '<span class="ta-titulo">Avería / Reparación</span>' +
+              '<span class="ta-desc">Fallos, roturas, reparaciones no previstas…</span>' +
+            '</span>' +
+          '</button>' +
+          '<button class="tarjeta-accion" onclick="Pantallas.formActuacion(null, \'tramite\')">' +
+            '<span class="ta-icono">📋</span>' +
+            '<span class="ta-texto">' +
+              '<span class="ta-titulo">Trámite / Obligación</span>' +
+              '<span class="ta-desc">ITV, seguro, multas, impuestos…</span>' +
+            '</span>' +
+          '</button>' +
+        '</div>'
       ) +
       '<button class="btn-informe" onclick="Informe.generar(\'' + v.id + '\')">📄 Generar informe de vida del vehículo</button>' +
 
@@ -3031,17 +3068,31 @@ const Pantallas = {
     // (v17) Dos bloques de entrada:
     //  - 'actuacion' = mantenimiento + avería (lo que LE HACES al vehículo)
     //  - 'tramite'   = documentación/obligaciones (lo administrativo/legal)
+    // (v39) Se añaden 'mantenimiento' y 'averia' como accesos directos que
+    // preseleccionan la categoría. Internamente ambos usan el bloque 'actuacion'.
     // Si editamos, el modo lo deduce la propia categoría de la actuación.
     let modoFinal = modo;
     if (idEditar) {
       const aEdit = BD.obtenerActuacion(idEditar);
       modoFinal = (aEdit && aEdit.categoria === 'documentacion') ? 'tramite' : 'actuacion';
     }
+    // Guardamos la categoría a preseleccionar antes de normalizar el modo
+    const categoriaPreselecc = (modoFinal === 'mantenimiento' || modoFinal === 'averia') ? modoFinal : null;
+    if (modoFinal === 'mantenimiento' || modoFinal === 'averia') modoFinal = 'actuacion';
     if (modoFinal !== 'tramite' && modoFinal !== 'actuacion') modoFinal = 'actuacion';
     Estado.modoActuacion = modoFinal;
-    Pantallas._configurarSelectorCategoria(modoFinal);
+    Pantallas._configurarSelectorCategoria(modoFinal, categoriaPreselecc);
 
-    const tituloAccion = modoFinal === 'tramite' ? 'trámite' : 'actuación';
+    // (v39) Si llegamos desde una tarjeta directa, forzamos la categoría
+    if (categoriaPreselecc && !idEditar) {
+      const sel = document.getElementById('a-categoria');
+      sel.value = categoriaPreselecc;
+      Pantallas.actualizarSubcategorias();
+    }
+
+    // (v39) El título refleja la categoría de acceso directo cuando procede
+    const tituloAccion = modoFinal === 'tramite' ? 'trámite'
+      : (categoriaPreselecc === 'averia' ? 'avería / reparación' : 'actuación');
     document.getElementById('titulo-form-actuacion').textContent =
       (idEditar ? 'Editar ' : 'Registrar ') + tituloAccion;
     document.getElementById('subtitulo-form-actuacion').textContent =
@@ -3215,7 +3266,10 @@ const Pantallas = {
      - modo 'tramite':   solo Trámites y obligaciones (lo administrativo).
      Ocultamos las opciones que no tocan y dejamos seleccionada la primera
      válida. Así cada botón de la pantalla del vehículo entra a su bloque. */
-  _configurarSelectorCategoria(modo) {
+  // (v39) El segundo parámetro, categoriaPreselecc, indica que llegamos desde
+  // una tarjeta de acceso directo. En ese caso ocultamos el selector de categoría
+  // igual que ya se hace en modo trámite: la elección ya se hizo antes.
+  _configurarSelectorCategoria(modo, categoriaPreselecc) {
     const select = document.getElementById('a-categoria');
     const opciones = select.options;
     const permitidas = (modo === 'tramite') ? ['documentacion'] : ['mantenimiento', 'averia'];
@@ -3227,10 +3281,12 @@ const Pantallas = {
       if (visible && primera === null) primera = opciones[i].value;
     }
     if (primera) select.value = primera;
-    // En modo trámite no tiene sentido cambiar de categoría (solo hay una),
-    // así que ocultamos el desplegable y dejamos solo el de subcategoría.
+    // Ocultamos el desplegable si ya no tiene sentido elegir:
+    //  - modo trámite: solo hay una categoría posible
+    //  - acceso directo (categoriaPreselecc): el usuario ya eligió en la pantalla anterior
     const campoCategoria = select.closest('.campo');
-    if (campoCategoria) campoCategoria.style.display = (modo === 'tramite') ? 'none' : '';
+    if (campoCategoria) campoCategoria.style.display =
+      (modo === 'tramite' || categoriaPreselecc) ? 'none' : '';
   },
 
   /* (v24) Si la multa/impuesto ya está pagada, la fecha límite de pago deja de
