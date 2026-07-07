@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Virafy v39 — Libro de vida de tus vehículos</title>
+<title>Virafy v44 — Libro de vida de tus vehículos</title>
 <style>
 /* ============================================================
    VIRAFY v15 — Estilos (mobile-first, CSS puro)
@@ -250,12 +250,32 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--a
 }
 .btn-archivo:hover { filter: brightness(0.97); }
 .btn-archivo:active { transform: scale(.98); }
+/* (v41) Fila que agrupa los dos botones de foto: "Hacer foto" y "Elegir de
+   galería". En pantallas estrechas se envuelven a dos líneas sin romperse. */
+.fila-archivo { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.fila-archivo .btn-archivo { margin-top: 0; }
 /* El foco del teclado se ve en el botón aunque el input esté oculto */
 .input-archivo-oculto:focus-visible + .btn-archivo { outline: 3px solid var(--ambar); outline-offset: 2px; }
 .btn-peligro { background: var(--rojo-suave); color: var(--rojo); width: 100%; }
 .btn-texto { background: none; color: var(--tinta-suave); padding: 8px 10px; font-weight: 600; }
 .btn-mini { padding: 7px 12px; font-size: 0.8rem; border-radius: 999px; }
 .fila-botones { display: flex; gap: 10px; margin-top: 18px; }
+
+/* (v40) Botón "Vender o dar de baja": antes era un botón gris pequeño y escondido
+   al lado de "Editar", y sin la palabra "vender" (los probadores no lo encontraban).
+   Ahora es un botón propio a lo ancho, con la palabra "Vender" bien visible y una
+   línea que explica que NO borra nada. Se distingue del rojo "Eliminar". */
+.btn-vender {
+  width: 100%; margin-top: 10px; text-align: left;
+  display: flex; align-items: center; gap: 12px;
+  background: var(--ambar-suave); color: var(--ambar-texto);
+  border: 1.5px solid var(--ambar-borde);
+}
+.btn-vender:hover { filter: brightness(0.98); }
+.btn-vender .bv-icono { font-size: 1.5rem; line-height: 1; flex-shrink: 0; }
+.btn-vender .bv-texto { display: flex; flex-direction: column; gap: 2px; }
+.btn-vender .bv-titulo { font-weight: 700; font-size: 1rem; }
+.btn-vender .bv-desc { font-size: 0.8rem; opacity: 0.8; font-weight: 500; line-height: 1.3; }
 
 /* Botón protagonista del informe (v6) */
 .btn-informe {
@@ -422,6 +442,25 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid var(--a
 }
 .vacio .icono { font-size: 3rem; margin-bottom: 12px; }
 .vacio p { margin-bottom: 6px; }
+
+/* (v43) Onboarding de bienvenida: SOLO se ve en el primer arranque, cuando aún
+   no hay vehículos. Sustituye al estado vacío seco por una presentación breve
+   de qué es Virafy y un botón para empezar. Reutiliza el tono de la landing.
+   Al añadir el primer vehículo desaparece solo (ya no se cumple length === 0). */
+.onboarding { background: var(--tarjeta); border-radius: var(--radio); box-shadow: var(--sombra); overflow: hidden; }
+.onboarding .ob-cabecera { background: var(--cabecera); color: #fff; padding: 26px 24px; text-align: center; }
+.onboarding .ob-marca { font-weight: 800; font-size: 1.5rem; letter-spacing: .01em; }
+.onboarding .ob-marca span { color: var(--ambar); }
+.onboarding .ob-lema { color: #c9d4dd; margin-top: 4px; font-size: 0.95rem; }
+.onboarding .ob-cuerpo { padding: 20px 22px 24px; }
+.onboarding .ob-intro { color: var(--tinta-suave); font-size: 0.95rem; text-align: center; margin-bottom: 12px; line-height: 1.5; }
+.onboarding .ob-promesa { text-align: center; font-weight: 700; color: var(--tinta); font-size: 1.05rem; margin-bottom: 20px; }
+.onboarding .ob-punto { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; text-align: left; }
+.onboarding .ob-punto .ob-ic { font-size: 1.4rem; flex-shrink: 0; line-height: 1.3; }
+.onboarding .ob-punto b { display: block; color: var(--tinta); font-size: 0.95rem; }
+.onboarding .ob-punto small { color: var(--tinta-suave); font-size: 0.85rem; line-height: 1.4; }
+.onboarding .ob-cta { width: 100%; margin-top: 8px; font-size: 1rem; }
+.onboarding .ob-nota { text-align: center; color: var(--tinta-suave); font-size: 0.78rem; margin-top: 12px; }
 
 /* ---------- Formularios ---------- */
 form, .panel { background: var(--tarjeta); border-radius: var(--radio); box-shadow: var(--sombra); padding: 18px 16px; }
@@ -709,12 +748,12 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
     <!-- (v31) Punto 1: el lema "El libro de vida de tus vehículos" es la promesa
          de la app; antes solo salía en el onboarding. Lo destacamos aquí, en la
          pantalla más vista. La instrucción funcional pasa debajo, en pequeño. -->
-    <p class="lema-app">El libro de vida de tus vehículos</p>
-    <p class="subtitulo">Toca un vehículo para ver su ficha e historial.</p>
+    <p class="lema-app" id="lema-lista">El libro de vida de tus vehículos</p>
+    <p class="subtitulo" id="subtitulo-lista">Toca un vehículo para ver su ficha e historial.</p>
     <div id="zona-acceso-obligaciones"></div>
     <div id="zona-alertas"></div>
     <div id="lista-vehiculos" class="lista-vehiculos"></div>
-    <button class="fab" onclick="Pantallas.formVehiculo()">+ Añadir vehículo</button>
+    <button class="fab" id="fab-add" onclick="Pantallas.formVehiculo()">+ Añadir vehículo</button>
   </section>
 
   <!-- ============ PANTALLA: FORMULARIO DE VEHÍCULO ============ -->
@@ -898,12 +937,18 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
       </div>
 
       <div class="campo">
-        <label for="v-foto">Foto del vehículo <span class="opc">(opcional, se optimiza sola)</span></label>
-        <!-- (v29) El input nativo trae un botón "Choose File" en idioma del sistema
-             que no se puede traducir. Lo ocultamos y usamos un <label> estilizado
-             como botón: al pulsarlo se abre el selector igual, sin necesidad de JS. -->
-        <input id="v-foto" type="file" accept="image/*" class="input-archivo-oculto" onchange="Fotos.cargarFotoVehiculo(this)">
-        <label for="v-foto" class="btn-archivo">📷 Elegir foto</label>
+        <label>Foto del vehículo <span class="opc">(opcional, se optimiza sola)</span></label>
+        <!-- (v41) Dos opciones separadas para que la cámara esté SIEMPRE disponible
+             (en algunos móviles el selector solo abría galería):
+             · "Hacer foto": el atributo capture="environment" abre la cámara trasera.
+             · "Elegir de galería": sin capture, abre galería/archivos.
+             Los dos usan el mismo manejador Fotos.cargarFotoVehiculo. -->
+        <div class="fila-archivo">
+          <input id="v-foto-camara" type="file" accept="image/*" capture="environment" class="input-archivo-oculto" onchange="Fotos.cargarFotoVehiculo(this)">
+          <label for="v-foto-camara" class="btn-archivo">📷 Hacer foto</label>
+          <input id="v-foto-galeria" type="file" accept="image/*" class="input-archivo-oculto" onchange="Fotos.cargarFotoVehiculo(this)">
+          <label for="v-foto-galeria" class="btn-archivo">🖼️ Elegir de galería</label>
+        </div>
         <div id="previa-foto-vehiculo" class="previas"></div>
       </div>
       <div class="fila-botones">
@@ -929,7 +974,7 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
     <div class="nav-pantalla">
       <button class="btn-texto" onclick="Pantallas.detalleVehiculo(Estado.vehiculoActualId)">← Ficha del vehículo</button>
     </div>
-    <h1 id="titulo-baja">Dar de baja</h1>
+    <h1 id="titulo-baja">Vender o dar de baja</h1>
     <p class="subtitulo" style="margin-bottom:18px">
       El vehículo dejará de ser tuyo, pero su libro de vida se conserva entero.
       No recibirás más avisos suyos y podrás consultarlo cuando quieras.
@@ -1019,7 +1064,7 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
         </div>
       </div>
       <div class="campo">
-        <label for="a-titulo">Título *</label>
+        <label for="a-titulo">Título <span class="opc">(opcional)</span></label>
         <input id="a-titulo" type="text" placeholder="Ej: breve descripción de la actuación" maxlength="80">
       </div>
 
@@ -1173,10 +1218,16 @@ body.onboarding header { display: none; } /* sin cabecera mientras configura */
         <textarea id="a-notas" placeholder="Observaciones, recomendaciones del mecánico..."></textarea>
       </div>
       <div class="campo">
-        <label for="a-fotos">Fotos / facturas <span class="opc">(opcional, hasta 3, se optimizan solas)</span></label>
-        <!-- (v29) Igual que la foto del vehículo: input oculto + botón propio en español. -->
-        <input id="a-fotos" type="file" accept="image/*" multiple class="input-archivo-oculto" onchange="Fotos.cargarFotosActuacion(this)">
-        <label for="a-fotos" class="btn-archivo">📎 Añadir fotos o facturas</label>
+        <label>Fotos / facturas <span class="opc">(opcional, hasta 3, se optimizan solas)</span></label>
+        <!-- (v41) Igual que la foto del vehículo: botón de cámara (capture) y botón
+             de galería. La galería mantiene "multiple" para elegir varias de golpe;
+             la cámara captura de una en una. Ambos usan Fotos.cargarFotosActuacion. -->
+        <div class="fila-archivo">
+          <input id="a-fotos-camara" type="file" accept="image/*" capture="environment" class="input-archivo-oculto" onchange="Fotos.cargarFotosActuacion(this)">
+          <label for="a-fotos-camara" class="btn-archivo">📷 Hacer foto</label>
+          <input id="a-fotos-galeria" type="file" accept="image/*" multiple class="input-archivo-oculto" onchange="Fotos.cargarFotosActuacion(this)">
+          <label for="a-fotos-galeria" class="btn-archivo">📎 Elegir de galería</label>
+        </div>
         <div id="previa-fotos-actuacion" class="previas"></div>
       </div>
       <div class="fila-botones">
@@ -1626,6 +1677,38 @@ const CATEGORIAS = {
 };
 
 const ICONO_TIPO = { coche: '🚗', moto: '🏍️', furgoneta: '🚐' };
+
+/* (v42) Ejemplos de "Título" según el tipo elegido, para Mantenimiento y Avería.
+   El título es opcional, pero en estas categorías el tipo es una CATEGORÍA amplia
+   (Frenos, Carrocería...) y el detalle suma. En vez de obligar, EMPUJAMOS: el
+   texto gris de ejemplo (placeholder) del campo cambia según el tipo, para que el
+   usuario vea qué clase de detalle encaja. Un único sitio, fácil de ampliar. */
+const EJEMPLOS_TITULO = {
+  mantenimiento: {
+    motor: 'Ej: cambio de aceite y filtro',
+    frenos: 'Ej: cambio de pastillas delanteras',
+    neumaticos: 'Ej: dos neumáticos nuevos + equilibrado',
+    suspension: 'Ej: amortiguadores traseros',
+    transmision: 'Ej: sustitución del embrague',
+    electrica: 'Ej: batería nueva',
+    climatizacion: 'Ej: recarga del aire acondicionado',
+    carroceria: 'Ej: tratamiento anticorrosión',
+    fluidos: 'Ej: relleno de líquido limpiaparabrisas',
+    general: 'Ej: revisión general previa a la ITV'
+  },
+  averia: {
+    motor: 'Ej: sobrecalentamiento por termostato',
+    electrica: 'Ej: fallo del alternador',
+    frenos: 'Ej: ruido al frenar, discos gastados',
+    transmision: 'Ej: patinaje del embrague',
+    suspension: 'Ej: ruido en baches, bieletas',
+    neumaticos: 'Ej: pinchazo en rueda delantera',
+    carroceria: 'Ej: golpe en el parachoques trasero',
+    climatizacion: 'Ej: no enfría, posible fuga de gas',
+    escape: 'Ej: ruido, silenciador perforado',
+    combustible: 'Ej: pérdida de potencia, bomba'
+  }
+};
 
 /* ================= OBLIGACIONES LEGALES (v12) =================
    ITV, seguro e impuestos son obligaciones que SE REPITEN en el tiempo
@@ -2177,17 +2260,43 @@ const Pantallas = {
     const contenedor = document.getElementById('lista-vehiculos');
 
     if (vehiculos.length === 0) {
+      // (v44) En el arranque vacío ocultamos el lema y el subtítulo de arriba
+      //  (el onboarding ya muestra la marca y el lema) y el botón flotante
+      //  "+ Añadir vehículo" (el onboarding ya trae su propio botón). Así no se
+      //  repiten ni el lema ni el botón de añadir.
+      document.getElementById('lema-lista').style.display = 'none';
+      document.getElementById('subtitulo-lista').style.display = 'none';
+      document.getElementById('fab-add').style.display = 'none';
+      // (v43) Mini-onboarding: en el primer arranque la app estaba vacía y no
+      //  explicaba qué era (feedback de una probadora). Ahora una bienvenida
+      //  breve cuenta el concepto y ofrece un botón directo para empezar.
       contenedor.innerHTML =
-        '<div class="vacio">' +
-          '<div class="icono">🚗</div>' +
-          '<p><strong>Todavía no hay vehículos.</strong></p>' +
-          '<p>Añade el primero con el botón de abajo y empieza su libro de vida.</p>' +
+        '<div class="onboarding">' +
+          '<div class="ob-cabecera">' +
+            '<div class="ob-marca">Vira<span>fy</span></div>' +
+            '<div class="ob-lema">El libro de vida de tus vehículos</div>' +
+          '</div>' +
+          '<div class="ob-cuerpo">' +
+            '<p class="ob-intro">Registra el mantenimiento y los papeles de tus coches y motos, y deja que Virafy te avise antes de cada vencimiento.</p>' +
+            '<p class="ob-promesa">Para que no se te pase nada.</p>' +
+            '<div class="ob-punto"><span class="ob-ic">🔧</span><span><b>Historial completo</b><small>Mantenimientos, averías y reparaciones, con sus costes.</small></span></div>' +
+            '<div class="ob-punto"><span class="ob-ic">🔔</span><span><b>Avisos a tiempo</b><small>ITV, seguro e impuestos: te avisamos antes de que venzan.</small></span></div>' +
+            '<div class="ob-punto"><span class="ob-ic">📄</span><span><b>Informe de vida</b><small>Al vender, demuestra que el vehículo está cuidado.</small></span></div>' +
+            '<button class="btn-primario ob-cta" onclick="Pantallas.formVehiculo()">🚗 Añadir tu primer vehículo</button>' +
+            '<p class="ob-nota">Gratis · sin registro · tus datos se quedan en tu dispositivo</p>' +
+          '</div>' +
         '</div>';
       document.getElementById('zona-alertas').innerHTML = '';
       document.getElementById('zona-acceso-obligaciones').innerHTML = '';
       Pantallas._mostrar('pantalla-lista');
       return;
     }
+
+    // (v44) Hay vehículos: nos aseguramos de que el lema, el subtítulo y el
+    //  botón flotante estén visibles (pudieron ocultarse en el estado vacío).
+    document.getElementById('lema-lista').style.display = '';
+    document.getElementById('subtitulo-lista').style.display = '';
+    document.getElementById('fab-add').style.display = '';
 
     // (v35) Separamos activos de los dados de baja. Los activos van arriba
     // como siempre; los dados de baja, en su propio bloque debajo, atenuados.
@@ -2459,7 +2568,7 @@ const Pantallas = {
     const v = BD.obtenerVehiculo(id);
     if (!v) { Pantallas.lista(); return; }
 
-    document.getElementById('titulo-baja').textContent = 'Dar de baja: ' + v.nombre;
+    document.getElementById('titulo-baja').textContent = 'Vender o dar de baja: ' + v.nombre;
 
     // Campos limpios; fecha = hoy por defecto.
     document.getElementById('baja-motivo').value = 'vendido';
@@ -2892,10 +3001,18 @@ const Pantallas = {
             '<button class="btn-secundario" onclick="Acciones.reactivarVehiculo(\'' + v.id + '\')">↩️ Reactivar</button>' +
           '</div>' +
           '<button class="btn-peligro" style="margin-top:10px" onclick="Acciones.eliminarVehiculo(\'' + v.id + '\')">🗑 Eliminar definitivamente</button>'
-        : '<div class="fila-botones" style="margin-top:0">' +
-            '<button class="btn-secundario" onclick="Pantallas.formVehiculo(\'' + v.id + '\')">✏️ Editar vehículo</button>' +
-            '<button class="btn-secundario" onclick="Pantallas.formBaja(\'' + v.id + '\')">📕 Dar de baja</button>' +
-          '</div>' +
+          // (v40) "Editar" ocupa ahora toda la anchura (ya no comparte fila con
+          //  la baja). "Vender o dar de baja" pasa a ser un botón propio, ámbar,
+          //  con la palabra "Vender" visible y una línea que aclara que conserva
+          //  el historial. Corrige que los probadores no lo encontraban.
+        : '<button class="btn-secundario" style="margin-top:0" onclick="Pantallas.formVehiculo(\'' + v.id + '\')">✏️ Editar vehículo</button>' +
+          '<button class="btn-vender" onclick="Pantallas.formBaja(\'' + v.id + '\')">' +
+            '<span class="bv-icono">📕</span>' +
+            '<span class="bv-texto">' +
+              '<span class="bv-titulo">Vender o dar de baja</span>' +
+              '<span class="bv-desc">Cierra su libro de vida conservando todo el historial. Deja de avisarte; podrás reactivarlo si hace falta.</span>' +
+            '</span>' +
+          '</button>' +
           '<button class="btn-peligro" style="margin-top:10px" onclick="Acciones.eliminarVehiculo(\'' + v.id + '\')">🗑 Eliminar</button>'
       );
 
@@ -3457,9 +3574,12 @@ const Pantallas = {
         document.getElementById('a-titulo').placeholder = 'Ej: Cambio de titularidad';
         return;
       }
-      // Mantenimiento y Avería no llevan config especial, pero les damos un
-      // ejemplo de título acorde para que el campo siga siendo orientativo.
-      const ejemplo = { mantenimiento: 'Ej: Cambio de aceite y filtro 5W30', averia: 'Ej: Avería del alternador' }[categoria];
+      // Mantenimiento y Avería no llevan config especial, pero damos un ejemplo
+      // de título ACORDE AL TIPO elegido (v42): si hay ejemplo concreto para esa
+      // subcategoría lo usamos; si no (p.ej. tipo libre "Otro"), uno genérico.
+      const ejemploTipo = (EJEMPLOS_TITULO[categoria] || {})[subcategoria];
+      const ejemploGenerico = { mantenimiento: 'Ej: cambio de aceite y filtro', averia: 'Ej: avería del alternador' }[categoria];
+      const ejemplo = ejemploTipo || ejemploGenerico;
       if (ejemplo) document.getElementById('a-titulo').placeholder = ejemplo;
       return;
     }
@@ -4137,6 +4257,17 @@ const Acciones = {
     // El sistema puede venir de "Otro" (texto libre)
     const subcategoria = Util.valorConOtro('a-subcategoria', 'a-subcategoria-otro');
     const titulo = document.getElementById('a-titulo').value.trim();
+    // (v42) El título es OPCIONAL. Si el usuario lo deja vacío, lo rellenamos
+    //  automáticamente con el nombre del tipo elegido, para que nunca quede en
+    //  blanco (el título se usa en el historial, los avisos y el informe):
+    //   - tipo del catálogo (itv, frenos...) -> su nombre legible, sin el
+    //     paréntesis explicativo ("ITV (inspección...)" -> "ITV").
+    //   - tipo libre escrito en "Otro" -> ese mismo texto.
+    const grupoTipos = CATEGORIAS[categoria];
+    const tituloFinal = titulo
+      || ((grupoTipos && grupoTipos[subcategoria])
+            ? grupoTipos[subcategoria].split(' (')[0]
+            : (subcategoria || 'Actuación'));
     // (v28) En "Trámites + Otro/especificar" el campo taller está oculto: si por
     // un cambio de subcategoría quedó algo escrito, no lo guardamos (iría en notas).
     const tallerOculto = document.getElementById('campo-taller-fila').style.display === 'none';
@@ -4208,7 +4339,6 @@ const Acciones = {
     else if (programada && fecha < Util.hoyISO()) error = 'Una cita programada debe tener una fecha futura. Si ya ocurrió, usa «Ya realizado».';
     else if (km !== null && (isNaN(km) || km < 0)) error = 'El kilometraje debe ser un número igual o mayor que 0.';
     else if (!subcategoria) error = 'Indica el tipo (o escríbelo en "Otro").';
-    else if (!titulo) error = 'Escribe un título breve para la actuación.';
     else if (coste !== null && (isNaN(coste) || coste < 0)) error = 'El coste debe ser un número positivo.';
     else if (puntos !== null && (isNaN(puntos) || puntos < 0 || puntos > 8)) error = 'Los puntos retirados deben estar entre 0 y 8.';
     else if (preavisoDias !== null && (isNaN(preavisoDias) || preavisoDias < 0)) error = 'Los días de preaviso deben ser 0 o más.';
@@ -4246,7 +4376,7 @@ const Acciones = {
 
     const datos = {
       vehiculoId: Estado.vehiculoActualId,
-      fecha, kilometraje: km, categoria, subcategoria, titulo,
+      fecha, kilometraje: km, categoria, subcategoria, titulo: tituloFinal,
       programada, // (v20) true = cita futura pendiente; false = ya realizada
       tallerOMismo: taller,
       costeTotalEuros: coste,
